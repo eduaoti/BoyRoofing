@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Quote {
+  id         Int      @id @default(autoincrement())
+  name       String
+  phone      String
+  email      String
+  service    String
+  message    String?
+  status     QuoteStatus @default(PENDING)
+  createdAt  DateTime @default(now())
+}
+
+enum QuoteStatus {
+  PENDING   // Recibida, pero sin atender
+  IN_REVIEW // El dueño ya la vio
+  SENT      // Cotización enviada al cliente
+  CLOSED    // Cerrada (aceptada / rechazada)
+}
+
+model AdminUser {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}

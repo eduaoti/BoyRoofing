@@ -1,0 +1,119 @@
+{
+  "navbar": {
+    "home": "Inicio",
+    "services": "Servicios",
+    "about": "Nosotros",
+    "contact": "Contacto",
+    "quote": "Cotización"
+  },
+  "hero": {
+    "ribbon": "Roofing profesional en Texas",
+    "title": "Calidad, rapidez y resultados.",
+    "subtitle": "Más de 7 años de experiencia brindando soluciones de techado profesional en Texas. En Boys Roofing protegemos lo que más valoras: tu hogar y tu tranquilidad.",
+    "primaryCta": "Solicita tu cotización gratuita",
+    "secondaryCta": "Conoce nuestros servicios",
+    "experienceNote": "Más de siete años de experiencia respaldan nuestro compromiso."
+  },
+  "services": {
+    "sectionTitle": "Nuestros servicios",
+    "sectionSubtitle": "Roofing profesional con resultados comprobados. Calidad y rapidez, sin complicaciones.",
+    "roofing": {
+      "title": "Instalación, reparación y mantenimiento de techos",
+      "p1": "En Boys Roofing somos expertos en techos residenciales y comerciales. Analizamos tu propiedad, proponemos soluciones específicas y ejecutamos el trabajo con precisión y rapidez para proteger tu inversión y tu familia.",
+      "p2": "Trabajamos con materiales certificados, herramientas de vanguardia y un equipo comprometido para garantizar un acabado resistente y profesional."
+    },
+    "cleaning": {
+      "title": "Limpieza y retiro de escombros",
+      "p1": "Un trabajo bien hecho no termina hasta dejar el espacio limpio y seguro. Complementamos cada proyecto con la limpieza y el retiro de escombros, dejando tu propiedad ordenada y lista para usarse.",
+      "p2": "Nos encargamos de recolectar, clasificar y retirar los desechos generados durante la obra, reflejando nuestra responsabilidad y respeto por tu espacio y el entorno."
+    }
+  },
+  "history": {
+    "sectionTitle": "Nuestra historia",
+    "p1": "Boys Roofing nació del esfuerzo, la dedicación y la visión de superación de su fundador, quien comenzó su camino en el mundo del roofing como ayudante en una compañía local de Texas.",
+    "p2": "Con el paso de los años, su pasión por el oficio, su ética de trabajo y su compromiso con la calidad lo llevaron a perfeccionar sus habilidades y adquirir una comprensión profunda del sector.",
+    "p3": "Al notar que muchos clientes buscaban un servicio más humano, confiable y eficiente, decidió fundar Boys Roofing, con la firme intención de ofrecer soluciones de techado basadas en la calidad, la rapidez y los resultados comprobables.",
+    "p4": "Hoy, con más de siete años de experiencia profesional, Boys Roofing es sinónimo de compromiso, confianza y excelencia, consolidándose como una de las opciones más recomendadas en el estado de Texas.",
+    "highlightTitle": "Nuestra promesa",
+    "highlightText": "Más que una empresa, somos el reflejo de una historia de esfuerzo y determinación, con un propósito claro: proteger tu hogar y tu tranquilidad con un trabajo bien hecho."
+  },
+  "missionVisionValues": {
+    "missionTitle": "Misión",
+    "missionText": "Ofrecer servicios de techado profesional de la más alta calidad, brindando soluciones seguras, duraderas y adaptadas a las necesidades de cada cliente. Trabajamos con eficiencia, honestidad y pasión para superar tus expectativas.",
+    "visionTitle": "Visión",
+    "visionText": "Ser reconocidos como una de las empresas líderes en roofing en Texas, destacando por nuestra integridad, calidad de servicio y compromiso con la satisfacción total del cliente.",
+    "valuesTitle": "Valores",
+    "valuesList": [
+      "Compromiso: asumimos cada proyecto como si fuera propio.",
+      "Calidad: utilizamos materiales de primera y técnicas probadas.",
+      "Rapidez: cumplimos plazos sin comprometer la excelencia.",
+      "Honestidad: creemos en relaciones transparentes y de confianza.",
+      "Respeto: cuidamos tus espacios como si fueran los nuestros.",
+      "Responsabilidad: cada trabajo es una promesa cumplida.",
+      "Trabajo en equipo: nuestro éxito se construye en conjunto."
+    ]
+  },
+  "contact": {
+    "sectionTitle": "Tu techo, nuestra prioridad.",
+    "sectionText": "Contáctanos hoy mismo y solicita tu cotización gratuita. Cuidamos tu hogar como si fuera el nuestro.",
+    "callButton": "Habla con un experto en roofing",
+    "badge": "Calidad y rapidez, sin complicaciones."
+  },
+  "quote": {
+    "title": "Solicita Tu Cotización Gratuita",
+    "subtitle": "Completa el formulario y nuestro equipo te contactará lo antes posible.",
+    "name": "Nombre Completo",
+    "phone": "Número de Teléfono",
+    "email": "Correo Electrónico",
+    "service": "Tipo de Servicio",
+    "select": "Selecciona una opción",
+    "services": {
+      "newRoof": "Instalación de Techo Nuevo",
+      "repair": "Reparación de Techo",
+      "cleaning": "Limpieza y Retiro de Escombros"
+    },
+    "message": "Detalles adicionales (opcional)",
+    "submit": "Enviar Solicitud"
+  },
+"admin": {
+  "login": {
+    "title": "Acceso Administrativo",
+    "email": "Correo",
+    "password": "Contraseña",
+    "button": "Entrar",
+    "error": "Credenciales incorrectas"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "totalQuotes": "Total de Cotizaciones",
+    "pendingQuotes": "Cotizaciones Pendientes",
+    "recentQuotes": "Cotizaciones Recientes",
+    "noQuotes": "Aún no hay cotizaciones"
+  },
+  "quotes": {
+    "title": "Cotizaciones",
+    "table": {
+      "name": "Nombre",
+      "email": "Correo",
+      "phone": "Teléfono",
+      "service": "Servicio",
+      "date": "Fecha",
+      "actions": "Acciones",
+      "view": "Ver"
+    },
+    "empty": "No hay cotizaciones."
+  },
+  "quoteDetail": {
+    "title": "Detalles de Cotización",
+    "name": "Nombre completo",
+    "email": "Correo",
+    "phone": "Número de teléfono",
+    "service": "Servicio solicitado",
+    "message": "Mensaje",
+    "date": "Fecha de creación",
+    "back": "Regresar",
+    "delete": "Eliminar Cotización",
+    "deleteConfirm": "¿Seguro que deseas eliminar esta cotización?"
+  }
+}
+}

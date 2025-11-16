@@ -1,0 +1,122 @@
+{
+  "navbar": {
+    "home": "Home",
+    "services": "Services",
+    "about": "About us",
+    "contact": "Contact",
+    "quote": "Get a quote"
+  },
+  "hero": {
+    "ribbon": "Professional roofing in Texas",
+    "title": "Quality, speed and results.",
+    "subtitle": "With more than 7 years of experience, we provide professional roofing solutions throughout Texas. At Boys Roofing we protect what you value most: your home and your peace of mind.",
+    "primaryCta": "Request your free quote",
+    "secondaryCta": "See our services",
+    "experienceNote": "More than seven years of experience back our commitment."
+  },
+  "services": {
+    "sectionTitle": "Our services",
+    "sectionSubtitle": "Professional roofing with proven results. Quality and speed, without complications.",
+    "roofing": {
+      "title": "Roofing installation, repair and maintenance",
+      "p1": "We are experts in residential and commercial roofing. We analyze your property, propose specific solutions and execute the work with precision and speed to protect your investment and your family.",
+      "p2": "We work with certified materials, modern tools and a committed team to guarantee a resistant and professional finish."
+    },
+    "cleaning": {
+      "title": "Cleaning and debris removal",
+      "p1": "A job is not finished until the area is clean and safe. We complete every project with cleaning and debris removal, leaving your property tidy and ready to use.",
+      "p2": "We collect, classify and remove waste generated during the work, reflecting our responsibility and respect for your space and the environment."
+    }
+  },
+  "history": {
+    "sectionTitle": "Our story",
+    "p1": "Boys Roofing was born from the effort, dedication and desire to improve of its founder, who began his journey in the roofing world as a helper in a local company in Texas.",
+    "p2": "Over the years, his passion for the trade, work ethic and commitment to quality led him to perfect his skills and deeply understand the needs of each client.",
+    "p3": "When he realized that many people were looking for a more human, reliable and efficient service, he decided to found Boys Roofing with a clear intention: to offer roofing solutions based on quality, speed and proven results.",
+    "p4": "Today, with more than seven years of professional experience, Boys Roofing is synonymous with commitment, trust and excellence, becoming one of the most recommended options in the state of Texas.",
+    "highlightTitle": "Our promise",
+    "highlightText": "More than a company, we are the reflection of a story of effort and determination, with a clear purpose: to protect your home and your peace of mind with a job well done."
+  },
+  "missionVisionValues": {
+    "missionTitle": "Mission",
+    "missionText": "Our mission is to offer top-quality professional roofing services, providing safe, durable solutions tailored to each customer. We work with efficiency, honesty and passion, guaranteeing results that exceed expectations.",
+    "visionTitle": "Vision",
+    "visionText": "To be recognized as one of the leading roofing companies in Texas, standing out for our integrity, service quality and commitment to total customer satisfaction.",
+    "valuesTitle": "Values",
+    "valuesList": [
+      "Commitment: we treat each project as if it were our own.",
+      "Quality: we use top materials and proven techniques.",
+      "Speed: we meet deadlines without sacrificing excellence.",
+      "Honesty: transparent and trusting relationships.",
+      "Respect: we take care of your spaces as if they were ours.",
+      "Responsibility: every job is a fulfilled promise.",
+      "Teamwork: our success is built together."
+    ]
+  },
+  "contact": {
+    "sectionTitle": "Your roof, our priority.",
+    "sectionText": "Contact us today and request your free quote. We take care of your home as if it were ours.",
+    "callButton": "Talk to a roofing expert",
+    "badge": "Quality and speed, without complications."
+  },
+  "quote": {
+    "title": "Request Your Free Roofing Quote",
+    "subtitle": "Fill out the form and our team will contact you as soon as possible.",
+    "name": "Full Name",
+    "phone": "Phone Number",
+    "email": "Email Address",
+    "service": "Service Type",
+    "select": "Select an option",
+    "services": {
+      "newRoof": "New Roof Installation",
+      "repair": "Roof Repair",
+      "cleaning": "Debris Removal and Cleaning"
+    },
+    "message": "Additional Details (optional)",
+    "submit": "Submit Request"
+  }
+,
+"admin": {
+  "login": {
+    "title": "Admin Access",
+    "email": "Email",
+    "password": "Password",
+    "button": "Login",
+    "error": "Invalid credentials"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalQuotes": "Total Quotes",
+    "pendingQuotes": "Pending Quotes",
+    "recentQuotes": "Recent Quotes",
+    "noQuotes": "No quotes yet"
+  },
+  "quotes": {
+    "title": "Quotes",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "service": "Service",
+      "date": "Date",
+      "actions": "Actions",
+      "view": "View"
+    },
+    "empty": "No quotes found."
+  },
+  "quoteDetail": {
+    "title": "Quote Details",
+    "name": "Full Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "service": "Service Requested",
+    "message": "Message",
+    "date": "Created At",
+    "back": "Back",
+    "delete": "Delete Quote",
+    "deleteConfirm": "Are you sure you want to delete this quote?"
+  }
+}
+}
+
+
