@@ -1,9 +1,15 @@
 "use client";
 
 import useTranslation from "@/hooks/useTranslation";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 export default function Hero() {
   const { t } = useTranslation();
+  const pathname = usePathname();
+
+  // Detectar idioma actual seguido de la URL
+  const lang = pathname.startsWith("/en") ? "en" : "es";
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-br-smoke to-br-carbon py-16">
@@ -28,14 +34,18 @@ export default function Hero() {
             {t("hero.subtitle")}
           </p>
 
-          {/* Botones con efecto hover */}
+          {/* Botones CTA */}
           <div className="flex flex-wrap gap-4">
-            <a
-              href="#contacto"
+
+            {/* 🔥 BOTÓN PRINCIPAL — IR A FORMULARIO DE COTIZACIÓN */}
+            <Link
+              href={lang === "en" ? "/en/quote" : "/quote"}
               className="rounded-md bg-br-red-main px-6 py-3 text-sm font-semibold uppercase tracking-wide shadow-md transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:bg-br-red-light"
             >
               {t("hero.primaryCta")}
-            </a>
+            </Link>
+
+            {/* Botón secundario */}
             <a
               href="#servicios"
               className="rounded-md border border-br-red-main px-6 py-3 text-sm font-semibold text-br-white/90 transition-all duration-300 hover:-translate-y-0.5 hover:border-br-red-light hover:bg-br-smoke/70"
@@ -49,10 +59,10 @@ export default function Hero() {
           </p>
         </div>
 
-        {/* Tarjeta lateral tipo “glassmorphism” */}
+        {/* Tarjeta lateral */}
         <div className="flex-1">
           <div className="h-64 rounded-2xl border border-white/10 bg-gradient-to-br from-br-smoke/60 to-br-carbon/80 shadow-xl backdrop-blur">
-            {/* Aquí después puedes meter una foto de techos / equipo */}
+            {/* Imagen futura */}
           </div>
         </div>
       </div>

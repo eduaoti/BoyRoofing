@@ -1,4 +1,4 @@
-// src/app/admin/en/login/page.tsx
+// src/app/admin/en/(auth)/login/page.tsx
 "use client";
 
 import { useState, FormEvent } from "react";

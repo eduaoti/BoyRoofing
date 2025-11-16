@@ -1,4 +1,4 @@
-// src/app/admin/en/dashboard/page.tsx
+// src/app/admin/en/(panel)/dashboard/page.tsx
 export default function AdminENDashboard() {
   return (
     <main className="p-8 text-white">

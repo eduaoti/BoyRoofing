@@ -18,11 +18,37 @@ export default function QuotePage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    alert("Formulario enviado (aquí conectaremos el backend).");
-  };
+  try {
+    const res = await fetch("http://localhost:3200/quotes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+
+    if (!res.ok) {
+      throw new Error("Error al enviar la cotización");
+    }
+
+    alert("¡Cotización enviada con éxito!");
+
+    // Limpiar formulario
+    setForm({
+      name: "",
+      phone: "",
+      email: "",
+      service: "",
+      message: "",
+    });
+
+  } catch (error) {
+    console.error(error);
+    alert("Hubo un error al enviar tu solicitud. Inténtalo más tarde.");
+  }
+};
+
 
   return (
     <div className="bg-br-carbon min-h-screen text-br-white py-20">

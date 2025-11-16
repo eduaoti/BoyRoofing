@@ -1,4 +1,4 @@
-import "./globals.css";
+import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Roboto, Montserrat } from "next/font/google";
@@ -15,12 +15,7 @@ const roboto = Roboto({
   variable: "--font-roboto",
 });
 
-export const metadata = {
-  title: "Boys Roofing | Roofing profesional",
-  description: "Servicios de techado profesional en Texas",
-};
-
-export default function RootLayout({
+export default function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -35,4 +30,3 @@ export default function RootLayout({
     </html>
   );
 }
-
