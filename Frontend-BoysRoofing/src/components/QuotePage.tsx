@@ -12,43 +12,55 @@ export default function QuotePage() {
     email: "",
     service: "",
     message: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
+    propertyLocation: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  try {
-    const res = await fetch("http://localhost:3200/quotes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    // Agregar el status por defecto (PENDING) al enviar el formulario
+    const formData = { ...form, status: "PENDING" };
 
-    if (!res.ok) {
-      throw new Error("Error al enviar la cotización");
+    try {
+      const res = await fetch("http://localhost:3200/quotes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),  // Se incluye el estado PENDING en la solicitud
+      });
+
+      if (!res.ok) {
+        throw new Error("Error al enviar la cotización");
+      }
+
+      alert("¡Cotización enviada con éxito!");
+
+      // Limpiar formulario después de enviar
+      setForm({
+        name: "",
+        phone: "",
+        email: "",
+        service: "",
+        message: "",
+        address: "",
+        city: "",
+        state: "",
+        zip: "",
+        propertyLocation: "",
+      });
+
+    } catch (error) {
+      console.error(error);
+      alert("Hubo un error al enviar tu solicitud. Inténtalo más tarde.");
     }
-
-    alert("¡Cotización enviada con éxito!");
-
-    // Limpiar formulario
-    setForm({
-      name: "",
-      phone: "",
-      email: "",
-      service: "",
-      message: "",
-    });
-
-  } catch (error) {
-    console.error(error);
-    alert("Hubo un error al enviar tu solicitud. Inténtalo más tarde.");
-  }
-};
-
+  };
 
   return (
     <div className="bg-br-carbon min-h-screen text-br-white py-20">
@@ -116,6 +128,66 @@ const handleSubmit = async (e: React.FormEvent) => {
               <option value="repair">{t("quote.services.repair")}</option>
               <option value="cleaning">{t("quote.services.cleaning")}</option>
             </select>
+          </div>
+
+          {/* Dirección */}
+          <div>
+            <label className="block text-sm text-br-stone">{t("quote.address")}</label>
+            <input
+              name="address"
+              value={form.address}
+              onChange={handleChange}
+              className="w-full rounded-md bg-br-smoke px-4 py-3 text-br-white border border-br-smoke-light"
+              required
+            />
+          </div>
+
+          {/* Ciudad */}
+          <div>
+            <label className="block text-sm text-br-stone">{t("quote.city")}</label>
+            <input
+              name="city"
+              value={form.city}
+              onChange={handleChange}
+              className="w-full rounded-md bg-br-smoke px-4 py-3 text-br-white border border-br-smoke-light"
+              required
+            />
+          </div>
+
+          {/* Estado */}
+          <div>
+            <label className="block text-sm text-br-stone">{t("quote.state")}</label>
+            <input
+              name="state"
+              value={form.state}
+              onChange={handleChange}
+              className="w-full rounded-md bg-br-smoke px-4 py-3 text-br-white border border-br-smoke-light"
+              required
+            />
+          </div>
+
+          {/* Código Postal */}
+          <div>
+            <label className="block text-sm text-br-stone">{t("quote.zip")}</label>
+            <input
+              name="zip"
+              value={form.zip}
+              onChange={handleChange}
+              className="w-full rounded-md bg-br-smoke px-4 py-3 text-br-white border border-br-smoke-light"
+              required
+            />
+          </div>
+
+          {/* Ubicación de la propiedad */}
+          <div>
+            <label className="block text-sm text-br-stone">{t("quote.propertyLocation")}</label>
+            <input
+              name="propertyLocation"
+              value={form.propertyLocation}
+              onChange={handleChange}
+              className="w-full rounded-md bg-br-smoke px-4 py-3 text-br-white border border-br-smoke-light"
+              required
+            />
           </div>
 
           {/* Mensaje */}

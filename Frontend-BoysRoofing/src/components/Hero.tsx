@@ -38,12 +38,13 @@ export default function Hero() {
           <div className="flex flex-wrap gap-4">
 
             {/* 🔥 BOTÓN PRINCIPAL — IR A FORMULARIO DE COTIZACIÓN */}
-            <Link
-              href={lang === "en" ? "/en/quote" : "/quote"}
-              className="rounded-md bg-br-red-main px-6 py-3 text-sm font-semibold uppercase tracking-wide shadow-md transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:bg-br-red-light"
-            >
-              {t("hero.primaryCta")}
-            </Link>
+<Link
+  href={lang === "en" ? "/en/quote" : "/es/cotizacion"}
+  className="rounded-md bg-br-red-main px-6 py-3 text-sm font-semibold uppercase tracking-wide shadow-md transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:bg-br-red-light"
+>
+  {t("hero.primaryCta")}
+</Link>
+
 
             {/* Botón secundario */}
             <a

@@ -73,50 +73,54 @@
       "cleaning": "Debris Removal and Cleaning"
     },
     "message": "Additional Details (optional)",
-    "submit": "Submit Request"
-  }
-,
-"admin": {
-  "login": {
-    "title": "Admin Access",
-    "email": "Email",
-    "password": "Password",
-    "button": "Login",
-    "error": "Invalid credentials"
+    "submit": "Submit Request",
+    "address": "Address",
+    "city": "City",
+    "state": "State",
+    "zip": "Zip Code",
+    "propertyLocation": "Property Location"
   },
-  "dashboard": {
-    "title": "Dashboard",
-    "totalQuotes": "Total Quotes",
-    "pendingQuotes": "Pending Quotes",
-    "recentQuotes": "Recent Quotes",
-    "noQuotes": "No quotes yet"
-  },
-  "quotes": {
-    "title": "Quotes",
-    "table": {
-      "name": "Name",
+  "admin": {
+    "login": {
+      "title": "Admin Access",
       "email": "Email",
-      "phone": "Phone",
-      "service": "Service",
-      "date": "Date",
-      "actions": "Actions",
-      "view": "View"
+      "password": "Password",
+      "button": "Login",
+      "error": "Invalid credentials"
     },
-    "empty": "No quotes found."
-  },
-  "quoteDetail": {
-    "title": "Quote Details",
-    "name": "Full Name",
-    "email": "Email",
-    "phone": "Phone Number",
-    "service": "Service Requested",
-    "message": "Message",
-    "date": "Created At",
-    "back": "Back",
-    "delete": "Delete Quote",
-    "deleteConfirm": "Are you sure you want to delete this quote?"
+    "dashboard": {
+      "title": "Dashboard",
+      "totalQuotes": "Total Quotes",
+      "pendingQuotes": "Pending Quotes",
+      "recentQuotes": "Recent Quotes",
+      "noQuotes": "No quotes yet"
+    },
+    "quotes": {
+      "title": "Quotes",
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "service": "Service",
+        "status": "Status",
+        "date": "Date",
+        "actions": "Actions",
+        "view": "View"
+      },
+      "empty": "No quotes found."
+    },
+    "quoteDetail": {
+      "title": "Quote Details",
+      "name": "Full Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "service": "Service Requested",
+      "status": "Status",
+      "message": "Message",
+      "date": "Created At",
+      "back": "Back",
+      "delete": "Delete Quote",
+      "deleteConfirm": "Are you sure you want to delete this quote?"
+    }
   }
 }
-}
-
-
