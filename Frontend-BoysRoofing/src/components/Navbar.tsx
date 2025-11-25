@@ -91,7 +91,7 @@ export default function Navbar() {
         {/* BOTÓN + IDIOMA */}
         <div className="flex items-center gap-4">
           <Link
-            href={`${base}${lang === "es" ? "/contacto" : "/contact"}`}
+  href={lang === "en" ? "/en/quote" : "/es/cotizacion"}
             className="btn-pulse rounded bg-br-red-main px-4 py-2 text-sm font-semibold hover:bg-br-red-light transition-all shadow-md"
           >
             {t("navbar.quote")}
