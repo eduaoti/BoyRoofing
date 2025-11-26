@@ -1,0 +1,125 @@
+/* ================================ */
+/* ESTILOS UNIFICADOS PARA EL ADMIN */
+/* ================================ */
+
+/* Fondo global */
+body {
+  background: radial-gradient(circle at top, #161A1D, #0B090A 70%);
+  color: #fff;
+  font-family: var(--font-body, system-ui, sans-serif);
+}
+
+/* Sidebar */
+.admin-sidebar {
+  background: linear-gradient(to bottom, #0B090A, #161A1D);
+  border-right: 1px solid #BA181B;
+  padding: 2rem 1.5rem;
+  width: 260px;
+}
+
+/* Sidebar título */
+.admin-sidebar-title {
+  color: #E5383B;
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+
+/* Sidebar links */
+.admin-link {
+  display: block;
+  padding: 0.6rem 0;
+  font-size: 1.1rem;
+  transition: 0.2s;
+  color: #D3D3D3;
+}
+
+.admin-link:hover {
+  color: #E5383B;
+  transform: translateX(4px);
+}
+
+/* Separador vertical */
+.admin-divider {
+  border-left: 2px solid #BA181B;
+}
+
+/* Contenido */
+.admin-content {
+  padding: 2rem;
+}
+
+/* Títulos principales */
+.admin-title {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #E5383B;
+}
+
+/* Texto normal */
+.admin-text {
+  color: #ddd;
+}
+
+/* Tarjetas (para QUOTES) */
+.admin-card {
+  background: #161A1D;
+  border: 1px solid #BA181B;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 10px rgba(229, 56, 59, 0.15);
+}
+
+/* Botón cerrar sesión */
+.admin-logout {
+  background: #BA181B;
+  color: #fff;
+  padding: 0.8rem;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+.admin-logout:hover {
+  background: #E5383B;
+  transform: translateY(-2px);
+}
+
+/* Form de login */
+.admin-login-box {
+  background: #161A1D;
+  border: 1px solid #BA181B;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 380px;
+  margin: 4rem auto;
+  box-shadow: 0 0 18px rgba(229, 56, 59, 0.2);
+}
+
+input {
+  background: #0B090A;
+  border: 1px solid #333;
+  padding: 0.8rem;
+  border-radius: 8px;
+  width: 100%;
+  color: #fff;
+}
+
+input:focus {
+  outline: none;
+  border-color: #E5383B;
+}
+
+.admin-login-button {
+  margin-top: 1rem;
+  width: 100%;
+  background: #BA181B;
+  padding: 0.8rem;
+  border-radius: 10px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.admin-login-button:hover {
+  background: #E5383B;
+}

@@ -1,0 +1,127 @@
+{
+  "navbar": {
+    "home": "Inicio",
+    "services": "Servicios",
+    "about": "Sobre nosotros",
+    "contact": "Contacto",
+    "quote": "Solicita una cotización"
+  },
+  "hero": {
+    "ribbon": "Techos profesionales en Texas",
+    "title": "Calidad, rapidez y resultados.",
+    "subtitle": "Con más de 7 años de experiencia, ofrecemos soluciones profesionales de techado en todo Texas. En Boys Roofing protegemos lo que más valoras: tu hogar y tu tranquilidad.",
+    "primaryCta": "Solicita tu cotización gratuita",
+    "secondaryCta": "Ver nuestros servicios",
+    "experienceNote": "Más de siete años de experiencia respaldan nuestro compromiso."
+  },
+  "services": {
+    "sectionTitle": "Nuestros servicios",
+    "sectionSubtitle": "Techos profesionales con resultados comprobados. Calidad y rapidez, sin complicaciones.",
+    "roofing": {
+      "title": "Instalación, reparación y mantenimiento de techos",
+      "p1": "Somos expertos en techado residencial y comercial. Analizamos tu propiedad, proponemos soluciones específicas y ejecutamos el trabajo con precisión y rapidez para proteger tu inversión y tu familia.",
+      "p2": "Trabajamos con materiales certificados, herramientas modernas y un equipo comprometido para garantizar un acabado resistente y profesional."
+    },
+    "cleaning": {
+      "title": "Limpieza y remoción de escombros",
+      "p1": "Un trabajo no está terminado hasta que el área está limpia y segura. Completamos cada proyecto con limpieza y remoción de escombros, dejando tu propiedad ordenada y lista para usar.",
+      "p2": "Recogemos, clasificamos y retiramos los desechos generados durante el trabajo, reflejando nuestra responsabilidad y respeto por tu espacio y el medio ambiente."
+    }
+  },
+  "history": {
+    "sectionTitle": "Nuestra historia",
+    "p1": "Boys Roofing nació del esfuerzo, dedicación y deseo de mejorar de su fundador, quien comenzó su trayectoria en el mundo de los techos como ayudante en una empresa local en Texas.",
+    "p2": "A lo largo de los años, su pasión por el oficio, ética de trabajo y compromiso con la calidad lo llevaron a perfeccionar sus habilidades y comprender profundamente las necesidades de cada cliente.",
+    "p3": "Cuando se dio cuenta de que muchas personas buscaban un servicio más humano, confiable y eficiente, decidió fundar Boys Roofing con una clara intención: ofrecer soluciones de techado basadas en calidad, rapidez y resultados comprobados.",
+    "p4": "Hoy, con más de siete años de experiencia profesional, Boys Roofing es sinónimo de compromiso, confianza y excelencia, convirtiéndose en una de las opciones más recomendadas en el estado de Texas.",
+    "highlightTitle": "Nuestra promesa",
+    "highlightText": "Más que una empresa, somos el reflejo de una historia de esfuerzo y determinación, con un propósito claro: proteger tu hogar y tu tranquilidad con un trabajo bien hecho."
+  },
+  "missionVisionValues": {
+    "missionTitle": "Misión",
+    "missionText": "Nuestra misión es ofrecer servicios profesionales de techado de la más alta calidad, proporcionando soluciones seguras y duraderas adaptadas a cada cliente. Trabajamos con eficiencia, honestidad y pasión, garantizando resultados que superan las expectativas.",
+    "visionTitle": "Visión",
+    "visionText": "Ser reconocidos como una de las principales empresas de techado en Texas, destacándonos por nuestra integridad, calidad de servicio y compromiso con la satisfacción total del cliente.",
+    "valuesTitle": "Valores",
+    "valuesList": [
+      "Compromiso: tratamos cada proyecto como si fuera el nuestro.",
+      "Calidad: usamos materiales de primera y técnicas comprobadas.",
+      "Rapidez: cumplimos con los plazos sin sacrificar la excelencia.",
+      "Honestidad: relaciones transparentes y de confianza.",
+      "Respeto: cuidamos tus espacios como si fueran nuestros.",
+      "Responsabilidad: cada trabajo es una promesa cumplida.",
+      "Trabajo en equipo: nuestro éxito se construye juntos."
+    ]
+  },
+  "contact": {
+    "sectionTitle": "Tu techo, nuestra prioridad.",
+    "sectionText": "Contáctanos hoy y solicita tu cotización gratuita. Cuidamos de tu hogar como si fuera nuestro.",
+    "callButton": "Habla con un experto en techos",
+    "badge": "Calidad y rapidez, sin complicaciones."
+  },
+  "quote": {
+    "title": "Solicita tu cotización gratuita de techado",
+    "subtitle": "Llena el formulario y nuestro equipo te contactará lo antes posible.",
+    "name": "Nombre completo",
+    "phone": "Número de teléfono",
+    "email": "Correo electrónico",
+    "service": "Tipo de servicio",
+    "select": "Selecciona una opción",
+    "services": {
+      "newRoof": "Instalación de nuevo techo",
+      "repair": "Reparación de techo",
+      "cleaning": "Remoción de escombros y limpieza"
+    },
+    "message": "Detalles adicionales (opcional)",
+    "submit": "Enviar solicitud",
+    "status": [
+      { "value": "PENDING", "label": "Pendiente" },
+      { "value": "IN_REVIEW", "label": "En revisión" },
+      { "value": "SENT", "label": "Enviado" },
+      { "value": "CLOSED", "label": "Cerrado" }
+    ]
+  },
+  "admin": {
+    "login": {
+      "title": "Acceso de administrador",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "button": "Iniciar sesión",
+      "error": "Credenciales inválidas"
+    },
+    "dashboard": {
+      "title": "Panel de control",
+      "totalQuotes": "Total de cotizaciones",
+      "pendingQuotes": "Cotizaciones pendientes",
+      "recentQuotes": "Cotizaciones recientes",
+      "noQuotes": "No hay cotizaciones aún"
+    },
+    "quotes": {
+      "title": "Cotizaciones",
+      "table": {
+        "name": "Nombre",
+        "email": "Correo electrónico",
+        "phone": "Teléfono",
+        "service": "Servicio",
+        "status": "Estado",
+        "date": "Fecha",
+        "actions": "Acciones",
+        "view": "Ver"
+      },
+      "empty": "No se encontraron cotizaciones."
+    },
+    "quoteDetail": {
+      "title": "Detalles de la cotización",
+      "name": "Nombre completo",
+      "email": "Correo electrónico",
+      "phone": "Número de teléfono",
+      "service": "Servicio solicitado",
+      "status": "Estado",
+      "message": "Mensaje",
+      "date": "Fecha de creación",
+      "back": "Volver",
+      "delete": "Eliminar cotización",
+      "deleteConfirm": "¿Estás seguro de que deseas eliminar esta cotización?"
+    }
+  }
+}

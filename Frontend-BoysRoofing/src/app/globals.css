@@ -1,26 +1,133 @@
+/* Importa Tailwind v4 */
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Definimos la paleta de Boys Roofing como theme variables */
+@theme {
+  /* Colores de marca */
+  --color-br-carbon: #0B090A;
+  --color-br-smoke: #161A1D;
+  --color-br-red-deep: #660708;
+  --color-br-red-dark: #A4161A;
+  --color-br-red-main: #BA181B;
+  --color-br-red-light: #E5383B;
+  --color-br-stone: #B1A7A6;
+  --color-br-pearl: #D3D3D3;
+  --color-br-smoke-light: #F5F3F4;
+  --color-br-white: #FFFFFF;
+
+  /* Fuente utilitaria: font-body */
+  --font-body: var(--font-roboto, system-ui, sans-serif);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Estilos globales */
+body {
+  @apply bg-br-carbon text-br-white font-body;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ---------------------------- */
+/* EFECTOS EXTRA (NO ROMPEN TAILWIND) */
+/* ---------------------------- */
+
+/* Efecto de brillo en el cintillo */
+.hero-ribbon {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-ribbon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.45),
+    transparent
+  );
+  transform: translateX(-120%);
+  animation: hero-ribbon-shine 3s ease-in-out infinite;
+}
+
+/* Animación del brillo */
+@keyframes hero-ribbon-shine {
+  0% {
+    transform: translateX(-120%);
+  }
+  60% {
+    transform: translateX(120%);
+  }
+  100% {
+    transform: translateX(120%);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+
+/* NAVBAR hover underline */
+.nav-link {
+  position: relative;
+  padding-bottom: 4px;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0;
+  background-color: var(--color-br-red-main);
+  transition: width 0.3s ease-in-out;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* LINK ACTIVO */
+.nav-link-active::after {
+  width: 100%;
+}
+
+/* Scroll Reveal Animation */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.btn-pulse {
+  animation: pulse-soft 2.8s infinite ease-in-out;
+}
+
+@keyframes pulse-soft {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0px rgba(229, 56, 59, 0.4);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 20px rgba(229, 56, 59, 0.35);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0px rgba(229, 56, 59, 0.4);
+  }
+}
+
+
+.footer-gradient {
+  background: linear-gradient(90deg, #0B090A, #660708, #BA181B, #0B090A);
+  background-size: 300% 100%;
+  animation: footerMove 12s ease infinite;
+}
+
+@keyframes footerMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
