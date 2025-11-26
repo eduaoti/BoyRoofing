@@ -11,13 +11,14 @@ export default function Navbar() {
 
   const base = lang === "es" ? "/es" : "/en";
 
-  // Función: detectar si un link está activo
+  // Función: link activo
   const isActive = (href: string) => pathname === href;
 
   return (
     <header className="w-full border-b border-br-smoke bg-br-carbon/95 backdrop-blur-md shadow-md">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        {/* Logo */}
+
+        {/* LOGO */}
         <Link
           href={base}
           className="text-xl font-bold text-br-red-main tracking-wide hover:text-br-red-light transition-colors"
@@ -25,9 +26,10 @@ export default function Navbar() {
           Boys Roofing
         </Link>
 
-        {/* Links principales */}
+        {/* LINKS */}
         <div className="hidden gap-8 text-sm md:flex">
 
+          {/* Inicio */}
           <Link
             href={base}
             className={`nav-link hover:text-br-red-light ${
@@ -37,12 +39,11 @@ export default function Navbar() {
             {t("navbar.home")}
           </Link>
 
+          {/* Servicios */}
           <Link
             href={`${base}${lang === "es" ? "/servicios" : "/services"}`}
             className={`nav-link hover:text-br-red-light ${
-              isActive(
-                `${base}${lang === "es" ? "/servicios" : "/services"}`
-              )
+              isActive(`${base}${lang === "es" ? "/servicios" : "/services"}`)
                 ? "nav-link-active text-br-red-light"
                 : ""
             }`}
@@ -50,6 +51,19 @@ export default function Navbar() {
             {t("navbar.services")}
           </Link>
 
+          {/* ⭐ NUEVO → Galería */}
+          <Link
+            href={`${base}${lang === "es" ? "/galeria" : "/gallery"}`}
+            className={`nav-link hover:text-br-red-light ${
+              isActive(`${base}${lang === "es" ? "/galeria" : "/gallery"}`)
+                ? "nav-link-active text-br-red-light"
+                : ""
+            }`}
+          >
+            {lang === "es" ? "Galería" : "Gallery"}
+          </Link>
+
+          {/* Nosotros */}
           <Link
             href={`${base}${lang === "es" ? "/nosotros" : "/about"}`}
             className={`nav-link hover:text-br-red-light ${
@@ -61,6 +75,7 @@ export default function Navbar() {
             {t("navbar.about")}
           </Link>
 
+          {/* Contacto */}
           <Link
             href={`${base}${lang === "es" ? "/contacto" : "/contact"}`}
             className={`nav-link hover:text-br-red-light ${
@@ -73,7 +88,7 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* CTA + idiomas */}
+        {/* BOTÓN + IDIOMA */}
         <div className="flex items-center gap-4">
           <Link
   href={lang === "en" ? "/en/quote" : "/es/cotizacion"}
