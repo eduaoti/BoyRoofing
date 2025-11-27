@@ -61,7 +61,6 @@ body {
   }
 }
 
-
 /* NAVBAR hover underline */
 .nav-link {
   position: relative;
@@ -118,7 +117,6 @@ body {
     box-shadow: 0 0 0px rgba(229, 56, 59, 0.4);
   }
 }
-
 
 .footer-gradient {
   background: linear-gradient(90deg, #0B090A, #660708, #BA181B, #0B090A);
