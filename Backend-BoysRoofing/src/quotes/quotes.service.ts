@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { MailService } from '../mail/mail.service';
 import { CreateQuoteDto } from './dto/create-quote.dto';
-import { QuoteStatus } from '@prisma/client';
 
 @Injectable()
 export class QuotesService {
@@ -15,7 +14,7 @@ export class QuotesService {
     const quote = await this.prisma.quote.create({
       data: {
         ...data,
-        status: data.status || QuoteStatus.PENDING,  // Si no se pasa un status, se establece 'PENDING' por defecto
+        status: 'PENDING',  // Usa el string directamente
       },
     });
 

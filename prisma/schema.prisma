@@ -1,0 +1,21 @@
+// ...puedes agregar tus modelos aquí...
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // o "mysql" o "sqlite" según tu base de datos
+  url      = env("DATABASE_URL")
+}
+
+// Ejemplo de modelo:
+model Review {
+  id        Int      @id @default(autoincrement())
+  quoteId   Int
+  quote     Quote    @relation(fields: [quoteId], references: [id])
+  name      String
+  email     String
+  rating    Int
+  message   String
+  createdAt DateTime @default(now())
+}
