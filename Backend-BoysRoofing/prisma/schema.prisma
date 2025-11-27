@@ -8,33 +8,46 @@ datasource db {
 }
 
 model Quote {
-  id               Int            @id @default(autoincrement())
+  id               Int         @id @default(autoincrement())
   name             String
   email            String
   phone            String
   service          String
   message          String?
-  address          String         // Dirección
-  city             String         // Ciudad
-  state            String         // Estado
-  zip              String         // Código postal
-  propertyLocation String         // Ubicación de la propiedad
-  activo           Boolean        @default(true)  // Estado de la cotización (activo o inactivo)
-  status           QuoteStatus    @default(PENDING) // Nuevo campo para el estado de la cotización
-  createdAt        DateTime       @default(now())
+  address          String
+  city             String
+  state            String
+  zip              String
+  propertyLocation String
+  activo           Boolean     @default(true)
+  status           QuoteStatus @default(PENDING)
+  createdAt        DateTime    @default(now())
+
+  // RELACIÓN 1:N CON Review
+  reviews Review[]
 }
 
 enum QuoteStatus {
-  PENDING   // Recibida, pero sin atender
+  PENDING // Recibida, pero sin atender
   IN_REVIEW // El dueño ya la vio
-  SENT      // Cotización enviada al cliente
-  CLOSED    // Cerrada (aceptada / rechazada)
+  SENT // Cotización enviada al cliente
+  CLOSED // Cerrada
 }
-
 
 model AdminUser {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  quoteId   Int
+  quote     Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  rating    Int
+  message   String
   createdAt DateTime @default(now())
 }
