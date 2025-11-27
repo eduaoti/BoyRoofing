@@ -61,7 +61,6 @@ body {
   }
 }
 
-
 /* NAVBAR hover underline */
 .nav-link {
   position: relative;
@@ -119,7 +118,6 @@ body {
   }
 }
 
-
 .footer-gradient {
   background: linear-gradient(90deg, #0B090A, #660708, #BA181B, #0B090A);
   background-size: 300% 100%;
@@ -131,3 +129,19 @@ body {
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+/* Diseño de las breadcrumnbs*/
+.breadcrumbs {
+  font-size: 14px;
+  color: #bbb;
+}
+
+.breadcrumbs a {
+  color: #ff4646;
+  text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+  text-decoration: underline;
+}
+

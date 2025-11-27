@@ -2,6 +2,7 @@ import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Roboto, Montserrat } from "next/font/google";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -24,6 +25,7 @@ export default function PublicLayout({
     <html lang="es">
       <body className={`${montserrat.variable} ${roboto.variable}`}>
         <Navbar />
+        <Breadcrumbs />
         <main>{children}</main>
         <Footer />
       </body>

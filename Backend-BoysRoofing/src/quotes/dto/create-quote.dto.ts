@@ -1,5 +1,3 @@
-import { QuoteStatus } from "@prisma/client";
-
 export class CreateQuoteDto {
   name: string;
   email: string;
@@ -11,5 +9,5 @@ export class CreateQuoteDto {
   state: string;
   zip: string;
   propertyLocation: string;
-  status: QuoteStatus;  // Añadimos el campo 'status' que es de tipo QuoteStatus
+  // status: QuoteStatus;  // Añadimos el campo 'status' que es de tipo QuoteStatus
 }
