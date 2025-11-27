@@ -22,6 +22,7 @@ model Quote {
   activo           Boolean        @default(true)  // Estado de la cotización (activo o inactivo)
   status           QuoteStatus    @default(PENDING) // Nuevo campo para el estado de la cotización
   createdAt        DateTime       @default(now())
+  reviews          Review[]
 }
 
 enum QuoteStatus {
@@ -36,5 +37,16 @@ model AdminUser {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  quoteId   Int
+  quote     Quote    @relation(fields: [quoteId], references: [id])
+  name      String
+  email     String
+  rating    Int
+  message   String
   createdAt DateTime @default(now())
 }

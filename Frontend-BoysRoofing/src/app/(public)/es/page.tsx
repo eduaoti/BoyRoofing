@@ -1,5 +1,11 @@
 import HomePage from "@/components/HomePage";
+import ReviewsCarousel from "@/components/ReviewsCarousel";
 
 export default function PageES() {
-  return <HomePage />;
+  return (
+    <>
+      <HomePage />
+      <ReviewsCarousel lang="es" />
+    </>
+  );
 }

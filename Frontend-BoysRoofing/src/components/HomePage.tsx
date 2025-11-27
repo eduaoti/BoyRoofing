@@ -5,6 +5,7 @@ import ServicesPage from "./ServicesPage";
 import AboutPage from "./AboutPage";
 import MissionVisionValuesSection from "./MissionVisionValuesSection";
 import ContactPage from "./ContactPage";
+import ReviewsCarousel from "./ReviewsCarousel";
 
 export default function HomePage() {
   return (
@@ -14,6 +15,7 @@ export default function HomePage() {
       <AboutPage />
       <MissionVisionValuesSection />
       <ContactPage />
+      <ReviewsCarousel />
     </div>
   );
 }
