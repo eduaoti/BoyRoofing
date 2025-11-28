@@ -12,21 +12,57 @@
     "subtitle": "Con más de 7 años de experiencia, ofrecemos soluciones profesionales de techado en todo Texas. En Boys Roofing protegemos lo que más valoras: tu hogar y tu tranquilidad.",
     "primaryCta": "Solicita tu cotización gratuita",
     "secondaryCta": "Ver nuestros servicios",
-    "experienceNote": "Más de siete años de experiencia respaldan nuestro compromiso."
+    "experienceNote": "Más de siete años de experiencia respaldan nuestro compromiso.",
+    "stats": {
+    "years": "Servicio profesional garantizado",
+    "roofs": "Residenciales",
+    "secured": "Garantía y materiales premium"
+  }
+
   },
-  "services": {
-    "sectionTitle": "Nuestros servicios",
-    "sectionSubtitle": "Techos profesionales con resultados comprobados. Calidad y rapidez, sin complicaciones.",
-    "roofing": {
-      "title": "Instalación, reparación y mantenimiento de techos",
-      "p1": "Somos expertos en techado residencial y comercial. Analizamos tu propiedad, proponemos soluciones específicas y ejecutamos el trabajo con precisión y rapidez para proteger tu inversión y tu familia.",
-      "p2": "Trabajamos con materiales certificados, herramientas modernas y un equipo comprometido para garantizar un acabado resistente y profesional."
-    },
-    "cleaning": {
-      "title": "Limpieza y remoción de escombros",
-      "p1": "Un trabajo no está terminado hasta que el área está limpia y segura. Completamos cada proyecto con limpieza y remoción de escombros, dejando tu propiedad ordenada y lista para usar.",
-      "p2": "Recogemos, clasificamos y retiramos los desechos generados durante el trabajo, reflejando nuestra responsabilidad y respeto por tu espacio y el medio ambiente."
-    }
+"services": {
+  "sectionTitle": "Nuestros servicios",
+  "sectionSubtitle": "Techos profesionales con resultados comprobados. Calidad y rapidez, sin complicaciones.",
+  "tagline": "Confianza construida con esfuerzo, dedicación y calidad.",
+
+  "benefits": {
+    "satisfaction": "Satisfacción garantizada",
+    "speed": "Rapidez en cada proyecto",
+    "certified": "Material certificado",
+    "cleaning": "Limpieza y cuidado del área"
+  },
+
+  "process": {
+    "title": "Nuestro proceso de trabajo",
+    "step1": "Inspección profesional",
+    "step2": "Elección de materiales",
+    "step3": "Instalación experta",
+    "step4": "Limpieza y entrega final"
+  },
+
+  "badges": {
+    "years": "7+ Años de experiencia",
+    "certified": "Material certificado",
+    "warranty": "Garantía contra filtraciones",
+    "insured": "Trabajo 100% asegurado"
+  },
+
+  "roofing": {
+    "title": "Instalación, reparación y mantenimiento de techos",
+    "p1": "Somos expertos en techado residencial y comercial. Analizamos tu propiedad, proponemos soluciones específicas y ejecutamos el trabajo con precisión y rapidez para proteger tu inversión y tu familia.",
+    "p2": "Trabajamos con materiales certificados, herramientas modernas y un equipo comprometido para garantizar un acabado resistente y profesional."
+  },
+
+  "cleaning": {
+    "title": "Limpieza y remoción de escombros",
+    "p1": "Un trabajo no está terminado hasta que el área está limpia y segura. Completamos cada proyecto con limpieza y remoción de escombros, dejando tu propiedad ordenada y lista para usar.",
+    "p2": "Recogemos, clasificamos y retiramos los desechos generados durante el trabajo, reflejando nuestra responsabilidad y respeto por tu espacio y el medio ambiente."
+  },
+
+  "before": "Antes",
+  "after": "Después",
+  "ourWork": "Nuestro trabajo"
+
   },
   "history": {
     "sectionTitle": "Nuestra historia",

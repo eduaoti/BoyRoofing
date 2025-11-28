@@ -12,21 +12,53 @@
     "subtitle": "With more than 7 years of experience, we provide professional roofing solutions throughout Texas. At Boys Roofing we protect what you value most: your home and your peace of mind.",
     "primaryCta": "Request your free quote",
     "secondaryCta": "See our services",
-    "experienceNote": "More than seven years of experience back our commitment."
+    "experienceNote": "More than seven years of experience back our commitment.",
+    "stats": {
+    "years": "Professional guaranteed service",
+    "roofs": "Residential work",
+    "secured": "Premium materials & full warranty"
+  }
   },
-  "services": {
-    "sectionTitle": "Our services",
-    "sectionSubtitle": "Professional roofing with proven results. Quality and speed, without complications.",
-    "roofing": {
-      "title": "Roofing installation, repair and maintenance",
-      "p1": "We are experts in residential and commercial roofing. We analyze your property, propose specific solutions and execute the work with precision and speed to protect your investment and your family.",
-      "p2": "We work with certified materials, modern tools and a committed team to guarantee a resistant and professional finish."
-    },
-    "cleaning": {
-      "title": "Cleaning and debris removal",
-      "p1": "A job is not finished until the area is clean and safe. We complete every project with cleaning and debris removal, leaving your property tidy and ready to use.",
-      "p2": "We collect, classify and remove waste generated during the work, reflecting our responsibility and respect for your space and the environment."
-    }
+"services": {
+  "sectionTitle": "Our services",
+  "sectionSubtitle": "Professional roofing with proven results. Quality and speed, without complications.",
+  "tagline": "Trust built with effort, dedication, and quality.",
+  "benefits": {
+    "satisfaction": "Guaranteed satisfaction",
+    "speed": "Fast project delivery",
+    "certified": "Certified materials",
+    "cleaning": "Area cleaning and care"
+  },
+
+  "process": {
+    "title": "Our work process",
+    "step1": "Professional inspection",
+    "step2": "Material selection",
+    "step3": "Expert installation",
+    "step4": "Final cleaning and delivery"
+  },
+  "badges": {
+    "years": "7+ Years of Experience",
+    "certified": "Certified materials",
+    "warranty": "Leak-proof warranty",
+    "insured": "100% insured work"
+  },
+  "roofing": {
+    "title": "Roofing installation, repair and maintenance",
+    "p1": "We are experts in residential and commercial roofing. We analyze your property, propose specific solutions and execute the work with precision and speed to protect your investment and your family.",
+    "p2": "We work with certified materials, modern tools and a committed team to guarantee a resistant and professional finish."
+  },
+
+  "cleaning": {
+    "title": "Cleaning and debris removal",
+    "p1": "A job is not finished until the area is clean and safe. We complete every project with cleaning and debris removal, leaving your property tidy and ready to use.",
+    "p2": "We collect, classify and remove waste generated during the work, reflecting our responsibility and respect for your space and the environment."
+  },
+
+  "before": "Before",
+  "after": "After",
+  "ourWork": "Our work"
+
   },
   "history": {
     "sectionTitle": "Our story",
