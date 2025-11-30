@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 type Quote = {
   id: number | string;
@@ -17,11 +18,13 @@ export default function AdminENDashboard() {
   useEffect(() => {
     async function loadQuotes() {
       try {
-        const token = localStorage.getItem("br_admin_token");
+        const res = await apiFetch("/quotes");
 
-        const res = await fetch("http://localhost:3200/quotes", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        if (!res.ok) {
+          console.error("Error loading quotes:", await res.text());
+          setQuotes([]);
+          return;
+        }
 
         const data = await res.json();
         setQuotes(Array.isArray(data) ? data : []);

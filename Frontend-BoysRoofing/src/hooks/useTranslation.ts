@@ -1,3 +1,4 @@
+//src/hooks/useTranslation.ts
 "use client";
 
 import en from "@/locales/en.json";

@@ -1,6 +1,8 @@
+// src/components/Reviews.tsx
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 interface Review {
   id: number;
@@ -15,16 +17,35 @@ export default function Reviews() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:3001/reviews") // TU BACKEND NESTJS
-      .then((res) => res.json())
-      .then((data) => {
-        setReviews(data);
+    async function loadReviews() {
+      try {
+        const res = await apiFetch("/reviews");
+
+        if (!res.ok) {
+          console.error("Error loading reviews:", await res.text());
+          setReviews([]);
+          return;
+        }
+
+        const data = await res.json();
+        setReviews(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Error loading reviews:", err);
+      } finally {
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
+      }
+    }
+
+    loadReviews();
   }, []);
 
-  if (loading) return <p>Cargando reseñas...</p>;
+  if (loading) {
+    return (
+      <section className="w-full py-10 px-6 bg-gray-100">
+        <p className="text-center text-gray-600">Cargando reseñas...</p>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full py-10 px-6 bg-gray-100">

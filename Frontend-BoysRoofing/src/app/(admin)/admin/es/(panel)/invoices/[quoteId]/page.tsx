@@ -1,4 +1,4 @@
-// src/app/admin/en/(panel)/invoices/[quoteId]/page.tsx
+// src/app/admin/es/(panel)/invoices/[quoteId]/page.tsx
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
@@ -23,7 +23,7 @@ type Quote = {
   createdAt?: string;
 };
 
-export default function InvoiceCreateEN() {
+export default function InvoiceCreateES() {
   const { quoteId } = useParams();
   const router = useRouter();
 
@@ -55,10 +55,12 @@ export default function InvoiceCreateEN() {
   useEffect(() => {
     async function loadQuote() {
       try {
-        const token = localStorage.getItem("br_admin_token");
+        const token = typeof window !== "undefined"
+          ? localStorage.getItem("br_admin_token")
+          : null;
 
         if (!token) {
-          router.push("/admin/en/login");
+          router.push("/admin/es/login");
           return;
         }
 
@@ -69,13 +71,18 @@ export default function InvoiceCreateEN() {
         });
 
         if (res.status === 401) {
-          localStorage.removeItem("br_admin_token");
-          router.push("/admin/en/login");
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("br_admin_token");
+          }
+          router.push("/admin/es/login");
           return;
         }
 
         if (!res.ok) {
-          console.error("Failed to load quote for invoice:", await res.text());
+          console.error(
+            "No se pudo cargar la cotización para la factura:",
+            await res.text()
+          );
           setLoading(false);
           return;
         }
@@ -92,20 +99,19 @@ export default function InvoiceCreateEN() {
         setZip(data.zip);
         setPropertyLocation(data.propertyLocation);
 
-        // Número de invoice sugerido
+        // Número sugerido
         const today = new Date();
         const datePart = `${today.getFullYear()}${String(
           today.getMonth() + 1
         ).padStart(2, "0")}${String(today.getDate()).padStart(2, "0")}`;
-        setInvoiceNumber(`INV-${data.id}-${datePart}`);
+        setInvoiceNumber(`FAC-${data.id}-${datePart}`);
 
         // Fecha de hoy en formato YYYY-MM-DD
         setInvoiceDate(today.toISOString().slice(0, 10));
 
-        // descripción inicial vacía (la escribe el dueño)
         setDescription("");
       } catch (err) {
-        console.error("Error loading quote for invoice:", err);
+        console.error("Error al cargar cotización para factura:", err);
       } finally {
         setLoading(false);
       }
@@ -121,9 +127,12 @@ export default function InvoiceCreateEN() {
     try {
       setSubmitting(true);
 
-      const token = localStorage.getItem("br_admin_token");
+      const token = typeof window !== "undefined"
+        ? localStorage.getItem("br_admin_token")
+        : null;
+
       if (!token) {
-        router.push("/admin/en/login");
+        router.push("/admin/es/login");
         return;
       }
 
@@ -155,8 +164,8 @@ export default function InvoiceCreateEN() {
       });
 
       if (!res.ok) {
-        console.error("Error creating invoice:", await res.text());
-        alert("There was a problem creating the invoice.");
+        console.error("Error al crear la factura:", await res.text());
+        alert("Hubo un problema al crear la factura.");
         setSubmitting(false);
         return;
       }
@@ -166,17 +175,19 @@ export default function InvoiceCreateEN() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `invoice-${invoiceNumber}.pdf`;
+      a.download = `factura-${invoiceNumber}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      alert("Invoice created, emailed to the customer and downloaded as PDF.");
-      router.push(`/admin/en/quotes/${quote.id}`);
+      alert(
+        "Factura creada, enviada al cliente por correo y descargada en PDF."
+      );
+      router.push(`/admin/es/quotes/${quote.id}`);
     } catch (err) {
-      console.error("Error submitting invoice:", err);
-      alert("Unexpected error while creating invoice.");
+      console.error("Error enviando factura:", err);
+      alert("Error inesperado al crear la factura.");
       setSubmitting(false);
     }
   }
@@ -184,7 +195,7 @@ export default function InvoiceCreateEN() {
   if (loading || !quote) {
     return (
       <div className="max-w-4xl mx-auto mt-6 rounded-2xl border border-br-smoke-light bg-br-smoke/30 p-6 text-sm text-br-white/70">
-        {loading ? "Loading quote data..." : "Quote not found."}
+        {loading ? "Cargando datos de la cotización..." : "Cotización no encontrada."}
       </div>
     );
   }
@@ -195,27 +206,27 @@ export default function InvoiceCreateEN() {
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <button
-            onClick={() => router.push(`/admin/en/quotes/${quote.id}`)}
+            onClick={() => router.push(`/admin/es/quotes/${quote.id}`)}
             className="mb-2 text-xs font-medium text-br-white/60 hover:text-br-pearl underline underline-offset-4"
           >
-            ← Back to quote
+            ← Volver a la cotización
           </button>
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-br-pearl">
-            Create invoice
+            Crear factura
           </h1>
           <p className="mt-1 text-xs text-br-white/60">
-            Fill the following form to generate a professional PDF invoice and
-            send it to the customer.
+            Llena el siguiente formulario para generar una factura en PDF y
+            enviarla al cliente.
           </p>
         </div>
 
         <div className="text-xs text-br-white/60 text-right">
           <p>
-            Quote ID:{" "}
+            ID de cotización:{" "}
             <span className="font-mono text-br-pearl">#{quote.id}</span>
           </p>
           <p>
-            Customer:{" "}
+            Cliente:{" "}
             <span className="font-semibold text-br-pearl">{quote.name}</span>
           </p>
         </div>
@@ -230,11 +241,11 @@ export default function InvoiceCreateEN() {
         <section className="grid gap-4 md:grid-cols-2">
           <div className="space-y-3">
             <h2 className="text-sm font-semibold text-br-pearl">
-              Billing information
+              Información de facturación
             </h2>
 
             <div className="space-y-1 text-xs">
-              <label className="block text-br-white/70">Bill to</label>
+              <label className="block text-br-white/70">Facturar a</label>
               <input
                 className="w-full rounded bg-br-carbon border border-br-smoke-light px-3 py-2 text-sm text-br-pearl"
                 value={billTo}
@@ -244,7 +255,7 @@ export default function InvoiceCreateEN() {
             </div>
 
             <div className="space-y-1 text-xs">
-              <label className="block text-br-white/70">Phone</label>
+              <label className="block text-br-white/70">Teléfono</label>
               <input
                 className="w-full rounded bg-br-carbon border border-br-smoke-light px-3 py-2 text-sm text-br-pearl"
                 value={phone}
@@ -254,7 +265,7 @@ export default function InvoiceCreateEN() {
             </div>
 
             <div className="space-y-1 text-xs">
-              <label className="block text-br-white/70">Address</label>
+              <label className="block text-br-white/70">Dirección</label>
               <input
                 className="w-full rounded bg-br-carbon border border-br-smoke-light px-3 py-2 text-sm text-br-pearl"
                 value={address}
@@ -266,12 +277,12 @@ export default function InvoiceCreateEN() {
 
           <div className="space-y-3">
             <h2 className="text-sm font-semibold text-br-pearl">
-              Location / meta
+              Ubicación / meta
             </h2>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="space-y-1">
-                <label className="block text-br-white/70">City</label>
+                <label className="block text-br-white/70">Ciudad</label>
                 <input
                   className="w-full rounded bg-br-carbon border border-br-smoke-light px-3 py-2 text-sm text-br-pearl"
                   value={city}
@@ -281,7 +292,7 @@ export default function InvoiceCreateEN() {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-br-white/70">State</label>
+                <label className="block text-br-white/70">Estado</label>
                 <input
                   className="w-full rounded bg-br-carbon border border-br-smoke-light px-3 py-2 text-sm text-br-pearl"
                   value={stateValue}
@@ -293,7 +304,7 @@ export default function InvoiceCreateEN() {
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="space-y-1">
-                <label className="block text-br-white/70">ZIP</label>
+                <label className="block text-br-white/70">Código postal</label>
                 <input
                   className="w-full rounded bg-br-carbon border border-br-smoke-light px-3 py-2 text-sm text-br-pearl"
                   value={zip}
@@ -304,7 +315,7 @@ export default function InvoiceCreateEN() {
 
               <div className="space-y-1">
                 <label className="block text-br-white/70">
-                  Invoice date (YYYY-MM-DD)
+                  Fecha de factura (AAAA-MM-DD)
                 </label>
                 <input
                   type="date"
@@ -317,7 +328,9 @@ export default function InvoiceCreateEN() {
             </div>
 
             <div className="space-y-1 text-xs">
-              <label className="block text-br-white/70">Property location</label>
+              <label className="block text-br-white/70">
+                Ubicación de la propiedad
+              </label>
               <input
                 className="w-full rounded bg-br-carbon border border-br-smoke-light px-3 py-2 text-sm text-br-pearl"
                 value={propertyLocation}
@@ -331,7 +344,7 @@ export default function InvoiceCreateEN() {
         {/* INVOICE META */}
         <section className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1 text-xs">
-            <label className="block text-br-white/70">Invoice number</label>
+            <label className="block text-br-white/70">Número de factura</label>
             <input
               className="w-full rounded bg-br-carbon border border-br-smoke-light px-3 py-2 text-sm text-br-pearl font-mono"
               value={invoiceNumber}
@@ -341,7 +354,7 @@ export default function InvoiceCreateEN() {
           </div>
 
           <div className="space-y-1 text-xs">
-            <label className="block text-br-white/70">Service</label>
+            <label className="block text-br-white/70">Servicio</label>
             <input
               className="w-full rounded bg-br-carbon border border-br-smoke-light px-3 py-2 text-sm text-br-pearl"
               value={quote.service}
@@ -353,11 +366,11 @@ export default function InvoiceCreateEN() {
         {/* DESCRIPTION */}
         <section className="space-y-2">
           <label className="block text-xs font-semibold text-br-pearl">
-            Work / materials description
+            Descripción del trabajo / materiales
           </label>
           <textarea
             className="min-h-[140px] w-full rounded-lg bg-br-carbon border border-br-smoke-light px-3 py-2 text-sm text-br-pearl"
-            placeholder="Describe the work, materials, squares, ridge caps, flashing, etc."
+            placeholder="Describe el trabajo, materiales, metros cuadrados, cumbreras, láminas, impermeabilización, etc."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
@@ -367,7 +380,7 @@ export default function InvoiceCreateEN() {
         {/* PRICES */}
         <section className="grid gap-4 md:grid-cols-3">
           <div className="space-y-1 text-xs">
-            <label className="block text-br-white/70">Price</label>
+            <label className="block text-br-white/70">Precio</label>
             <input
               type="number"
               step="0.01"
@@ -380,7 +393,7 @@ export default function InvoiceCreateEN() {
           </div>
 
           <div className="space-y-1 text-xs">
-            <label className="block text-br-white/70">Other charges</label>
+            <label className="block text-br-white/70">Otros cargos</label>
             <input
               type="number"
               step="0.01"
@@ -405,10 +418,10 @@ export default function InvoiceCreateEN() {
         <div className="flex flex-col gap-3 border-t border-br-smoke-light pt-4 sm:flex-row sm:justify-between sm:items-center">
           <button
             type="button"
-            onClick={() => router.push(`/admin/en/quotes/${quote.id}`)}
+            onClick={() => router.push(`/admin/es/quotes/${quote.id}`)}
             className="inline-flex items-center justify-center rounded-full border border-br-smoke-light bg-br-smoke/40 px-5 py-2 text-xs font-medium text-br-pearl hover:bg-br-smoke-light/60 transition"
           >
-            Cancel
+            Cancelar
           </button>
 
           <button
@@ -416,7 +429,9 @@ export default function InvoiceCreateEN() {
             disabled={submitting}
             className="inline-flex items-center justify-center rounded-full bg-br-red-main px-6 py-2 text-xs font-semibold text-white hover:bg-br-red-light disabled:opacity-60 disabled:cursor-not-allowed transition"
           >
-            {submitting ? "Creating invoice..." : "Create & send invoice"}
+            {submitting
+              ? "Creando factura..."
+              : "Crear y enviar factura"}
           </button>
         </div>
       </form>

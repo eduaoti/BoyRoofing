@@ -2,6 +2,7 @@
 
 import useTranslation from "@/hooks/useTranslation";
 import { useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 export default function QuotePage() {
   const { t } = useTranslation();
@@ -19,30 +20,32 @@ export default function QuotePage() {
     propertyLocation: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Agregar el status por defecto (PENDING) al enviar el formulario
     const formData = { ...form, status: "PENDING" };
 
     try {
-      const res = await fetch("http://localhost:3200/quotes", {
+      const res = await apiFetch("/quotes", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),  // Se incluye el estado PENDING en la solicitud
+        body: JSON.stringify(formData),
       });
 
       if (!res.ok) {
+        console.error("Error backend:", await res.text());
         throw new Error("Error al enviar la cotización");
       }
 
       alert("¡Cotización enviada con éxito!");
 
-      // Limpiar formulario después de enviar
       setForm({
         name: "",
         phone: "",
@@ -55,9 +58,8 @@ export default function QuotePage() {
         zip: "",
         propertyLocation: "",
       });
-
     } catch (error) {
-      console.error(error);
+      console.error("Error:", error);
       alert("Hubo un error al enviar tu solicitud. Inténtalo más tarde.");
     }
   };
@@ -65,18 +67,14 @@ export default function QuotePage() {
   return (
     <div className="bg-br-carbon min-h-screen text-br-white py-20">
       <div className="mx-auto max-w-3xl px-4">
-        
         <h1 className="text-4xl font-bold text-br-red-main">
           {t("quote.title")}
         </h1>
 
-        <p className="mt-4 text-br-stone">
-          {t("quote.subtitle")}
-        </p>
+        <p className="mt-4 text-br-stone">{t("quote.subtitle")}</p>
 
         <form onSubmit={handleSubmit} className="mt-10 space-y-6">
-          
-          {/* Nombre */}
+          {/* NAME */}
           <div>
             <label className="block text-sm text-br-stone">{t("quote.name")}</label>
             <input
@@ -88,7 +86,7 @@ export default function QuotePage() {
             />
           </div>
 
-          {/* Teléfono */}
+          {/* PHONE */}
           <div>
             <label className="block text-sm text-br-stone">{t("quote.phone")}</label>
             <input
@@ -100,7 +98,7 @@ export default function QuotePage() {
             />
           </div>
 
-          {/* Email */}
+          {/* EMAIL */}
           <div>
             <label className="block text-sm text-br-stone">{t("quote.email")}</label>
             <input
@@ -113,7 +111,7 @@ export default function QuotePage() {
             />
           </div>
 
-          {/* Tipo de servicio */}
+          {/* SERVICE */}
           <div>
             <label className="block text-sm text-br-stone">{t("quote.service")}</label>
             <select
@@ -130,7 +128,7 @@ export default function QuotePage() {
             </select>
           </div>
 
-          {/* Dirección */}
+          {/* ADDRESS */}
           <div>
             <label className="block text-sm text-br-stone">{t("quote.address")}</label>
             <input
@@ -142,7 +140,7 @@ export default function QuotePage() {
             />
           </div>
 
-          {/* Ciudad */}
+          {/* CITY */}
           <div>
             <label className="block text-sm text-br-stone">{t("quote.city")}</label>
             <input
@@ -154,7 +152,7 @@ export default function QuotePage() {
             />
           </div>
 
-          {/* Estado */}
+          {/* STATE */}
           <div>
             <label className="block text-sm text-br-stone">{t("quote.state")}</label>
             <input
@@ -166,7 +164,7 @@ export default function QuotePage() {
             />
           </div>
 
-          {/* Código Postal */}
+          {/* ZIP */}
           <div>
             <label className="block text-sm text-br-stone">{t("quote.zip")}</label>
             <input
@@ -178,9 +176,11 @@ export default function QuotePage() {
             />
           </div>
 
-          {/* Ubicación de la propiedad */}
+          {/* PROPERTY LOCATION */}
           <div>
-            <label className="block text-sm text-br-stone">{t("quote.propertyLocation")}</label>
+            <label className="block text-sm text-br-stone">
+              {t("quote.propertyLocation")}
+            </label>
             <input
               name="propertyLocation"
               value={form.propertyLocation}
@@ -190,7 +190,7 @@ export default function QuotePage() {
             />
           </div>
 
-          {/* Mensaje */}
+          {/* MESSAGE */}
           <div>
             <label className="block text-sm text-br-stone">{t("quote.message")}</label>
             <textarea
@@ -199,7 +199,7 @@ export default function QuotePage() {
               onChange={handleChange}
               rows={4}
               className="w-full rounded-md bg-br-smoke px-4 py-3 text-br-white border border-br-smoke-light"
-            ></textarea>
+            />
           </div>
 
           <button

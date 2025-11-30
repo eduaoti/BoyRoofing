@@ -1,3 +1,4 @@
+//src/components/AboutPage.tsx
 "use client";
 
 import useTranslation from "@/hooks/useTranslation";

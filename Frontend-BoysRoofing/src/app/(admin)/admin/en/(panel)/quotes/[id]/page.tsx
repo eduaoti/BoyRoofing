@@ -3,8 +3,9 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/api";
 
-type QuoteStatus = "PENDING" | "IN_REVIEW" | "SENT" | "CLOSED";
+type QuoteStatus = "PENDING" | "IN_REVIEW" | "SENT" | "CLOSED" | string;
 
 type Quote = {
   id: number | string;
@@ -28,19 +29,21 @@ export default function QuoteDetailEN() {
 
   async function loadQuote() {
     try {
-      const token = localStorage.getItem("br_admin_token");
+      const hasWindow = typeof window !== "undefined";
+      const token = hasWindow ? localStorage.getItem("br_admin_token") : null;
 
       if (!token) {
         router.push("/admin/en/login");
         return;
       }
 
-      const res = await fetch(`http://localhost:3200/quotes/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // apiFetch ya agrega Authorization y Content-Type
+      const res = await apiFetch(`/quotes/${id}`);
 
       if (res.status === 401) {
-        localStorage.removeItem("br_admin_token");
+        if (hasWindow) {
+          localStorage.removeItem("br_admin_token");
+        }
         router.push("/admin/en/login");
         return;
       }
@@ -52,7 +55,7 @@ export default function QuoteDetailEN() {
         return;
       }
 
-      const data = await res.json();
+      const data: Quote = await res.json();
       setQuote(data);
       setLoading(false);
     } catch (err) {
@@ -77,12 +80,33 @@ export default function QuoteDetailEN() {
 
     try {
       setDeleting(true);
-      const token = localStorage.getItem("br_admin_token");
 
-      await fetch(`http://localhost:3200/quotes/${id}`, {
+      const hasWindow = typeof window !== "undefined";
+      const token = hasWindow ? localStorage.getItem("br_admin_token") : null;
+
+      if (!token) {
+        router.push("/admin/en/login");
+        return;
+      }
+
+      const res = await apiFetch(`/quotes/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (res.status === 401) {
+        if (hasWindow) {
+          localStorage.removeItem("br_admin_token");
+        }
+        router.push("/admin/en/login");
+        return;
+      }
+
+      if (!res.ok) {
+        console.error("Error deleting quote:", await res.text());
+        setDeleting(false);
+        alert("There was a problem deleting this quote. Please try again.");
+        return;
+      }
 
       router.push("/admin/en/quotes");
     } catch (err) {
