@@ -1,15 +1,14 @@
-// src/components/ReviewsCarousel.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation, Pagination } from "swiper/modules";
+import { Autoplay, Pagination, EffectFade } from "swiper/modules";
 import "swiper/css";
-import "swiper/css/navigation";
 import "swiper/css/pagination";
+import "swiper/css/effect-fade";
 import { apiFetch } from "@/lib/api";
+import useTranslation from "@/hooks/useTranslation";
 
-// Define el tipo de review
 interface Review {
   id: number;
   name: string;
@@ -20,13 +19,21 @@ interface Review {
 interface ReviewsCarouselProps {
   reviews?: Review[];
   lang?: "es" | "en";
+  canReview?: boolean;
+  onOpenReviewModal?: () => void;
 }
 
 export default function ReviewsCarousel({
   reviews = [],
-  lang = "es",
+  lang,
+  canReview = false,
+  onOpenReviewModal,
 }: ReviewsCarouselProps) {
-  // Reseñas de ejemplo en español
+  const { lang: ctxLang } = useTranslation();
+  const activeLang: "es" | "en" =
+    lang ?? (ctxLang === "en" ? "en" : "es");
+
+  // Mock ES
   const defaultReviewsES: Review[] = [
     {
       id: 1,
@@ -50,7 +57,7 @@ export default function ReviewsCarousel({
     },
   ];
 
-  // Reseñas de ejemplo en inglés
+  // Mock EN
   const defaultReviewsEN: Review[] = [
     {
       id: 1,
@@ -80,7 +87,6 @@ export default function ReviewsCarousel({
   useEffect(() => {
     async function loadReviews() {
       try {
-        // Si ya vienen reviews por props, usamos esas y no llamamos al backend
         if (reviews.length > 0) {
           setData(reviews);
           return;
@@ -90,15 +96,12 @@ export default function ReviewsCarousel({
 
         if (!res.ok) {
           console.error("Error loading reviews:", await res.text());
-          // fallback a mock por idioma
-          setData(lang === "en" ? defaultReviewsEN : defaultReviewsES);
+          setData(activeLang === "en" ? defaultReviewsEN : defaultReviewsES);
           return;
         }
 
         const json = await res.json();
 
-        // El backend devuelve algo como:
-        // { id, name, message, rating, createdAt }
         const mapped: Review[] = Array.isArray(json)
           ? json.map((r: any) => ({
               id: r.id,
@@ -109,108 +112,139 @@ export default function ReviewsCarousel({
           : [];
 
         if (mapped.length === 0) {
-          setData(lang === "en" ? defaultReviewsEN : defaultReviewsES);
+          setData(activeLang === "en" ? defaultReviewsEN : defaultReviewsES);
         } else {
           setData(mapped);
         }
       } catch (err) {
         console.error("Error loading reviews:", err);
-        setData(lang === "en" ? defaultReviewsEN : defaultReviewsES);
+        setData(activeLang === "en" ? defaultReviewsEN : defaultReviewsES);
       } finally {
         setLoading(false);
       }
     }
 
     loadReviews();
-  }, [reviews, lang]);
-
-  // Simulación: función para verificar si el usuario puede dejar reseña
-  // En producción, deberías obtener este dato del backend según el usuario autenticado
-  const userCanReview = false; // Cambia esto según la lógica real
+  }, [reviews, activeLang]);
 
   const texts = {
     es: {
       title: "Reseñas de Nuestros Clientes",
       button: "Deja tu reseña",
-      onlyIf:
-        "Solo puedes dejar una reseña si has solicitado una cotización.",
+      onlyIf: "Solo puedes dejar una reseña si has solicitado una cotización.",
+      loading: "Cargando reseñas...",
+      empty: "Aún no hay reseñas. ¡Sé el primero en opinar!",
     },
     en: {
       title: "Our Clients' Reviews",
       button: "Leave your review",
       onlyIf: "You can only leave a review if you have requested a quote.",
+      loading: "Loading reviews...",
+      empty: "There are no reviews yet. Be the first to leave one!",
     },
   };
 
+  const t = texts[activeLang];
+
   if (loading) {
     return (
-      <section className="w-full max-w-4xl mx-auto py-10">
-        <p className="text-center text-gray-500">
-          {lang === "en" ? "Loading reviews..." : "Cargando reseñas..."}
-        </p>
+      <section className="w-full max-w-5xl mx-auto py-12 px-4">
+        <h2 className="text-3xl font-bold text-center mb-4 text-br-white">
+          {t.title}
+        </h2>
+        <p className="text-center text-br-stone">{t.loading}</p>
       </section>
     );
   }
 
+  if (!data || data.length === 0) {
+    return (
+      <section className="w-full max-w-5xl mx-auto py-12 px-4">
+        <h2 className="text-3xl font-bold text-center mb-4 text-br-white">
+          {t.title}
+        </h2>
+        <p className="text-center text-br-stone">{t.empty}</p>
+      </section>
+    );
+  }
+
+  const onlyOne = data.length === 1;
+  const canLoop = data.length >= 3; // loop solo si hay 3+ reseñas
+
   return (
-    <section className="w-full max-w-4xl mx-auto py-10">
-      <h2 className="text-3xl font-bold text-center mb-6">
-        {texts[lang].title}
+    <section className="w-full max-w-5xl mx-auto py-16 px-4">
+      <h2 className="text-3xl font-bold text-center mb-6 text-br-white">
+        {t.title}
       </h2>
 
-      {/* Botón para dejar reseña */}
-      <div className="flex justify-center mb-6">
+      {/* Botón reseña */}
+      <div className="flex justify-center mb-4">
         <button
-          className={`px-6 py-2 rounded-lg font-semibold transition ${
-            userCanReview
-              ? "bg-blue-600 text-white hover:bg-blue-700"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          className={`px-6 py-2 rounded-lg font-semibold text-sm transition ${
+            canReview
+              ? "bg-br-red-main text-white hover:bg-br-red-light shadow-md"
+              : "bg-gray-700/60 text-gray-400 cursor-not-allowed"
           }`}
-          disabled={!userCanReview}
+          disabled={!canReview}
           onClick={() => {
-            if (userCanReview) {
-              // Aquí abre el modal/formulario para dejar reseña
-              alert("Abrir formulario de reseña");
+            if (canReview && onOpenReviewModal) {
+              onOpenReviewModal();
             }
           }}
         >
-          {texts[lang].button}
+          {t.button}
         </button>
       </div>
-      {!userCanReview && (
-        <p className="text-center text-sm text-gray-500 mb-4">
-          {texts[lang].onlyIf}
+      {!canReview && (
+        <p className="text-center text-xs text-br-stone mb-6">
+          {t.onlyIf}
         </p>
       )}
 
       <Swiper
-        modules={[Navigation, Pagination, Autoplay]}
-        navigation
-        pagination={{ clickable: true }}
-        autoplay={{ delay: 3500 }}
-        spaceBetween={20}
+        modules={[Pagination, Autoplay, EffectFade]}
+        effect="fade"
+        fadeEffect={{ crossFade: true }}
+        pagination={data.length > 1 ? { clickable: true } : false}
+        autoplay={
+          data.length > 1
+            ? {
+                delay: 4000,
+                disableOnInteraction: false,
+              }
+            : false
+        }
+        loop={canLoop}
         slidesPerView={1}
+        className="!pb-10"
       >
         {data.map((review) => (
-          <SwiperSlide key={review.id}>
-            <div className="bg-white shadow-lg rounded-xl p-6 text-center">
+          <SwiperSlide key={review.id} className="!flex !justify-center">
+            <article className="bg-[#111315] border border-[#2a2a2a] rounded-2xl px-8 py-6 shadow-xl max-w-xl w-full mx-2 transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl">
               {/* Rating */}
               <div className="flex justify-center mb-3">
-                {Array.from({ length: review.rating }).map((_, i) => (
-                  <span key={i} className="text-yellow-500 text-xl">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span
+                    key={i}
+                    className={`text-xl ${
+                      i < review.rating ? "text-yellow-400" : "text-gray-600"
+                    }`}
+                  >
                     ★
                   </span>
                 ))}
               </div>
 
               {/* Comment */}
-              <p className="text-gray-700 italic mb-4">
-                "{review.comment}"
+              <p className="text-sm text-br-stone italic mb-4 text-center">
+                “{review.comment}”
               </p>
 
               {/* Name */}
-              <p className="font-semibold text-gray-900">- {review.name}</p>
-            </div>
+              <p className="text-sm font-semibold text-br-white text-center">
+                — {review.name}
+              </p>
+            </article>
           </SwiperSlide>
         ))}
       </Swiper>

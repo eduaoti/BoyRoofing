@@ -1,13 +1,8 @@
-//src/app/(public)/layout.tsx
-'use client'
-
 import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Roboto, Montserrat } from "next/font/google";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import ReviewsCarousel from "@/components/ReviewsCarousel";
-import { usePathname } from "next/navigation";
+import { Roboto, Montserrat } from "next/font/google";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -23,20 +18,25 @@ const roboto = Roboto({
 
 export default function PublicLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: { lang: "es" | "en" };
 }) {
-
-  const pathname = usePathname();
-  const lang = pathname.startsWith("/en") ? "en" : "es";
+  const lang = params?.lang ?? "es"; // 👈 por si acaso
 
   return (
     <html lang={lang}>
       <body className={`${montserrat.variable} ${roboto.variable}`}>
         <Navbar />
-        <Breadcrumbs />
+
+        {/* 📌 Breadcrumbs justo debajo del navbar */}
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          <Breadcrumbs />
+        </div>
+
         <main>{children}</main>
-        <ReviewsCarousel lang={lang} />
+
         <Footer />
       </body>
     </html>
