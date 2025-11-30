@@ -1,5 +1,4 @@
-// src/app/admin/en/(auth)/layout.tsx
-export default function AuthLayoutEN({
+export default function AuthLayoutES({
   children,
 }: {
   children: React.ReactNode;

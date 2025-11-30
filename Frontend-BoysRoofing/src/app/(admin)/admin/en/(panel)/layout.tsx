@@ -1,44 +1,73 @@
+// app/admin/en/(panel)/layout.tsx
 "use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function AdminENLayout({ children }: { children: React.ReactNode }) {
+export default function AdminENPanelLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
 
   function logout() {
     localStorage.removeItem("br_admin_token");
+    document.cookie =
+      "br_admin_token=; Max-Age=0; path=/; SameSite=Lax; Secure=false;";
     router.push("/admin/en/login");
   }
 
   return (
-    <div className="flex min-h-screen bg-br-carbon text-white">
+    <div className="min-h-screen flex bg-br-carbon text-white">
       {/* SIDEBAR */}
-      <aside className="w-64 bg-br-smoke p-6 border-r border-br-red-main flex flex-col justify-between">
+      <aside className="hidden md:flex w-64 flex-col justify-between bg-br-smoke/90 border-r border-br-smoke-light px-6 py-6 shadow-2xl">
         <div>
-          <h2 className="text-2xl font-bold text-br-red-main mb-8">Admin Panel</h2>
+          <h2 className="text-xl font-bold tracking-tight text-br-red-main mb-1">
+            Boy&apos;s Roofing
+          </h2>
+          <p className="text-xs text-br-pearl/80 mb-8">
+            Admin dashboard · EN
+          </p>
 
-          <nav className="space-y-4">
-            <Link className="block hover:text-br-red-main" href="/admin/en/dashboard">
+          <nav className="space-y-3 text-sm">
+            <Link
+              href="/admin/en/dashboard"
+              className="block rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
+            >
               Dashboard
             </Link>
-            <Link className="block hover:text-br-red-main" href="/admin/en/quotes">
+            <Link
+              href="/admin/en/quotes"
+              className="block rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
+            >
               Quotes
             </Link>
           </nav>
         </div>
 
-        {/* LOGOUT */}
         <button
           onClick={logout}
-          className="mt-6 w-full bg-br-red-main hover:bg-br-red-dark text-white py-2 px-4 rounded transition"
+          className="mt-6 w-full bg-br-red-main hover:bg-br-red-light text-white py-2 px-4 rounded-lg text-sm font-semibold transition"
         >
-          Cerrar sesión
+          Log out
         </button>
       </aside>
 
-      {/* CONTENIDO */}
-      <main className="flex-1 p-8">{children}</main>
+      {/* MOBILE TOPBAR + CONTENT */}
+      <div className="flex-1 flex flex-col">
+        <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-br-smoke-light bg-br-smoke/90">
+          <span className="text-sm font-semibold">Boy&apos;s Roofing · Admin</span>
+          <button
+            onClick={logout}
+            className="text-xs rounded-full bg-br-red-main px-3 py-1"
+          >
+            Log out
+          </button>
+        </header>
+
+        <main className="flex-1 p-4 md:p-8">{children}</main>
+      </div>
     </div>
   );
 }

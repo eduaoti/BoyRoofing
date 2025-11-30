@@ -1,10 +1,7 @@
-// src/app/admin/en/(panel)/quotes/[id]/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-
-type QuoteStatus = "PENDING" | "IN_REVIEW" | "SENT" | "CLOSED";
 
 type Quote = {
   id: number | string;
@@ -13,13 +10,12 @@ type Quote = {
   phone: string;
   service: string;
   message: string;
-  status: QuoteStatus;
+  status: string;
   createdAt?: string;
 };
 
-export default function QuoteDetailEN() {
-  const params = useParams() as { id: string };
-  const id = params.id;
+export default function QuoteDetailES() {
+  const { id } = useParams();
   const router = useRouter();
 
   const [quote, setQuote] = useState<Quote | null>(null);
@@ -31,7 +27,7 @@ export default function QuoteDetailEN() {
       const token = localStorage.getItem("br_admin_token");
 
       if (!token) {
-        router.push("/admin/en/login");
+        router.push("/admin/es/login");
         return;
       }
 
@@ -41,12 +37,12 @@ export default function QuoteDetailEN() {
 
       if (res.status === 401) {
         localStorage.removeItem("br_admin_token");
-        router.push("/admin/en/login");
+        router.push("/admin/es/login");
         return;
       }
 
       if (!res.ok) {
-        console.error("Failed to load quote:", await res.text());
+        console.error("Error al cargar cotización:", await res.text());
         setQuote(null);
         setLoading(false);
         return;
@@ -56,22 +52,21 @@ export default function QuoteDetailEN() {
       setQuote(data);
       setLoading(false);
     } catch (err) {
-      console.error("Error loading quote:", err);
+      console.error("Error al cargar cotización:", err);
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    if (id) {
-      loadQuote();
-    }
-  }, [id, router]);
+    loadQuote();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   async function deleteQuote() {
     if (!quote) return;
 
     const confirmed = confirm(
-      `Are you sure you want to delete quote from "${quote.name}"? This action cannot be undone.`
+      `¿Seguro que deseas eliminar la cotización de "${quote.name}"? Esta acción no se puede deshacer.`
     );
     if (!confirmed) return;
 
@@ -84,11 +79,11 @@ export default function QuoteDetailEN() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      router.push("/admin/en/quotes");
+      router.push("/admin/es/quotes");
     } catch (err) {
-      console.error("Error deleting quote:", err);
+      console.error("Error al eliminar cotización:", err);
       setDeleting(false);
-      alert("There was a problem deleting this quote. Please try again.");
+      alert("Ocurrió un problema al eliminar la cotización. Intenta de nuevo.");
     }
   }
 
@@ -110,13 +105,13 @@ export default function QuoteDetailEN() {
     return (
       <div className="max-w-xl rounded-2xl border border-br-smoke-light bg-br-smoke/30 p-8 text-center text-sm text-br-white/70">
         <p className="mb-4 font-semibold text-br-pearl">
-          Quote not found or no longer available.
+          La cotización no existe o ya no está disponible.
         </p>
         <button
-          onClick={() => router.push("/admin/en/quotes")}
+          onClick={() => router.push("/admin/es/quotes")}
           className="inline-flex items-center rounded-full bg-br-red-main px-5 py-2 text-xs font-semibold text-white hover:bg-br-red-light transition"
         >
-          Back to quotes
+          Volver a cotizaciones
         </button>
       </div>
     );
@@ -129,28 +124,26 @@ export default function QuoteDetailEN() {
   const statusClasses =
     quote.status === "PENDING"
       ? "bg-yellow-500/10 text-yellow-300 border border-yellow-500/40"
-      : quote.status === "IN_REVIEW"
-      ? "bg-sky-500/10 text-sky-300 border border-sky-500/40"
-      : quote.status === "SENT"
+      : quote.status === "APPROVED"
       ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/40"
-      : "bg-zinc-500/10 text-zinc-300 border border-zinc-500/40";
+      : "bg-red-500/10 text-red-300 border border-red-500/40";
 
   return (
     <div className="max-w-4xl space-y-6">
-      {/* BREADCRUMB / HEADER */}
+      {/* HEADER */}
       <div className="flex items-center justify-between gap-3">
         <div>
           <button
-            onClick={() => router.push("/admin/en/quotes")}
+            onClick={() => router.push("/admin/es/quotes")}
             className="mb-2 text-xs font-medium text-br-white/60 hover:text-br-pearl underline underline-offset-4"
           >
-            ← Back to quotes
+            ← Volver a cotizaciones
           </button>
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-br-pearl">
-            Quote detail
+            Detalle de cotización
           </h1>
           <p className="mt-1 text-xs text-br-white/50">
-            Review information, status and message sent by the customer.
+            Revisa la información, estado y mensaje enviado por el cliente.
           </p>
         </div>
 
@@ -161,59 +154,59 @@ export default function QuoteDetailEN() {
             {quote.status}
           </span>
           <p className="text-[11px] text-br-white/50">
-            Quote ID:{" "}
+            ID de cotización:{" "}
             <span className="font-mono text-br-pearl">#{quote.id}</span>
           </p>
         </div>
       </div>
 
-      {/* TOP INFO CARDS */}
+      {/* INFO PRINCIPAL */}
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Contact info */}
+        {/* Cliente */}
         <div className="rounded-2xl border border-br-smoke-light bg-br-smoke/30 p-5 shadow-lg">
           <h2 className="text-sm font-semibold text-br-pearl mb-3">
-            Customer information
+            Información del cliente
           </h2>
           <div className="space-y-2 text-sm text-br-white/80">
             <div>
               <p className="text-xs uppercase tracking-[0.18em] text-br-white/50">
-                Name
+                Nombre
               </p>
               <p className="font-medium">{quote.name}</p>
             </div>
 
             <div>
               <p className="text-xs uppercase tracking-[0.18em] text-br-white/50">
-                Email
+                Correo
               </p>
               <p className="font-medium break-all">{quote.email}</p>
             </div>
 
             <div>
               <p className="text-xs uppercase tracking-[0.18em] text-br-white/50">
-                Phone
+                Teléfono
               </p>
               <p className="font-medium">{quote.phone}</p>
             </div>
           </div>
         </div>
 
-        {/* Meta info */}
+        {/* Metadatos */}
         <div className="rounded-2xl border border-br-smoke-light bg-br-smoke/30 p-5 shadow-lg">
           <h2 className="text-sm font-semibold text-br-pearl mb-3">
-            Quote details
+            Detalles de la cotización
           </h2>
           <div className="space-y-2 text-sm text-br-white/80">
             <div>
               <p className="text-xs uppercase tracking-[0.18em] text-br-white/50">
-                Service
+                Servicio
               </p>
               <p className="font-medium">{quote.service}</p>
             </div>
 
             <div>
               <p className="text-xs uppercase tracking-[0.18em] text-br-white/50">
-                Created at
+                Fecha de creación
               </p>
               <p className="font-medium">{createdAt}</p>
             </div>
@@ -221,46 +214,35 @@ export default function QuoteDetailEN() {
         </div>
       </div>
 
-      {/* MESSAGE CARD */}
+      {/* MENSAJE */}
       <div className="rounded-2xl border border-br-smoke-light bg-br-smoke/35 p-5 shadow-lg">
         <h2 className="text-sm font-semibold text-br-pearl mb-2">
-          Customer message
+          Mensaje del cliente
         </h2>
         {quote.message ? (
           <p className="whitespace-pre-wrap text-sm leading-relaxed text-br-white/80">
             {quote.message}
           </p>
         ) : (
-          <p className="text-sm text-br-white/50">No message provided.</p>
+          <p className="text-sm text-br-white/50">Sin mensaje adicional.</p>
         )}
       </div>
 
-      {/* ACTIONS */}
+      {/* ACCIONES */}
       <div className="flex flex-col gap-3 border-t border-br-smoke-light pt-4 sm:flex-row sm:justify-between sm:items-center">
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={() => router.push("/admin/en/quotes")}
-            className="inline-flex items-center justify-center rounded-full border border-br-smoke-light bg-br-smoke/40 px-5 py-2 text-xs font-medium text-br-pearl hover:bg-br-smoke-light/60 transition"
-          >
-            Back to list
-          </button>
-
-          {quote.status === "PENDING" && (
-            <button
-              onClick={() => router.push(`/admin/en/invoices/${quote.id}`)}
-              className="inline-flex items-center justify-center rounded-full bg-br-red-main px-5 py-2 text-xs font-semibold text-white hover:bg-br-red-light transition"
-            >
-              Create invoice
-            </button>
-          )}
-        </div>
+        <button
+          onClick={() => router.push("/admin/es/quotes")}
+          className="inline-flex items-center justify-center rounded-full border border-br-smoke-light bg-br-smoke/40 px-5 py-2 text-xs font-medium text-br-pearl hover:bg-br-smoke-light/60 transition"
+        >
+          Volver al listado
+        </button>
 
         <button
           onClick={deleteQuote}
           disabled={deleting}
           className="inline-flex items-center justify-center rounded-full bg-red-600 px-5 py-2 text-xs font-semibold text-white hover:bg-red-500 disabled:opacity-60 disabled:cursor-not-allowed transition"
         >
-          {deleting ? "Deleting..." : "Delete quote"}
+          {deleting ? "Eliminando..." : "Eliminar cotización"}
         </button>
       </div>
     </div>
