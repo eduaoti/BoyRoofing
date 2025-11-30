@@ -14,80 +14,68 @@
     "secondaryCta": "Ver nuestros servicios",
     "experienceNote": "Más de siete años de experiencia respaldan nuestro compromiso.",
     "stats": {
-    "years": "Servicio profesional garantizado",
-    "roofs": "Residenciales",
-    "secured": "Garantía y materiales premium"
-  }
-},
+      "years": "Servicio profesional garantizado",
+      "roofs": "Residenciales",
+      "secured": "Garantía y materiales premium"
+    }
+  },
   "home": {
-  "benefits": [
-    "Más de 7 años de experiencia en techado.",
-    "Trabajo rápido, profesional y garantizado.",
-    "Material certificado premium en cada proyecto."
-  ],
-  "aboutTitle": "Sobre Boys Roofing",
-  "aboutP1": "Somos especialistas en techado residencial y comercial en Texas. Con más de siete años de experiencia, ofrecemos soluciones basadas en calidad, rapidez y resultados comprobados.",
+    "benefits": [
+      "Más de 7 años de experiencia en techado.",
+      "Trabajo rápido, profesional y garantizado.",
+      "Material certificado premium en cada proyecto."
+    ],
+    "aboutTitle": "Sobre Boys Roofing",
+    "aboutP1": "Somos especialistas en techado residencial y comercial en Texas. Con más de siete años de experiencia, ofrecemos soluciones basadas en calidad, rapidez y resultados comprobados.",
     "aboutP2": "Cada proyecto se ejecuta con materiales certificados, herramientas modernas y un equipo profesional comprometido.",
-  
-  "featuredServicesTitle": "Nuestros servicios",
+    "featuredServicesTitle": "Nuestros servicios",
     "service1Title": "Instalación, reparación y mantenimiento de techos",
     "service1Text": "Soluciones profesionales para techado residencial y comercial. Evaluamos tu propiedad y te brindamos propuestas basadas en durabilidad y seguridad para proteger tu hogar o negocio.",
-
     "service2Title": "Limpieza y remoción de escombros",
     "service2Text": "Dejamos cada área limpia y segura al finalizar cualquier proyecto. Eliminamos y retiramos los desechos generados, reflejando responsabilidad y calidad profesional.",
-
-  "mission": "Misión",
-  "vision": "Visión",
-  "values": "Valores",
-
-  "footerCtaTitle": "¿Necesitas ayuda con tu techo?",
-  "footerCtaText": "Obtén una inspección profesional...",
-  "footerButton": "Habla con un experto en techos"
-},
-
-"services": {
-  "sectionTitle": "Nuestros servicios",
-  "sectionSubtitle": "Techos profesionales con resultados comprobados. Calidad y rapidez, sin complicaciones.",
-  "tagline": "Confianza construida con esfuerzo, dedicación y calidad.",
-
-  "benefits": {
-    "satisfaction": "Satisfacción garantizada",
-    "speed": "Rapidez en cada proyecto",
-    "certified": "Material certificado",
-    "cleaning": "Limpieza y cuidado del área"
+    "mission": "Misión",
+    "vision": "Visión",
+    "values": "Valores",
+    "footerCtaTitle": "¿Necesitas ayuda con tu techo?",
+    "footerCtaText": "Obtén una inspección profesional...",
+    "footerButton": "Habla con un experto en techos"
   },
-
-  "process": {
-    "title": "Nuestro proceso de trabajo",
-    "step1": "Inspección profesional",
-    "step2": "Elección de materiales",
-    "step3": "Instalación experta",
-    "step4": "Limpieza y entrega final"
-  },
-
-  "badges": {
-    "years": "7+ Años de experiencia",
-    "certified": "Material certificado",
-    "warranty": "Garantía contra filtraciones",
-    "insured": "Trabajo 100% asegurado"
-  },
-
-  "roofing": {
-    "title": "Instalación, reparación y mantenimiento de techos",
-    "p1": "Somos expertos en techado residencial y comercial. Analizamos tu propiedad, proponemos soluciones específicas y ejecutamos el trabajo con precisión y rapidez para proteger tu inversión y tu familia.",
-    "p2": "Trabajamos con materiales certificados, herramientas modernas y un equipo comprometido para garantizar un acabado resistente y profesional."
-  },
-
-  "cleaning": {
-    "title": "Limpieza y remoción de escombros",
-    "p1": "Un trabajo no está terminado hasta que el área está limpia y segura. Completamos cada proyecto con limpieza y remoción de escombros, dejando tu propiedad ordenada y lista para usar.",
-    "p2": "Recogemos, clasificamos y retiramos los desechos generados durante el trabajo, reflejando nuestra responsabilidad y respeto por tu espacio y el medio ambiente."
-  },
-
-  "before": "Antes",
-  "after": "Después",
-  "ourWork": "Nuestro trabajo"
-
+  "services": {
+    "sectionTitle": "Nuestros servicios",
+    "sectionSubtitle": "Techos profesionales con resultados comprobados. Calidad y rapidez, sin complicaciones.",
+    "tagline": "Confianza construida con esfuerzo, dedicación y calidad.",
+    "benefits": {
+      "satisfaction": "Satisfacción garantizada",
+      "speed": "Rapidez en cada proyecto",
+      "certified": "Material certificado",
+      "cleaning": "Limpieza y cuidado del área"
+    },
+    "process": {
+      "title": "Nuestro proceso de trabajo",
+      "step1": "Inspección profesional",
+      "step2": "Elección de materiales",
+      "step3": "Instalación experta",
+      "step4": "Limpieza y entrega final"
+    },
+    "badges": {
+      "years": "7+ Años de experiencia",
+      "certified": "Material certificado",
+      "warranty": "Garantía contra filtraciones",
+      "insured": "Trabajo 100% asegurado"
+    },
+    "roofing": {
+      "title": "Instalación, reparación y mantenimiento de techos",
+      "p1": "Somos expertos en techado residencial y comercial. Analizamos tu propiedad, proponemos soluciones específicas y ejecutamos el trabajo con precisión y rapidez para proteger tu inversión y tu familia.",
+      "p2": "Trabajamos con materiales certificados, herramientas modernas y un equipo comprometido para garantizar un acabado resistente y profesional."
+    },
+    "cleaning": {
+      "title": "Limpieza y remoción de escombros",
+      "p1": "Un trabajo no está terminado hasta que el área está limpia y segura. Completamos cada proyecto con limpieza y remoción de escombros, dejando tu propiedad ordenada y lista para usar.",
+      "p2": "Recogemos, clasificamos y retiramos los desechos generados durante el trabajo, reflejando nuestra responsabilidad y respeto por tu espacio y el medio ambiente."
+    },
+    "before": "Antes",
+    "after": "Después",
+    "ourWork": "Nuestro trabajo"
   },
   "history": {
     "sectionTitle": "Nuestra historia",
@@ -99,23 +87,22 @@
     "highlightText": "Más que una empresa, somos el reflejo de una historia de esfuerzo y determinación, con un propósito claro: proteger tu hogar y tu tranquilidad con un trabajo bien hecho."
   },
   "aboutPage": {
-  "heroSubtitle": "Más de siete años de experiencia respaldan nuestro compromiso.",
-  "founderTitle": "Conoce al fundador",
-  "founderP1": "Cada proyecto de Boys Roofing inició con un sueño: brindar un servicio honesto, profesional y cercano a las familias de Texas.",
-  "founderP2": "Con el paso del tiempo, su dedicación, pasión por el oficio y compromiso con la excelencia lo llevaron a convertir su trabajo en una empresa referente en el estado.",
-  "quote": "“Un buen techo no solo cubre un hogar, también protege historias, esfuerzos y sueños.”",
-  "whyChooseUs": "¿Por qué elegirnos?",
-  "whatDefinesUs": "Lo que nos define",
-  "defines": [
-    "Trabajo 100% asegurado",
-    "Material certificado premium",
-    "Garantía contra filtraciones",
-    "Atención rápida y profesional",
-    "Precios honestos y transparentes",
-    "Servicio local en todo Texas"
-  ]
-},
-
+    "heroSubtitle": "Más de siete años de experiencia respaldan nuestro compromiso.",
+    "founderTitle": "Conoce al fundador",
+    "founderP1": "Cada proyecto de Boys Roofing inició con un sueño: brindar un servicio honesto, profesional y cercano a las familias de Texas.",
+    "founderP2": "Con el paso del tiempo, su dedicación, pasión por el oficio y compromiso con la excelencia lo llevaron a convertir su trabajo en una empresa referente en el estado.",
+    "quote": "“Un buen techo no solo cubre un hogar, también protege historias, esfuerzos y sueños.”",
+    "whyChooseUs": "¿Por qué elegirnos?",
+    "whatDefinesUs": "Lo que nos define",
+    "defines": [
+      "Trabajo 100% asegurado",
+      "Material certificado premium",
+      "Garantía contra filtraciones",
+      "Atención rápida y profesional",
+      "Precios honestos y transparentes",
+      "Servicio local en todo Texas"
+    ]
+  },
   "missionVisionValues": {
     "missionTitle": "Misión",
     "missionText": "Nuestra misión es ofrecer servicios profesionales de techado de la más alta calidad, proporcionando soluciones seguras y duraderas adaptadas a cada cliente. Trabajamos con eficiencia, honestidad y pasión, garantizando resultados que superan las expectativas.",
@@ -133,15 +120,14 @@
     ]
   },
   "contact": {
-  "sectionTitle": "Tu techo, nuestra prioridad.",
-  "sectionText": "Contáctanos hoy para recibir atención inmediata por llamada o mensaje.",
-  "callButton": "Llamar ahora",
-  "smsButton": "Enviar mensaje",
-  "badge": "Calidad y rapidez, sin complicaciones.",
-  "phone": "+1 (409) 868 8853",
-  "defaultMessage": "Hola, necesito información sobre servicio de techado."
-},
-
+    "sectionTitle": "Tu techo, nuestra prioridad.",
+    "sectionText": "Contáctanos hoy para recibir atención inmediata por llamada o mensaje.",
+    "callButton": "Llamar ahora",
+    "smsButton": "Enviar mensaje",
+    "badge": "Calidad y rapidez, sin complicaciones.",
+    "phone": "+1 (409) 868 8853",
+    "defaultMessage": "Hola, necesito información sobre servicio de techado."
+  },
   "quote": {
     "title": "Solicita tu cotización gratuita de techado",
     "subtitle": "Llena el formulario y nuestro equipo te contactará lo antes posible.",
@@ -157,6 +143,15 @@
     },
     "message": "Detalles adicionales (opcional)",
     "submit": "Enviar solicitud",
+    "address": "Dirección",
+    "city": "Ciudad",
+    "state": "Estado",
+    "zip": "Código postal",
+    "propertyLocation": "Ubicación de la propiedad",
+    "sectionContact": "Datos de contacto",
+    "sectionService": "Detalles del servicio",
+    "sectionLocation": "Ubicación de la propiedad",
+    "sectionDetails": "Detalles adicionales",
     "status": [
       { "value": "PENDING", "label": "Pendiente" },
       { "value": "IN_REVIEW", "label": "En revisión" },
@@ -207,7 +202,7 @@
       "deleteConfirm": "¿Estás seguro de que deseas eliminar esta cotización?"
     }
   },
-      "footer": {
+  "footer": {
     "rights": "Todos los derechos reservados."
   }
 }
