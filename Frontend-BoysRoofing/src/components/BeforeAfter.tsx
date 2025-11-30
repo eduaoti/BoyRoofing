@@ -1,3 +1,4 @@
+//src/components/BeforeAfter.tsx
 "use client";
 import Image from "next/image";
 
