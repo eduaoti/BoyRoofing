@@ -1,3 +1,4 @@
+// src/app/(public)/layout.tsx
 import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -18,15 +19,11 @@ const roboto = Roboto({
 
 export default function PublicLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params: { lang: "es" | "en" };
 }) {
-  const lang = params?.lang ?? "es"; // 👈 por si acaso
-
   return (
-    <html lang={lang}>
+    <html lang="en">
       <body className={`${montserrat.variable} ${roboto.variable}`}>
         <Navbar />
 

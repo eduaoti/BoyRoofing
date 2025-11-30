@@ -1,4 +1,3 @@
-//
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -7,7 +6,8 @@ export default function LanguageSwitcher() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const routeMap = {
+  // 👇 Le damos tipo explícito con índice string
+  const routeMap: Record<string, string> = {
     servicios: "services",
     services: "servicios",
 
@@ -28,7 +28,7 @@ export default function LanguageSwitcher() {
 
   const segments = pathname.split("/").filter(Boolean);
   const currentLang = segments[0] === "es" ? "es" : "en";
-  const newLang = currentLang === "es" ? "en" : "es";
+  const newLang = currentLang === "es" ? "en" : "es"; // (no lo usas, pero no estorba)
 
   const currentRoute = segments[1] || "";
   const translatedRoute = routeMap[currentRoute] ?? "";
@@ -48,11 +48,14 @@ export default function LanguageSwitcher() {
 
   return (
     <div className="flex items-center gap-2 text-xs font-semibold">
-
       {/* ES */}
       <button
         onClick={() => goTo("es")}
-        className={`${currentLang === "es" ? "text-br-red-light" : "hover:text-br-red-light"}`}
+        className={
+          currentLang === "es"
+            ? "text-br-red-light"
+            : "hover:text-br-red-light"
+        }
       >
         ES
       </button>
@@ -62,11 +65,14 @@ export default function LanguageSwitcher() {
       {/* EN */}
       <button
         onClick={() => goTo("en")}
-        className={`${currentLang === "en" ? "text-br-red-light" : "hover:text-br-red-light"}`}
+        className={
+          currentLang === "en"
+            ? "text-br-red-light"
+            : "hover:text-br-red-light"
+        }
       >
         EN
       </button>
-
     </div>
   );
 }
