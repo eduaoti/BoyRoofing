@@ -14,76 +14,68 @@
     "secondaryCta": "See our services",
     "experienceNote": "More than seven years of experience back our commitment.",
     "stats": {
-    "years": "Professional guaranteed service",
-    "roofs": "Residential work",
-    "secured": "Premium materials & full warranty"
-  }
-},
+      "years": "Professional guaranteed service",
+      "roofs": "Residential work",
+      "secured": "Premium materials & full warranty"
+    }
+  },
   "home": {
-  "benefits": [
-    "More than 7 years of roofing experience.",
-    "Fast, professional and guaranteed work.",
-    "Premium certified materials in every project."
-  ],
-  "aboutTitle": "About Boys Roofing",
-  "aboutP1": "We specialize in residential and commercial roofing in Texas. With more than seven years of experience, we offer solutions based on quality, speed and proven results.",
-  "aboutP2": "Each project is executed with certified materials, modern tools and a professional and committed team.",
-  
-  "featuredServicesTitle": "Our Services",
-  "service1Title": "Roof installation, repair and maintenance",
-  "service1Text": "Professional solutions for residential and commercial roofing. We assess your property and provide proposals based on durability and safety to protect your home or business.",
-  
-  "service2Title": "Cleaning and debris removal",
-  "service2Text": "We leave every area clean and safe at the end of any project. We remove and collect all waste generated, reflecting responsibility and professionalism.",
-
-  "mission": "Mission",
-  "vision": "Vision",
-  "values": "Values",
-
-  "footerCtaTitle": "Do you need help with your roof?",
-  "footerCtaText": "Get a professional inspection and a personalized quote today.",
-  "footerButton": "Talk to a roofing expert"
-},
-"services": {
-  "sectionTitle": "Our services",
-  "sectionSubtitle": "Professional roofing with proven results. Quality and speed, without complications.",
-  "tagline": "Trust built with effort, dedication, and quality.",
-  "benefits": {
-    "satisfaction": "Guaranteed satisfaction",
-    "speed": "Fast project delivery",
-    "certified": "Certified materials",
-    "cleaning": "Area cleaning and care"
+    "benefits": [
+      "More than 7 years of roofing experience.",
+      "Fast, professional and guaranteed work.",
+      "Premium certified materials in every project."
+    ],
+    "aboutTitle": "About Boys Roofing",
+    "aboutP1": "We specialize in residential and commercial roofing in Texas. With more than seven years of experience, we offer solutions based on quality, speed and proven results.",
+    "aboutP2": "Each project is executed with certified materials, modern tools and a professional and committed team.",
+    "featuredServicesTitle": "Our Services",
+    "service1Title": "Roof installation, repair and maintenance",
+    "service1Text": "Professional solutions for residential and commercial roofing. We assess your property and provide proposals based on durability and safety to protect your home or business.",
+    "service2Title": "Cleaning and debris removal",
+    "service2Text": "We leave every area clean and safe at the end of any project. We remove and collect all waste generated, reflecting responsibility and professionalism.",
+    "mission": "Mission",
+    "vision": "Vision",
+    "values": "Values",
+    "footerCtaTitle": "Do you need help with your roof?",
+    "footerCtaText": "Get a professional inspection and a personalized quote today.",
+    "footerButton": "Talk to a roofing expert"
   },
-
-  "process": {
-    "title": "Our work process",
-    "step1": "Professional inspection",
-    "step2": "Material selection",
-    "step3": "Expert installation",
-    "step4": "Final cleaning and delivery"
-  },
-  "badges": {
-    "years": "7+ Years of Experience",
-    "certified": "Certified materials",
-    "warranty": "Leak-proof warranty",
-    "insured": "100% insured work"
-  },
-  "roofing": {
-    "title": "Roofing installation, repair and maintenance",
-    "p1": "We are experts in residential and commercial roofing. We analyze your property, propose specific solutions and execute the work with precision and speed to protect your investment and your family.",
-    "p2": "We work with certified materials, modern tools and a committed team to guarantee a resistant and professional finish."
-  },
-
-  "cleaning": {
-    "title": "Cleaning and debris removal",
-    "p1": "A job is not finished until the area is clean and safe. We complete every project with cleaning and debris removal, leaving your property tidy and ready to use.",
-    "p2": "We collect, classify and remove waste generated during the work, reflecting our responsibility and respect for your space and the environment."
-  },
-
-  "before": "Before",
-  "after": "After",
-  "ourWork": "Our work"
-
+  "services": {
+    "sectionTitle": "Our services",
+    "sectionSubtitle": "Professional roofing with proven results. Quality and speed, without complications.",
+    "tagline": "Trust built with effort, dedication, and quality.",
+    "benefits": {
+      "satisfaction": "Guaranteed satisfaction",
+      "speed": "Fast project delivery",
+      "certified": "Certified materials",
+      "cleaning": "Area cleaning and care"
+    },
+    "process": {
+      "title": "Our work process",
+      "step1": "Professional inspection",
+      "step2": "Material selection",
+      "step3": "Expert installation",
+      "step4": "Final cleaning and delivery"
+    },
+    "badges": {
+      "years": "7+ Years of Experience",
+      "certified": "Certified materials",
+      "warranty": "Leak-proof warranty",
+      "insured": "100% insured work"
+    },
+    "roofing": {
+      "title": "Roofing installation, repair and maintenance",
+      "p1": "We are experts in residential and commercial roofing. We analyze your property, propose specific solutions and execute the work with precision and speed to protect your investment and your family.",
+      "p2": "We work with certified materials, modern tools and a committed team to guarantee a resistant and professional finish."
+    },
+    "cleaning": {
+      "title": "Cleaning and debris removal",
+      "p1": "A job is not finished until the area is clean and safe. We complete every project with cleaning and debris removal, leaving your property tidy and ready to use.",
+      "p2": "We collect, classify and remove waste generated during the work, reflecting our responsibility and respect for your space and the environment."
+    },
+    "before": "Before",
+    "after": "After",
+    "ourWork": "Our work"
   },
   "history": {
     "sectionTitle": "Our story",
@@ -95,23 +87,22 @@
     "highlightText": "More than a company, we are the reflection of a story of effort and determination, with a clear purpose: to protect your home and your peace of mind with a job well done."
   },
   "aboutPage": {
-  "heroSubtitle": "Over seven years of experience back our commitment.",
-  "founderTitle": "Meet the founder",
-  "founderP1": "Every Boys Roofing project began with a dream: to provide honest, professional, and friendly service to families across Texas.",
-  "founderP2": "Over time, his dedication, passion for the trade and commitment to excellence turned his work into a leading company in the state.",
-  "quote": "“A good roof not only covers a home — it protects stories, effort and dreams.”",
-  "whyChooseUs": "Why choose us?",
-  "whatDefinesUs": "What defines us",
-  "defines": [
-    "100% insured work",
-    "Premium certified materials",
-    "Leak-proof warranty",
-    "Fast and professional service",
-    "Honest and transparent pricing",
-    "Local service throughout Texas"
-  ]
-},
-
+    "heroSubtitle": "Over seven years of experience back our commitment.",
+    "founderTitle": "Meet the founder",
+    "founderP1": "Every Boys Roofing project began with a dream: to provide honest, professional, and friendly service to families across Texas.",
+    "founderP2": "Over time, his dedication, passion for the trade and commitment to excellence turned his work into a leading company in the state.",
+    "quote": "“A good roof not only covers a home — it protects stories, effort and dreams.”",
+    "whyChooseUs": "Why choose us?",
+    "whatDefinesUs": "What defines us",
+    "defines": [
+      "100% insured work",
+      "Premium certified materials",
+      "Leak-proof warranty",
+      "Fast and professional service",
+      "Honest and transparent pricing",
+      "Local service throughout Texas"
+    ]
+  },
   "missionVisionValues": {
     "missionTitle": "Mission",
     "missionText": "Our mission is to offer top-quality professional roofing services, providing safe, durable solutions tailored to each customer. We work with efficiency, honesty and passion, guaranteeing results that exceed expectations.",
@@ -128,15 +119,15 @@
       "Teamwork: our success is built together."
     ]
   },
-"contact": {
-  "sectionTitle": "Your roof, our priority.",
-  "sectionText": "Contact us today to get immediate assistance by call or text.",
-  "callButton": "Call now",
-  "smsButton": "Send message",
-  "badge": "Quality and speed, without complications.",
-  "phone": "+1 (409) 868 8853",
-  "defaultMessage": "Hello, I need information about roofing service."
-},
+  "contact": {
+    "sectionTitle": "Your roof, our priority.",
+    "sectionText": "Contact us today to get immediate assistance by call or text.",
+    "callButton": "Call now",
+    "smsButton": "Send message",
+    "badge": "Quality and speed, without complications.",
+    "phone": "+1 (409) 868 8853",
+    "defaultMessage": "Hello, I need information about roofing service."
+  },
   "quote": {
     "title": "Request Your Free Roofing Quote",
     "subtitle": "Fill out the form and our team will contact you as soon as possible.",
@@ -156,7 +147,17 @@
     "city": "City",
     "state": "State",
     "zip": "Zip Code",
-    "propertyLocation": "Property Location"
+    "propertyLocation": "Property Location",
+    "sectionContact": "Contact information",
+    "sectionService": "Service details",
+    "sectionLocation": "Property location",
+    "sectionDetails": "Additional details",
+    "status": [
+      { "value": "PENDING", "label": "Pending" },
+      { "value": "IN_REVIEW", "label": "In review" },
+      { "value": "SENT", "label": "Sent" },
+      { "value": "CLOSED", "label": "Closed" }
+    ]
   },
   "admin": {
     "login": {
@@ -201,7 +202,7 @@
       "deleteConfirm": "Are you sure you want to delete this quote?"
     }
   },
-   "footer": {
+  "footer": {
     "rights": "All rights reserved."
   }
 }

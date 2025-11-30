@@ -159,7 +159,6 @@ export default function HomePage() {
       <ServicesPage />
       <AboutPage />
       <MissionVisionValuesSection />
-      <ContactPage />
     </div>
   );
 }
