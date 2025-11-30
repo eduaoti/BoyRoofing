@@ -1,6 +1,6 @@
-//src/app/(public)/en/contact/page.tsx
+// src/app/(public)/es/contacto/page.tsx
+"use client";
+
 import ContactPage from "@/components/ContactPage";
 
-export default function ContactES() {
-  return <ContactPage />;
-}
+export default ContactPage;
