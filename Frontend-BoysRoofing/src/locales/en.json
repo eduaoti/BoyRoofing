@@ -18,7 +18,32 @@
     "roofs": "Residential work",
     "secured": "Premium materials & full warranty"
   }
-  },
+},
+  "home": {
+  "benefits": [
+    "More than 7 years of roofing experience.",
+    "Fast, professional and guaranteed work.",
+    "Premium certified materials in every project."
+  ],
+  "aboutTitle": "About Boys Roofing",
+  "aboutP1": "We specialize in residential and commercial roofing in Texas. With more than seven years of experience, we offer solutions based on quality, speed and proven results.",
+  "aboutP2": "Each project is executed with certified materials, modern tools and a professional and committed team.",
+  
+  "featuredServicesTitle": "Our Services",
+  "service1Title": "Roof installation, repair and maintenance",
+  "service1Text": "Professional solutions for residential and commercial roofing. We assess your property and provide proposals based on durability and safety to protect your home or business.",
+  
+  "service2Title": "Cleaning and debris removal",
+  "service2Text": "We leave every area clean and safe at the end of any project. We remove and collect all waste generated, reflecting responsibility and professionalism.",
+
+  "mission": "Mission",
+  "vision": "Vision",
+  "values": "Values",
+
+  "footerCtaTitle": "Do you need help with your roof?",
+  "footerCtaText": "Get a professional inspection and a personalized quote today.",
+  "footerButton": "Talk to a roofing expert"
+},
 "services": {
   "sectionTitle": "Our services",
   "sectionSubtitle": "Professional roofing with proven results. Quality and speed, without complications.",
@@ -69,6 +94,24 @@
     "highlightTitle": "Our promise",
     "highlightText": "More than a company, we are the reflection of a story of effort and determination, with a clear purpose: to protect your home and your peace of mind with a job well done."
   },
+  "aboutPage": {
+  "heroSubtitle": "Over seven years of experience back our commitment.",
+  "founderTitle": "Meet the founder",
+  "founderP1": "Every Boys Roofing project began with a dream: to provide honest, professional, and friendly service to families across Texas.",
+  "founderP2": "Over time, his dedication, passion for the trade and commitment to excellence turned his work into a leading company in the state.",
+  "quote": "“A good roof not only covers a home — it protects stories, effort and dreams.”",
+  "whyChooseUs": "Why choose us?",
+  "whatDefinesUs": "What defines us",
+  "defines": [
+    "100% insured work",
+    "Premium certified materials",
+    "Leak-proof warranty",
+    "Fast and professional service",
+    "Honest and transparent pricing",
+    "Local service throughout Texas"
+  ]
+},
+
   "missionVisionValues": {
     "missionTitle": "Mission",
     "missionText": "Our mission is to offer top-quality professional roofing services, providing safe, durable solutions tailored to each customer. We work with efficiency, honesty and passion, guaranteeing results that exceed expectations.",
@@ -85,12 +128,15 @@
       "Teamwork: our success is built together."
     ]
   },
-  "contact": {
-    "sectionTitle": "Your roof, our priority.",
-    "sectionText": "Contact us today and request your free quote. We take care of your home as if it were ours.",
-    "callButton": "Talk to a roofing expert",
-    "badge": "Quality and speed, without complications."
-  },
+"contact": {
+  "sectionTitle": "Your roof, our priority.",
+  "sectionText": "Contact us today to get immediate assistance by call or text.",
+  "callButton": "Call now",
+  "smsButton": "Send message",
+  "badge": "Quality and speed, without complications.",
+  "phone": "+1 832 582 5564",
+  "defaultMessage": "Hello, I need information about roofing service."
+},
   "quote": {
     "title": "Request Your Free Roofing Quote",
     "subtitle": "Fill out the form and our team will contact you as soon as possible.",
