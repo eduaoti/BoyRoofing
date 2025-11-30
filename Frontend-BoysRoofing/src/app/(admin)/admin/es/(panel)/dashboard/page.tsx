@@ -1,4 +1,3 @@
-// src/app/admin/en/(panel)/dashboard/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -6,11 +5,11 @@ import { useEffect, useMemo, useState } from "react";
 type Quote = {
   id: number | string;
   name: string;
-  status: "PENDING" | "IN_REVIEW" | "SENT" | "CLOSED" | string;
+  status: string;
   createdAt?: string;
 };
 
-export default function AdminENDashboard() {
+export default function DashboardES() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,7 +25,7 @@ export default function AdminENDashboard() {
         const data = await res.json();
         setQuotes(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("Error loading quotes:", err);
+        console.error("Error al cargar cotizaciones:", err);
       } finally {
         setLoading(false);
       }
@@ -37,11 +36,9 @@ export default function AdminENDashboard() {
 
   const stats = useMemo(() => {
     const total = quotes.length;
-
     const pending = quotes.filter((q) => q.status === "PENDING").length;
-    const inReview = quotes.filter((q) => q.status === "IN_REVIEW").length;
-    const sent = quotes.filter((q) => q.status === "SENT").length;
-    const closed = quotes.filter((q) => q.status === "CLOSED").length;
+    const approved = quotes.filter((q) => q.status === "APPROVED").length;
+    const rejected = quotes.filter((q) => q.status === "REJECTED").length;
 
     const pendingPercent = total > 0 ? Math.round((pending / total) * 100) : 0;
 
@@ -53,22 +50,14 @@ export default function AdminENDashboard() {
       })
       .slice(0, 5);
 
-    return {
-      total,
-      pending,
-      inReview,
-      sent,
-      closed,
-      pendingPercent,
-      recent,
-    };
+    return { total, pending, approved, rejected, pendingPercent, recent };
   }, [quotes]);
 
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <p className="text-br-white/70 text-sm tracking-wide">
-          Loading dashboard data...
+          Cargando datos del dashboard...
         </p>
       </div>
     );
@@ -80,46 +69,46 @@ export default function AdminENDashboard() {
       <header className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-br-pearl">
-            Admin Dashboard
+            Dashboard Admin
           </h1>
           <p className="text-sm text-br-white/60 mt-1">
-            Overview of incoming quotes and their current status.
+            Resumen general de las cotizaciones recibidas y su estado actual.
           </p>
         </div>
 
         <p className="text-xs text-br-white/50">
-          Last update:{" "}
+          Última actualización:{" "}
           <span className="font-medium text-br-pearl">
             {new Date().toLocaleString()}
           </span>
         </p>
       </header>
 
-      {/* TOP STATS */}
+      {/* TARJETAS PRINCIPALES */}
       <section className="grid gap-5 md:grid-cols-3">
         {/* Total */}
         <div className="relative overflow-hidden rounded-2xl border border-br-smoke-light bg-br-smoke/40 px-5 py-4 shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.18em] text-br-white/50">
-                Total Quotes
+                Cotizaciones totales
               </p>
               <p className="mt-2 text-4xl font-extrabold text-br-red-main">
                 {stats.total}
               </p>
             </div>
             <span className="rounded-full bg-br-red-main/10 px-3 py-1 text-xs font-medium text-br-red-main">
-              All time
+              Histórico
             </span>
           </div>
         </div>
 
-        {/* Pending */}
+        {/* Pendientes */}
         <div className="relative overflow-hidden rounded-2xl border border-br-smoke-light bg-gradient-to-br from-br-smoke/80 to-br-carbon px-5 py-4 shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.18em] text-br-white/50">
-                Pending
+                Pendientes
               </p>
               <p className="mt-2 text-3xl font-extrabold text-br-red-light">
                 {stats.pending}
@@ -127,9 +116,8 @@ export default function AdminENDashboard() {
             </div>
             <div className="text-right">
               <p className="text-xs text-br-white/60 mb-1">
-                {stats.pendingPercent}% of total
+                {stats.pendingPercent}% del total
               </p>
-              {/* progress bar */}
               <div className="h-2 w-24 rounded-full bg-br-smoke-light/40 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-br-red-main transition-all"
@@ -140,80 +128,76 @@ export default function AdminENDashboard() {
           </div>
         </div>
 
-        {/* Status breakdown */}
+        {/* Aprobadas / Rechazadas */}
         <div className="relative overflow-hidden rounded-2xl border border-br-smoke-light bg-br-smoke/40 px-5 py-4 shadow-lg">
           <p className="text-xs uppercase tracking-[0.18em] text-br-white/50">
-            Status breakdown
+            Desglose por estado
           </p>
           <div className="mt-3 space-y-1.5 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-br-pearl">In review</span>
+              <span className="text-br-pearl">Aprobadas</span>
               <span className="text-br-white/80 font-semibold">
-                {stats.inReview}
+                {stats.approved}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-br-pearl">Sent</span>
+              <span className="text-br-pearl">Rechazadas</span>
               <span className="text-br-white/80 font-semibold">
-                {stats.sent}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-br-pearl">Closed</span>
-              <span className="text-br-white/80 font-semibold">
-                {stats.closed}
+                {stats.rejected}
               </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* RECENT QUOTES */}
+      {/* RECIENTES */}
       <section className="rounded-2xl border border-br-smoke-light bg-br-smoke/30 shadow-lg">
         <div className="border-b border-br-smoke-light px-6 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-br-pearl">
-              Recent Quotes
+              Cotizaciones recientes
             </h2>
             <p className="text-xs text-br-white/60">
-              The last 5 submissions received by the system.
+              Últimas 5 cotizaciones capturadas en el sistema.
             </p>
           </div>
           <a
-            href="/admin/en/quotes"
+            href="/admin/es/quotes"
             className="text-xs font-medium text-br-red-main hover:text-br-red-light underline underline-offset-4"
           >
-            View all
+            Ver todas
           </a>
         </div>
 
         {stats.recent.length === 0 ? (
           <div className="px-6 py-10 text-center text-sm text-br-white/60">
-            No quotes have been created yet.
+            Aún no hay cotizaciones registradas.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full border-separate border-spacing-y-1 px-4 py-3 text-sm">
               <thead className="text-xs uppercase tracking-wide text-br-white/50">
                 <tr>
-                  <th className="px-6 py-2 text-left">Customer</th>
+                  <th className="px-6 py-2 text-left">Cliente</th>
                   <th className="px-6 py-2 text-left hidden md:table-cell">
-                    Created at
+                    Fecha
                   </th>
-                  <th className="px-6 py-2 text-left">Status</th>
-                  <th className="px-6 py-2 text-right">Actions</th>
+                  <th className="px-6 py-2 text-left">Estado</th>
+                  <th className="px-6 py-2 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {stats.recent.map((q) => {
-                  const badgeClass =
+                  const createdAt = q.createdAt
+                    ? new Date(q.createdAt).toLocaleString()
+                    : "—";
+
+                  const statusClasses =
                     q.status === "PENDING"
                       ? "bg-yellow-500/10 text-yellow-300 border border-yellow-500/40"
-                      : q.status === "IN_REVIEW"
-                      ? "bg-sky-500/10 text-sky-300 border border-sky-500/40"
-                      : q.status === "SENT"
+                      : q.status === "APPROVED"
                       ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/40"
-                      : "bg-zinc-500/10 text-zinc-300 border border-zinc-500/40"; // CLOSED / otros
+                      : "bg-red-500/10 text-red-300 border border-red-500/40";
 
                   return (
                     <tr
@@ -228,14 +212,12 @@ export default function AdminENDashboard() {
                       </td>
 
                       <td className="px-6 py-3 text-xs text-br-white/60 hidden md:table-cell">
-                        {q.createdAt
-                          ? new Date(q.createdAt).toLocaleString()
-                          : "—"}
+                        {createdAt}
                       </td>
 
                       <td className="px-6 py-3">
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${badgeClass}`}
+                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${statusClasses}`}
                         >
                           {q.status}
                         </span>
@@ -243,10 +225,10 @@ export default function AdminENDashboard() {
 
                       <td className="px-6 py-3 text-right">
                         <a
-                          href={`/admin/en/quotes/${q.id}`}
+                          href={`/admin/es/quotes/${q.id}`}
                           className="text-xs font-medium text-br-red-main hover:text-br-red-light underline underline-offset-4"
                         >
-                          View details
+                          Ver detalle
                         </a>
                       </td>
                     </tr>
