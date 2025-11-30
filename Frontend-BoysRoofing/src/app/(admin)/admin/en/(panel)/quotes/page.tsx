@@ -4,8 +4,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/api";
 
-type QuoteStatus = "PENDING" | "IN_REVIEW" | "SENT" | "CLOSED";
+type QuoteStatus = "PENDING" | "IN_REVIEW" | "SENT" | "CLOSED" | string;
 
 type Quote = {
   id: number | string;
@@ -31,20 +32,30 @@ export default function QuotesEN() {
   useEffect(() => {
     async function loadQuotes() {
       try {
-        const token = localStorage.getItem("br_admin_token");
+        const hasWindow = typeof window !== "undefined";
+        const token = hasWindow ? localStorage.getItem("br_admin_token") : null;
+
+        // Si no hay token -> fuera
         if (!token) {
           router.push("/admin/en/login");
           return;
         }
 
-        const res = await fetch("http://localhost:3200/quotes", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // apiFetch ya agrega Authorization automáticamente
+        const res = await apiFetch("/quotes");
 
-        // si el token ya no es válido
+        // Si el token ya no es válido
         if (res.status === 401) {
-          localStorage.removeItem("br_admin_token");
+          if (hasWindow) {
+            localStorage.removeItem("br_admin_token");
+          }
           router.push("/admin/en/login");
+          return;
+        }
+
+        if (!res.ok) {
+          console.error("Error loading quotes:", await res.text());
+          setQuotes([]);
           return;
         }
 
@@ -78,7 +89,7 @@ export default function QuotesEN() {
       );
     }
 
-    // ordena del más reciente al más antiguo (si tiene createdAt)
+    // ordena del más reciente al más antiguo
     result.sort((a, b) => {
       const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const db = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -197,7 +208,7 @@ export default function QuotesEN() {
                       ? "bg-sky-500/10 text-sky-300 border border-sky-500/40"
                       : q.status === "SENT"
                       ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/40"
-                      : "bg-zinc-500/10 text-zinc-300 border border-zinc-500/40"; // CLOSED / otros
+                      : "bg-zinc-500/10 text-zinc-300 border border-zinc-500/40";
 
                   return (
                     <tr

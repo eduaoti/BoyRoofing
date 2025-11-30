@@ -1,3 +1,4 @@
+//src/components/MissionVisionValuesSection.tsx
 "use client";
 
 import useTranslation from "@/hooks/useTranslation";

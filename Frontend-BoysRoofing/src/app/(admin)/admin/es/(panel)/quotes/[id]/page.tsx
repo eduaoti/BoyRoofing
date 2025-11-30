@@ -1,7 +1,11 @@
+// src/app/admin/es/(panel)/quotes/[id]/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/api";
+
+type QuoteStatus = "PENDING" | "IN_REVIEW" | "SENT" | "CLOSED" | string;
 
 type Quote = {
   id: number | string;
@@ -10,12 +14,13 @@ type Quote = {
   phone: string;
   service: string;
   message: string;
-  status: string;
+  status: QuoteStatus;
   createdAt?: string;
 };
 
 export default function QuoteDetailES() {
-  const { id } = useParams();
+  const params = useParams() as { id: string };
+  const id = params.id;
   const router = useRouter();
 
   const [quote, setQuote] = useState<Quote | null>(null);
@@ -24,43 +29,45 @@ export default function QuoteDetailES() {
 
   async function loadQuote() {
     try {
-      const token = localStorage.getItem("br_admin_token");
+      const hasWindow = typeof window !== "undefined";
+      const token = hasWindow ? localStorage.getItem("br_admin_token") : null;
 
       if (!token) {
         router.push("/admin/es/login");
         return;
       }
 
-      const res = await fetch(`http://localhost:3200/quotes/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await apiFetch(`/quotes/${id}`);
 
       if (res.status === 401) {
-        localStorage.removeItem("br_admin_token");
+        if (hasWindow) {
+          localStorage.removeItem("br_admin_token");
+        }
         router.push("/admin/es/login");
         return;
       }
 
       if (!res.ok) {
-        console.error("Error al cargar cotización:", await res.text());
+        console.error("No se pudo cargar la cotización:", await res.text());
         setQuote(null);
         setLoading(false);
         return;
       }
 
-      const data = await res.json();
+      const data: Quote = await res.json();
       setQuote(data);
       setLoading(false);
     } catch (err) {
-      console.error("Error al cargar cotización:", err);
+      console.error("Error al cargar la cotización:", err);
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadQuote();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+    if (id) {
+      loadQuote();
+    }
+  }, [id, router]);
 
   async function deleteQuote() {
     if (!quote) return;
@@ -72,18 +79,39 @@ export default function QuoteDetailES() {
 
     try {
       setDeleting(true);
-      const token = localStorage.getItem("br_admin_token");
 
-      await fetch(`http://localhost:3200/quotes/${id}`, {
+      const hasWindow = typeof window !== "undefined";
+      const token = hasWindow ? localStorage.getItem("br_admin_token") : null;
+
+      if (!token) {
+        router.push("/admin/es/login");
+        return;
+      }
+
+      const res = await apiFetch(`/quotes/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (res.status === 401) {
+        if (hasWindow) {
+          localStorage.removeItem("br_admin_token");
+        }
+        router.push("/admin/es/login");
+        return;
+      }
+
+      if (!res.ok) {
+        console.error("Error al eliminar la cotización:", await res.text());
+        setDeleting(false);
+        alert("Hubo un problema al eliminar la cotización. Intenta de nuevo.");
+        return;
+      }
 
       router.push("/admin/es/quotes");
     } catch (err) {
-      console.error("Error al eliminar cotización:", err);
+      console.error("Error al eliminar la cotización:", err);
       setDeleting(false);
-      alert("Ocurrió un problema al eliminar la cotización. Intenta de nuevo.");
+      alert("Hubo un problema al eliminar la cotización. Intenta de nuevo.");
     }
   }
 
@@ -105,7 +133,7 @@ export default function QuoteDetailES() {
     return (
       <div className="max-w-xl rounded-2xl border border-br-smoke-light bg-br-smoke/30 p-8 text-center text-sm text-br-white/70">
         <p className="mb-4 font-semibold text-br-pearl">
-          La cotización no existe o ya no está disponible.
+          Cotización no encontrada o ya no está disponible.
         </p>
         <button
           onClick={() => router.push("/admin/es/quotes")}
@@ -124,13 +152,15 @@ export default function QuoteDetailES() {
   const statusClasses =
     quote.status === "PENDING"
       ? "bg-yellow-500/10 text-yellow-300 border border-yellow-500/40"
-      : quote.status === "APPROVED"
+      : quote.status === "IN_REVIEW"
+      ? "bg-sky-500/10 text-sky-300 border border-sky-500/40"
+      : quote.status === "SENT"
       ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/40"
-      : "bg-red-500/10 text-red-300 border border-red-500/40";
+      : "bg-zinc-500/10 text-zinc-300 border border-zinc-500/40";
 
   return (
     <div className="max-w-4xl space-y-6">
-      {/* HEADER */}
+      {/* BREADCRUMB / HEADER */}
       <div className="flex items-center justify-between gap-3">
         <div>
           <button
@@ -160,9 +190,9 @@ export default function QuoteDetailES() {
         </div>
       </div>
 
-      {/* INFO PRINCIPAL */}
+      {/* TOP INFO CARDS */}
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Cliente */}
+        {/* Contact info */}
         <div className="rounded-2xl border border-br-smoke-light bg-br-smoke/30 p-5 shadow-lg">
           <h2 className="text-sm font-semibold text-br-pearl mb-3">
             Información del cliente
@@ -177,7 +207,7 @@ export default function QuoteDetailES() {
 
             <div>
               <p className="text-xs uppercase tracking-[0.18em] text-br-white/50">
-                Correo
+                Correo electrónico
               </p>
               <p className="font-medium break-all">{quote.email}</p>
             </div>
@@ -191,7 +221,7 @@ export default function QuoteDetailES() {
           </div>
         </div>
 
-        {/* Metadatos */}
+        {/* Meta info */}
         <div className="rounded-2xl border border-br-smoke-light bg-br-smoke/30 p-5 shadow-lg">
           <h2 className="text-sm font-semibold text-br-pearl mb-3">
             Detalles de la cotización
@@ -214,7 +244,7 @@ export default function QuoteDetailES() {
         </div>
       </div>
 
-      {/* MENSAJE */}
+      {/* MESSAGE CARD */}
       <div className="rounded-2xl border border-br-smoke-light bg-br-smoke/35 p-5 shadow-lg">
         <h2 className="text-sm font-semibold text-br-pearl mb-2">
           Mensaje del cliente
@@ -224,18 +254,31 @@ export default function QuoteDetailES() {
             {quote.message}
           </p>
         ) : (
-          <p className="text-sm text-br-white/50">Sin mensaje adicional.</p>
+          <p className="text-sm text-br-white/50">
+            El cliente no proporcionó un mensaje.
+          </p>
         )}
       </div>
 
-      {/* ACCIONES */}
+      {/* ACTIONS */}
       <div className="flex flex-col gap-3 border-t border-br-smoke-light pt-4 sm:flex-row sm:justify-between sm:items-center">
-        <button
-          onClick={() => router.push("/admin/es/quotes")}
-          className="inline-flex items-center justify-center rounded-full border border-br-smoke-light bg-br-smoke/40 px-5 py-2 text-xs font-medium text-br-pearl hover:bg-br-smoke-light/60 transition"
-        >
-          Volver al listado
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => router.push("/admin/es/quotes")}
+            className="inline-flex items-center justify-center rounded-full border border-br-smoke-light bg-br-smoke/40 px-5 py-2 text-xs font-medium text-br-pearl hover:bg-br-smoke-light/60 transition"
+          >
+            Volver a la lista
+          </button>
+
+          {quote.status === "PENDING" && (
+            <button
+              onClick={() => router.push(`/admin/es/invoices/${quote.id}`)}
+              className="inline-flex items-center justify-center rounded-full bg-br-red-main px-5 py-2 text-xs font-semibold text-white hover:bg-br-red-light transition"
+            >
+              Crear factura
+            </button>
+          )}
+        </div>
 
         <button
           onClick={deleteQuote}

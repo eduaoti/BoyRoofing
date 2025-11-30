@@ -1,7 +1,12 @@
+// src/app/admin/es/(panel)/quotes/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/api";
+
+type QuoteStatus = "PENDING" | "IN_REVIEW" | "SENT" | "CLOSED" | string;
 
 type Quote = {
   id: number | string;
@@ -9,14 +14,16 @@ type Quote = {
   email: string;
   phone: string;
   service: string;
-  status: string;
+  status: QuoteStatus;
   createdAt?: string;
 };
 
-const STATUS_OPTIONS = ["ALL", "PENDING", "APPROVED", "REJECTED"] as const;
+const STATUS_OPTIONS = ["ALL", "PENDING", "IN_REVIEW", "SENT", "CLOSED"] as const;
 type StatusFilter = (typeof STATUS_OPTIONS)[number];
 
 export default function QuotesES() {
+  const router = useRouter();
+
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
@@ -25,11 +32,29 @@ export default function QuotesES() {
   useEffect(() => {
     async function loadQuotes() {
       try {
-        const token = localStorage.getItem("br_admin_token");
+        const hasWindow = typeof window !== "undefined";
+        const token = hasWindow ? localStorage.getItem("br_admin_token") : null;
 
-        const res = await fetch("http://localhost:3200/quotes", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        if (!token) {
+          router.push("/admin/es/login");
+          return;
+        }
+
+        const res = await apiFetch("/quotes");
+
+        if (res.status === 401) {
+          if (hasWindow) {
+            localStorage.removeItem("br_admin_token");
+          }
+          router.push("/admin/es/login");
+          return;
+        }
+
+        if (!res.ok) {
+          console.error("Error al cargar cotizaciones:", await res.text());
+          setQuotes([]);
+          return;
+        }
 
         const data = await res.json();
         setQuotes(Array.isArray(data) ? data : []);
@@ -41,7 +66,7 @@ export default function QuotesES() {
     }
 
     loadQuotes();
-  }, []);
+  }, [router]);
 
   const filteredQuotes = useMemo(() => {
     let result = [...quotes];
@@ -87,13 +112,13 @@ export default function QuotesES() {
             Cotizaciones
           </h1>
           <p className="mt-1 text-sm text-br-white/60">
-            Administra todas las solicitudes de cotización de tus clientes.
+            Administra todas las solicitudes de cotización de los clientes desde este panel.
           </p>
         </div>
 
         <div className="text-right text-xs text-br-white/60">
           <p>
-            Total de cotizaciones:{" "}
+            Cotizaciones totales:{" "}
             <span className="font-semibold text-br-pearl">
               {quotes.length}
             </span>
@@ -101,7 +126,7 @@ export default function QuotesES() {
         </div>
       </header>
 
-      {/* FILTROS */}
+      {/* FILTERS */}
       <section className="flex flex-col gap-3 rounded-2xl border border-br-smoke-light bg-br-smoke/40 p-4 shadow-lg md:flex-row md:items-center md:justify-between">
         <div className="flex flex-1 items-center gap-3">
           <label className="text-xs font-medium text-br-white/70">
@@ -130,16 +155,18 @@ export default function QuotesES() {
                   ? "Todos"
                   : s === "PENDING"
                   ? "Pendiente"
-                  : s === "APPROVED"
-                  ? "Aprobada"
-                  : "Rechazada"}
+                  : s === "IN_REVIEW"
+                  ? "En revisión"
+                  : s === "SENT"
+                  ? "Enviada"
+                  : "Cerrada"}
               </option>
             ))}
           </select>
         </div>
       </section>
 
-      {/* TABLA / LISTADO */}
+      {/* LIST / TABLE */}
       <section className="rounded-2xl border border-br-smoke-light bg-br-smoke/30 shadow-lg">
         {filteredQuotes.length === 0 ? (
           <div className="px-6 py-10 text-center text-sm text-br-white/60">
@@ -159,7 +186,7 @@ export default function QuotesES() {
                   </th>
                   <th className="px-6 py-2 text-left">Estado</th>
                   <th className="px-6 py-2 text-left hidden md:table-cell">
-                    Fecha
+                    Fecha de creación
                   </th>
                   <th className="px-6 py-2 text-right">Acciones</th>
                 </tr>
@@ -173,9 +200,11 @@ export default function QuotesES() {
                   const statusClasses =
                     q.status === "PENDING"
                       ? "bg-yellow-500/10 text-yellow-300 border border-yellow-500/40"
-                      : q.status === "APPROVED"
+                      : q.status === "IN_REVIEW"
+                      ? "bg-sky-500/10 text-sky-300 border border-sky-500/40"
+                      : q.status === "SENT"
                       ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/40"
-                      : "bg-red-500/10 text-red-300 border border-red-500/40";
+                      : "bg-zinc-500/10 text-zinc-300 border border-zinc-500/40";
 
                   return (
                     <tr
@@ -203,7 +232,13 @@ export default function QuotesES() {
                         <span
                           className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${statusClasses}`}
                         >
-                          {q.status}
+                          {q.status === "PENDING"
+                            ? "PENDING"
+                            : q.status === "IN_REVIEW"
+                            ? "IN_REVIEW"
+                            : q.status === "SENT"
+                            ? "SENT"
+                            : "CLOSED"}
                         </span>
                       </td>
 

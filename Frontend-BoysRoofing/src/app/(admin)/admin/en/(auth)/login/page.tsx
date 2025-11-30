@@ -3,6 +3,7 @@
 
 import { useState, FormEvent } from "react";
 import { setCookie } from "cookies-next";
+import { apiFetch } from "@/lib/api";
 
 export default function AdminLoginEN() {
   const [email, setEmail] = useState("");
@@ -12,9 +13,11 @@ export default function AdminLoginEN() {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:3200/auth/login", {
+      const res = await apiFetch("/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ email, password }),
       });
 
@@ -31,6 +34,7 @@ export default function AdminLoginEN() {
         return;
       }
 
+      // Guardar token en cookie + localStorage
       setCookie("br_admin_token", token, { path: "/", maxAge: 60 * 60 * 24 });
       localStorage.setItem("br_admin_token", token);
 

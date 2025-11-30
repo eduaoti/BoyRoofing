@@ -1,92 +1,139 @@
-'use client'
+// src/components/ReviewsCarousel.tsx
+"use client";
 
+import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
-import 'swiper/css'
-import 'swiper/css/navigation'
-import 'swiper/css/pagination'
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import { apiFetch } from "@/lib/api";
 
 // Define el tipo de review
 interface Review {
-  id: number
-  name: string
-  rating: number
-  comment: string
+  id: number;
+  name: string;
+  rating: number;
+  comment: string;
 }
 
 interface ReviewsCarouselProps {
-  reviews?: Review[]
-  lang?: "es" | "en"
+  reviews?: Review[];
+  lang?: "es" | "en";
 }
 
-export default function ReviewsCarousel({ reviews = [], lang = "es" }: ReviewsCarouselProps) {
+export default function ReviewsCarousel({
+  reviews = [],
+  lang = "es",
+}: ReviewsCarouselProps) {
   // Reseñas de ejemplo en español
-  const defaultReviewsES = [
+  const defaultReviewsES: Review[] = [
     {
       id: 1,
-      name: 'Carlos Martínez',
+      name: "Carlos Martínez",
       rating: 5,
       comment:
-        'Excelente servicio, llegaron rápido y repararon mi techo en el mismo día. 100% recomendados.',
+        "Excelente servicio, llegaron rápido y repararon mi techo en el mismo día. 100% recomendados.",
     },
     {
       id: 2,
-      name: 'María López',
+      name: "María López",
       rating: 5,
       comment:
-        'Muy profesionales y con buena atención. Me explicaron todo el proceso. Gran trabajo.',
+        "Muy profesionales y con buena atención. Me explicaron todo el proceso. Gran trabajo.",
     },
     {
       id: 3,
-      name: 'Luis Hernández',
+      name: "Luis Hernández",
       rating: 4,
-      comment:
-        'Buen servicio y precio justo. Mi techo quedó como nuevo.',
+      comment: "Buen servicio y precio justo. Mi techo quedó como nuevo.",
     },
   ];
 
   // Reseñas de ejemplo en inglés
-  const defaultReviewsEN = [
+  const defaultReviewsEN: Review[] = [
     {
       id: 1,
-      name: 'Carlos Martinez',
+      name: "Carlos Martinez",
       rating: 5,
       comment:
-        'Excellent service, they arrived quickly and repaired my roof the same day. 100% recommended.',
+        "Excellent service, they arrived quickly and repaired my roof the same day. 100% recommended.",
     },
     {
       id: 2,
-      name: 'Maria Lopez',
+      name: "Maria Lopez",
       rating: 5,
       comment:
-        'Very professional and great attention. They explained the whole process. Great job.',
+        "Very professional and great attention. They explained the whole process. Great job.",
     },
     {
       id: 3,
-      name: 'Luis Hernandez',
+      name: "Luis Hernandez",
       rating: 4,
-      comment:
-        'Good service and fair price. My roof looks like new.',
+      comment: "Good service and fair price. My roof looks like new.",
     },
   ];
 
-  const data =
-    reviews.length > 0
-      ? reviews.map(({ id, name, rating, comment }) => ({ id, name, rating, comment }))
-      : lang === "en"
-      ? defaultReviewsEN
-      : defaultReviewsES;
+  const [data, setData] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadReviews() {
+      try {
+        // Si ya vienen reviews por props, usamos esas y no llamamos al backend
+        if (reviews.length > 0) {
+          setData(reviews);
+          return;
+        }
+
+        const res = await apiFetch("/reviews");
+
+        if (!res.ok) {
+          console.error("Error loading reviews:", await res.text());
+          // fallback a mock por idioma
+          setData(lang === "en" ? defaultReviewsEN : defaultReviewsES);
+          return;
+        }
+
+        const json = await res.json();
+
+        // El backend devuelve algo como:
+        // { id, name, message, rating, createdAt }
+        const mapped: Review[] = Array.isArray(json)
+          ? json.map((r: any) => ({
+              id: r.id,
+              name: r.name,
+              rating: r.rating,
+              comment: r.message,
+            }))
+          : [];
+
+        if (mapped.length === 0) {
+          setData(lang === "en" ? defaultReviewsEN : defaultReviewsES);
+        } else {
+          setData(mapped);
+        }
+      } catch (err) {
+        console.error("Error loading reviews:", err);
+        setData(lang === "en" ? defaultReviewsEN : defaultReviewsES);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadReviews();
+  }, [reviews, lang]);
 
   // Simulación: función para verificar si el usuario puede dejar reseña
   // En producción, deberías obtener este dato del backend según el usuario autenticado
   const userCanReview = false; // Cambia esto según la lógica real
 
-  // Textos según idioma
   const texts = {
     es: {
       title: "Reseñas de Nuestros Clientes",
       button: "Deja tu reseña",
-      onlyIf: "Solo puedes dejar una reseña si has solicitado una cotización.",
+      onlyIf:
+        "Solo puedes dejar una reseña si has solicitado una cotización.",
     },
     en: {
       title: "Our Clients' Reviews",
@@ -94,6 +141,16 @@ export default function ReviewsCarousel({ reviews = [], lang = "es" }: ReviewsCa
       onlyIf: "You can only leave a review if you have requested a quote.",
     },
   };
+
+  if (loading) {
+    return (
+      <section className="w-full max-w-4xl mx-auto py-10">
+        <p className="text-center text-gray-500">
+          {lang === "en" ? "Loading reviews..." : "Cargando reseñas..."}
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full max-w-4xl mx-auto py-10">
@@ -152,19 +209,11 @@ export default function ReviewsCarousel({ reviews = [], lang = "es" }: ReviewsCa
               </p>
 
               {/* Name */}
-              <p className="font-semibold text-gray-900">
-                - {review.name}
-              </p>
+              <p className="font-semibold text-gray-900">- {review.name}</p>
             </div>
           </SwiperSlide>
         ))}
       </Swiper>
     </section>
-  )
+  );
 }
-
-// Cuando implementes el formulario de reseña:
-// 1. Pide el correo al usuario.
-// 2. Consulta al backend si existe una cotización con ese correo.
-// 3. Si existe, obtén el quoteId y permite enviar la reseña con ese quoteId.
-// 4. Si no existe, muestra un mensaje de error.

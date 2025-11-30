@@ -1,26 +1,30 @@
+// src/app/admin/es/(panel)/dashboard/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 type Quote = {
   id: number | string;
   name: string;
-  status: string;
+  status: "PENDING" | "IN_REVIEW" | "SENT" | "CLOSED" | string;
   createdAt?: string;
 };
 
-export default function DashboardES() {
+export default function AdminESDashboard() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadQuotes() {
       try {
-        const token = localStorage.getItem("br_admin_token");
+        const res = await apiFetch("/quotes");
 
-        const res = await fetch("http://localhost:3200/quotes", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        if (!res.ok) {
+          console.error("Error al cargar cotizaciones:", await res.text());
+          setQuotes([]);
+          return;
+        }
 
         const data = await res.json();
         setQuotes(Array.isArray(data) ? data : []);
@@ -36,9 +40,11 @@ export default function DashboardES() {
 
   const stats = useMemo(() => {
     const total = quotes.length;
+
     const pending = quotes.filter((q) => q.status === "PENDING").length;
-    const approved = quotes.filter((q) => q.status === "APPROVED").length;
-    const rejected = quotes.filter((q) => q.status === "REJECTED").length;
+    const inReview = quotes.filter((q) => q.status === "IN_REVIEW").length;
+    const sent = quotes.filter((q) => q.status === "SENT").length;
+    const closed = quotes.filter((q) => q.status === "CLOSED").length;
 
     const pendingPercent = total > 0 ? Math.round((pending / total) * 100) : 0;
 
@@ -50,14 +56,22 @@ export default function DashboardES() {
       })
       .slice(0, 5);
 
-    return { total, pending, approved, rejected, pendingPercent, recent };
+    return {
+      total,
+      pending,
+      inReview,
+      sent,
+      closed,
+      pendingPercent,
+      recent,
+    };
   }, [quotes]);
 
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <p className="text-br-white/70 text-sm tracking-wide">
-          Cargando datos del dashboard...
+          Cargando datos del panel...
         </p>
       </div>
     );
@@ -69,10 +83,10 @@ export default function DashboardES() {
       <header className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-br-pearl">
-            Dashboard Admin
+            Panel de Administración
           </h1>
           <p className="text-sm text-br-white/60 mt-1">
-            Resumen general de las cotizaciones recibidas y su estado actual.
+            Resumen de las cotizaciones recibidas y su estado actual.
           </p>
         </div>
 
@@ -84,7 +98,7 @@ export default function DashboardES() {
         </p>
       </header>
 
-      {/* TARJETAS PRINCIPALES */}
+      {/* TOP STATS */}
       <section className="grid gap-5 md:grid-cols-3">
         {/* Total */}
         <div className="relative overflow-hidden rounded-2xl border border-br-smoke-light bg-br-smoke/40 px-5 py-4 shadow-lg">
@@ -98,12 +112,12 @@ export default function DashboardES() {
               </p>
             </div>
             <span className="rounded-full bg-br-red-main/10 px-3 py-1 text-xs font-medium text-br-red-main">
-              Histórico
+              Todo el tiempo
             </span>
           </div>
         </div>
 
-        {/* Pendientes */}
+        {/* Pending */}
         <div className="relative overflow-hidden rounded-2xl border border-br-smoke-light bg-gradient-to-br from-br-smoke/80 to-br-carbon px-5 py-4 shadow-lg">
           <div className="flex items-center justify-between">
             <div>
@@ -118,6 +132,7 @@ export default function DashboardES() {
               <p className="text-xs text-br-white/60 mb-1">
                 {stats.pendingPercent}% del total
               </p>
+              {/* progress bar */}
               <div className="h-2 w-24 rounded-full bg-br-smoke-light/40 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-br-red-main transition-all"
@@ -128,29 +143,35 @@ export default function DashboardES() {
           </div>
         </div>
 
-        {/* Aprobadas / Rechazadas */}
+        {/* Status breakdown */}
         <div className="relative overflow-hidden rounded-2xl border border-br-smoke-light bg-br-smoke/40 px-5 py-4 shadow-lg">
           <p className="text-xs uppercase tracking-[0.18em] text-br-white/50">
             Desglose por estado
           </p>
           <div className="mt-3 space-y-1.5 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-br-pearl">Aprobadas</span>
+              <span className="text-br-pearl">En revisión</span>
               <span className="text-br-white/80 font-semibold">
-                {stats.approved}
+                {stats.inReview}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-br-pearl">Rechazadas</span>
+              <span className="text-br-pearl">Enviadas</span>
               <span className="text-br-white/80 font-semibold">
-                {stats.rejected}
+                {stats.sent}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-br-pearl">Cerradas</span>
+              <span className="text-br-white/80 font-semibold">
+                {stats.closed}
               </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* RECIENTES */}
+      {/* RECENT QUOTES */}
       <section className="rounded-2xl border border-br-smoke-light bg-br-smoke/30 shadow-lg">
         <div className="border-b border-br-smoke-light px-6 py-4 flex items-center justify-between">
           <div>
@@ -158,7 +179,7 @@ export default function DashboardES() {
               Cotizaciones recientes
             </h2>
             <p className="text-xs text-br-white/60">
-              Últimas 5 cotizaciones capturadas en el sistema.
+              Las últimas 5 cotizaciones recibidas en el sistema.
             </p>
           </div>
           <a
@@ -171,7 +192,7 @@ export default function DashboardES() {
 
         {stats.recent.length === 0 ? (
           <div className="px-6 py-10 text-center text-sm text-br-white/60">
-            Aún no hay cotizaciones registradas.
+            Aún no se han creado cotizaciones.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -180,7 +201,7 @@ export default function DashboardES() {
                 <tr>
                   <th className="px-6 py-2 text-left">Cliente</th>
                   <th className="px-6 py-2 text-left hidden md:table-cell">
-                    Fecha
+                    Fecha de creación
                   </th>
                   <th className="px-6 py-2 text-left">Estado</th>
                   <th className="px-6 py-2 text-right">Acciones</th>
@@ -188,16 +209,14 @@ export default function DashboardES() {
               </thead>
               <tbody>
                 {stats.recent.map((q) => {
-                  const createdAt = q.createdAt
-                    ? new Date(q.createdAt).toLocaleString()
-                    : "—";
-
-                  const statusClasses =
+                  const badgeClass =
                     q.status === "PENDING"
                       ? "bg-yellow-500/10 text-yellow-300 border border-yellow-500/40"
-                      : q.status === "APPROVED"
+                      : q.status === "IN_REVIEW"
+                      ? "bg-sky-500/10 text-sky-300 border border-sky-500/40"
+                      : q.status === "SENT"
                       ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/40"
-                      : "bg-red-500/10 text-red-300 border border-red-500/40";
+                      : "bg-zinc-500/10 text-zinc-300 border border-zinc-500/40";
 
                   return (
                     <tr
@@ -212,12 +231,14 @@ export default function DashboardES() {
                       </td>
 
                       <td className="px-6 py-3 text-xs text-br-white/60 hidden md:table-cell">
-                        {createdAt}
+                        {q.createdAt
+                          ? new Date(q.createdAt).toLocaleString()
+                          : "—"}
                       </td>
 
                       <td className="px-6 py-3">
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${statusClasses}`}
+                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${badgeClass}`}
                         >
                           {q.status}
                         </span>
