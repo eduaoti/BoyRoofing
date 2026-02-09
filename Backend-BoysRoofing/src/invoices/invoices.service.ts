@@ -103,7 +103,7 @@ export class InvoicesService {
         .fontSize(10)
         .fillColor('#444444')
         .text('409-868-8853', 40, doc.y, { align: 'center' })
-        .text('boysroofing@example.com', 40, doc.y, { align: 'center' });
+        .text('services@boysroofing.company', 40, doc.y, { align: 'center' });
 
       // Logo a la derecha (más arriba y un poco más chico)
       try {
@@ -151,10 +151,9 @@ export class InvoicesService {
         .fillColor('#333333')
         .text(invoice.billTo || quote.name, { align: 'left' })
         .text(invoice.address, { align: 'left' })
-        .text(
-          `${invoice.city}, ${invoice.state} ${invoice.zip}`,
-          { align: 'left' },
-        )
+        .text(`${invoice.city}, ${invoice.state} ${invoice.zip}`, {
+          align: 'left',
+        })
         .moveDown(0.3)
         .text(`Phone: ${invoice.phone}`, { align: 'left' });
 
@@ -164,10 +163,7 @@ export class InvoicesService {
       // Phone / Invoice # / Date a la derecha
       doc.y = headerBottomY + 15;
 
-      doc
-        .fontSize(11)
-        .fillColor('#111111')
-        .text('Phone:', rightX, doc.y);
+      doc.fontSize(11).fillColor('#111111').text('Phone:', rightX, doc.y);
 
       doc
         .fontSize(10)
@@ -231,14 +227,11 @@ export class InvoicesService {
 
       // ==========================
       // DESCRIPCIÓN Y PRECIO (tabla)
+      // ✅ FIX: evitar que el texto de descripción se encime con totales
       // ==========================
       const tableStartY = doc.y;
 
-      doc
-        .fontSize(10)
-        .fillColor('#111111')
-        .text('Date', leftX, tableStartY);
-
+      doc.fontSize(10).fillColor('#111111').text('Date', leftX, tableStartY);
       doc.text('Description', leftX + 80, tableStartY);
       doc.text('Price', 500, tableStartY, { width: 70, align: 'right' });
 
@@ -260,24 +253,29 @@ export class InvoicesService {
           ? invoice.invoiceDate.toLocaleDateString()
           : new Date(invoice.invoiceDate).toLocaleDateString();
 
+      doc.fontSize(10).fillColor('#333333').text(invoiceDateStr, leftX, rowY);
+
+      // Description (texto largo) -> capturar hasta dónde baja
       doc
         .fontSize(10)
         .fillColor('#333333')
-        .text(invoiceDateStr, leftX, rowY);
+        .text(invoice.description || '', leftX + 80, rowY, {
+          width: 360, // 👈 deja espacio para que no choque con la columna "Price"
+        });
 
-      // Description
-      doc.text(invoice.description || '', leftX + 80, rowY, {
-        width: 380,
-      });
+      const descBottomY = doc.y; // ✅ aquí ya está el final REAL de la descripción
 
-      // Price
-      doc.text(`$${Number(invoice.price).toFixed(2)}`, 500, rowY, {
-        width: 70,
-        align: 'right',
-      });
+      // Price (NO debe mover doc.y por encima del final de la descripción)
+      doc
+        .fontSize(10)
+        .fillColor('#333333')
+        .text(`$${Number(invoice.price).toFixed(2)}`, 500, rowY, {
+          width: 70,
+          align: 'right',
+        });
 
-      // Dejar espacio visual para más filas
-      doc.moveDown(5);
+      // ✅ Importantísimo: regresar el cursor abajo del texto más largo
+      doc.y = descBottomY + 12;
 
       // ==========================
       // SUBTOTAL / OTHER / TOTAL
@@ -294,10 +292,7 @@ export class InvoicesService {
 
       yTotals += 6;
 
-      doc
-        .fontSize(10)
-        .fillColor('#333333')
-        .text('Subtotal', totalsX, yTotals);
+      doc.fontSize(10).fillColor('#333333').text('Subtotal', totalsX, yTotals);
 
       doc.text(`$${Number(invoice.subtotal).toFixed(2)}`, 500, yTotals, {
         width: 70,
@@ -305,10 +300,7 @@ export class InvoicesService {
       });
 
       yTotals += 14;
-      doc
-        .fontSize(10)
-        .fillColor('#333333')
-        .text('Other', totalsX, yTotals);
+      doc.fontSize(10).fillColor('#333333').text('Other', totalsX, yTotals);
 
       doc.text(`$${Number(invoice.other ?? 0).toFixed(2)}`, 500, yTotals, {
         width: 70,
@@ -326,17 +318,17 @@ export class InvoicesService {
 
       yTotals += 6;
 
-      doc
-        .fontSize(11)
-        .fillColor('#111111')
-        .text('Total', totalsX, yTotals);
+      doc.fontSize(11).fillColor('#111111').text('Total', totalsX, yTotals);
 
       doc.text(`$${Number(invoice.total).toFixed(2)}`, 500, yTotals, {
         width: 70,
         align: 'right',
       });
 
-      doc.moveDown(4);
+      // Alinear doc.y al final del bloque de totales
+      doc.y = yTotals + 20;
+
+      doc.moveDown(2);
 
       // ==========================
       // FIRMA
@@ -369,10 +361,7 @@ export class InvoicesService {
 
       doc.moveDown(2);
 
-      doc
-        .fontSize(9)
-        .fillColor('#444444')
-        .text('Paid Check: ___________________', 40, doc.y);
+      doc.fontSize(9).fillColor('#444444').text('Paid Check: ___________________', 40, doc.y);
 
       doc.moveDown(0.8);
       doc.text('Paid cash: ___________________', 40, doc.y);
