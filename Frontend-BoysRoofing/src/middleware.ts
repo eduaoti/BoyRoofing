@@ -11,12 +11,12 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/admin/es/login");
 
   if (isAdminRoute && !isLoginRoute) {
-    // 👇 El token se toma de las COOKIES
     const token = request.cookies.get("br_admin_token")?.value;
 
     if (!token) {
-      // si no hay token, manda al login EN por defecto
-      return NextResponse.redirect(new URL("/admin/en/login", request.url));
+      // ✅ Respeta idioma según la ruta actual
+      const lang = pathname.startsWith("/admin/es") ? "es" : "en";
+      return NextResponse.redirect(new URL(`/admin/${lang}/login`, request.url));
     }
   }
 
