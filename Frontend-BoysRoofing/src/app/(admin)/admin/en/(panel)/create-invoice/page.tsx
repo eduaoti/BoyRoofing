@@ -60,7 +60,7 @@ export default function CreateInvoiceEN() {
         message: description || "",
       };
 
-      const quoteRes = await apiFetch("/quotes/for-invoice", {
+      let quoteRes = await apiFetch("/quotes/for-invoice", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -68,6 +68,15 @@ export default function CreateInvoiceEN() {
         },
         body: JSON.stringify(quoteBody),
       });
+
+      // Fallback: if backend on Railway doesn't have the new route yet (404), use POST /quotes
+      if (quoteRes.status === 404) {
+        quoteRes = await apiFetch("/quotes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(quoteBody),
+        });
+      }
 
       if (!quoteRes.ok) {
         const text = await quoteRes.text();
