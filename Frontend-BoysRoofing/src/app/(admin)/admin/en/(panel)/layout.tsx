@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { MapPinIcon, HomeIcon, DocumentTextIcon, DocumentPlusIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 
 export default function AdminENPanelLayout({
   children,
@@ -30,26 +31,43 @@ export default function AdminENPanelLayout({
             Admin dashboard · EN
           </p>
 
-          <nav className="space-y-3 text-sm">
+          <nav className="space-y-1 text-sm">
             <Link
               href="/admin/en/dashboard"
-              className="block rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
             >
+              <HomeIcon className="h-5 w-5 shrink-0" />
               Dashboard
             </Link>
             <Link
               href="/admin/en/quotes"
-              className="block rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
             >
+              <DocumentTextIcon className="h-5 w-5 shrink-0" />
               Quotes
+            </Link>
+            <Link
+              href="/admin/en/create-invoice"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
+            >
+              <DocumentPlusIcon className="h-5 w-5 shrink-0" />
+              Create invoice
+            </Link>
+            <Link
+              href="/admin/en/medir"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
+            >
+              <MapPinIcon className="h-5 w-5 shrink-0" />
+              Measure
             </Link>
           </nav>
         </div>
 
         <button
           onClick={logout}
-          className="mt-6 w-full bg-br-red-main hover:bg-br-red-light text-white py-2 px-4 rounded-lg text-sm font-semibold transition"
+          className="mt-6 flex w-full items-center justify-center gap-2 bg-br-red-main hover:bg-br-red-light text-white py-2 px-4 rounded-lg text-sm font-semibold transition"
         >
+          <ArrowRightOnRectangleIcon className="h-5 w-5" />
           Log out
         </button>
       </aside>
@@ -58,12 +76,28 @@ export default function AdminENPanelLayout({
       <div className="flex-1 flex flex-col">
         <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-br-smoke-light bg-br-smoke/90">
           <span className="text-sm font-semibold">Boy&apos;s Roofing · Admin</span>
-          <button
-            onClick={logout}
-            className="text-xs rounded-full bg-br-red-main px-3 py-1"
-          >
-            Log out
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/admin/en/create-invoice"
+              className="flex items-center gap-1.5 text-xs rounded-full border border-br-smoke-light px-3 py-1.5 hover:bg-br-carbon/60"
+            >
+              <DocumentPlusIcon className="h-4 w-4" />
+              Create invoice
+            </Link>
+            <Link
+              href="/admin/en/medir"
+              className="flex items-center gap-1.5 text-xs rounded-full border border-br-smoke-light px-3 py-1.5 hover:bg-br-carbon/60"
+            >
+              <MapPinIcon className="h-4 w-4" />
+              Measure
+            </Link>
+            <button
+              onClick={logout}
+              className="text-xs rounded-full bg-br-red-main px-3 py-1"
+            >
+              Log out
+            </button>
+          </div>
         </header>
 
         <main className="flex-1 p-4 md:p-8">{children}</main>

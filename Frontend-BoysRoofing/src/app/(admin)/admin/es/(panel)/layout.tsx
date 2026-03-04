@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { MapPinIcon, HomeIcon, DocumentTextIcon, DocumentPlusIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 
 export default function AdminESPanelLayout({
   children,
@@ -13,8 +14,10 @@ export default function AdminESPanelLayout({
 
   function logout() {
     localStorage.removeItem("br_admin_token");
-    document.cookie =
-      "br_admin_token=; Max-Age=0; path=/; SameSite=Lax; Secure=false;";
+
+    // Borrar cookie (Secure=false NO es válido en cookies)
+    document.cookie = "br_admin_token=; Max-Age=0; path=/; SameSite=Lax";
+
     router.push("/admin/es/login");
   }
 
@@ -30,27 +33,43 @@ export default function AdminESPanelLayout({
             Panel de administración · ES
           </p>
 
-          <nav className="space-y-3 text-sm">
+          <nav className="space-y-1 text-sm">
             <Link
               href="/admin/es/dashboard"
-              className="block rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
             >
+              <HomeIcon className="h-5 w-5 shrink-0" />
               Dashboard
             </Link>
-
             <Link
               href="/admin/es/quotes"
-              className="block rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
             >
+              <DocumentTextIcon className="h-5 w-5 shrink-0" />
               Cotizaciones
+            </Link>
+            <Link
+              href="/admin/es/crear-factura"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
+            >
+              <DocumentPlusIcon className="h-5 w-5 shrink-0" />
+              Crear factura
+            </Link>
+            <Link
+              href="/admin/es/medir"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
+            >
+              <MapPinIcon className="h-5 w-5 shrink-0" />
+              Medir
             </Link>
           </nav>
         </div>
 
         <button
           onClick={logout}
-          className="mt-6 w-full bg-br-red-main hover:bg-br-red-light text-white py-2 px-4 rounded-lg text-sm font-semibold transition"
+          className="mt-6 flex w-full items-center justify-center gap-2 bg-br-red-main hover:bg-br-red-light text-white py-2 px-4 rounded-lg text-sm font-semibold transition"
         >
+          <ArrowRightOnRectangleIcon className="h-5 w-5" />
           Cerrar sesión
         </button>
       </aside>
@@ -62,12 +81,29 @@ export default function AdminESPanelLayout({
             Boy&apos;s Roofing · Administrador
           </span>
 
-          <button
-            onClick={logout}
-            className="text-xs rounded-full bg-br-red-main px-3 py-1"
-          >
-            Cerrar sesión
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/admin/es/crear-factura"
+              className="flex items-center gap-1.5 text-xs rounded-full border border-br-smoke-light px-3 py-1.5 hover:bg-br-carbon/60"
+            >
+              <DocumentPlusIcon className="h-4 w-4" />
+              Crear factura
+            </Link>
+            <Link
+              href="/admin/es/medir"
+              className="flex items-center gap-1.5 text-xs rounded-full border border-br-smoke-light px-3 py-1.5 hover:bg-br-carbon/60"
+            >
+              <MapPinIcon className="h-4 w-4" />
+              Medir
+            </Link>
+
+            <button
+              onClick={logout}
+              className="text-xs rounded-full bg-br-red-main px-3 py-1"
+            >
+              Cerrar sesión
+            </button>
+          </div>
         </header>
 
         <main className="flex-1 p-4 md:p-8">{children}</main>

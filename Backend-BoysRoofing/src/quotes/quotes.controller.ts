@@ -8,6 +8,13 @@ import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 export class QuotesController {
   constructor(private readonly quotesService: QuotesService) { }
 
+  // Ruta específica primero para que no la pise ningún param
+  @UseGuards(JwtAuthGuard)
+  @Post('for-invoice')
+  createForInvoice(@Body() data: CreateQuoteDto) {
+    return this.quotesService.createForInvoice(data);
+  }
+
   @Post()
   create(@Body() data: CreateQuoteDto) {
     return this.quotesService.create(data);

@@ -22,6 +22,19 @@ export class QuotesService {
     return quote;
   }
 
+  /**
+   * Crea una cotización solo para vincular una factura (desde el panel admin).
+   * No envía el correo de "cotización recibida"; el envío será solo el de la factura.
+   */
+  async createForInvoice(data: CreateQuoteDto) {
+    return this.prisma.quote.create({
+      data: {
+        ...data,
+        status: 'PENDING',
+      },
+    });
+  }
+
   findAll() {
     return this.prisma.quote.findMany({
       orderBy: { createdAt: 'desc' },
