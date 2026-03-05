@@ -68,7 +68,7 @@ export default function PayrollBalancesEN() {
 
   if (loading && workers.length === 0) {
     return (
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <div className="h-8 w-48 rounded bg-br-smoke/60 animate-pulse" />
         <div className="mt-4 h-64 rounded bg-br-smoke/40 animate-pulse" />
       </div>
@@ -76,10 +76,10 @@ export default function PayrollBalancesEN() {
   }
 
   return (
-    <div className="space-y-6 p-6 text-white">
+    <div className="space-y-4 md:space-y-6 p-4 md:p-6 text-white">
       <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold text-br-pearl">Balances / Debts</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-br-pearl">Balances / Debts</h1>
           <p className="mt-1 text-sm text-br-white/60">
             Workers with non-zero balance. Positive = you owe them; negative = they owe you.
           </p>
@@ -92,7 +92,7 @@ export default function PayrollBalancesEN() {
         </Link>
       </header>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {(["all", "i_owe", "owe_me"] as const).map((f) => (
           <button
             key={f}
@@ -108,8 +108,74 @@ export default function PayrollBalancesEN() {
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-br-smoke-light">
-        <table className="w-full text-left text-sm">
+      {/* Mobile: cards */}
+      <div className="md:hidden space-y-3">
+        {workers.length === 0 ? (
+          <div className="rounded-xl border border-br-smoke-light bg-br-smoke/40 px-4 py-8 text-center text-br-white/60">
+            No workers with balance in this filter.
+          </div>
+        ) : (
+          workers.map((w) => (
+            <div
+              key={w.id}
+              className="rounded-xl border border-br-smoke-light bg-br-smoke/40 p-4"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-semibold text-br-pearl">{w.name}</p>
+                  <p className="text-sm text-br-white/60">{w.phone || "—"}</p>
+                </div>
+                <span className={`shrink-0 font-semibold ${w.balance > 0 ? "text-amber-400" : "text-green-400"}`}>
+                  ${Number(w.balance).toFixed(2)}
+                </span>
+              </div>
+              <div className="mt-3">
+                {adjustId === w.id ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={adjustValue}
+                      onChange={(e) => setAdjustValue(e.target.value)}
+                      className="w-28 rounded-lg border border-white/10 bg-br-carbon px-2 py-1.5 text-white text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => submitAdjust(w.id)}
+                      disabled={saving}
+                      className="rounded-lg bg-br-red-main px-3 py-1.5 text-sm disabled:opacity-50"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setAdjustId(null); setAdjustValue(""); }}
+                      className="rounded-lg border border-br-smoke-light px-3 py-1.5 text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAdjustId(w.id);
+                      setAdjustValue(String(w.balance));
+                    }}
+                    className="rounded-lg border border-br-red-main/50 text-br-red-main px-3 py-1.5 text-sm"
+                  >
+                    Adjust
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop: table */}
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-br-smoke-light">
+        <table className="w-full min-w-[400px] text-left text-sm">
           <thead className="bg-br-smoke/80">
             <tr>
               <th className="px-4 py-3 font-semibold">Name</th>
