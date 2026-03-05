@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { MapPinIcon, HomeIcon, DocumentTextIcon, DocumentPlusIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
+import { MapPinIcon, HomeIcon, DocumentTextIcon, DocumentPlusIcon, ArrowRightOnRectangleIcon, UserGroupIcon, BanknotesIcon } from "@heroicons/react/24/outline";
 
 export default function AdminENPanelLayout({
   children,
@@ -59,6 +59,26 @@ export default function AdminENPanelLayout({
             >
               <MapPinIcon className="h-5 w-5 shrink-0" />
               Measure
+            </Link>
+            <Link
+              href="/admin/en/payroll/workers"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
+            >
+              <UserGroupIcon className="h-5 w-5 shrink-0" />
+              Workers
+            </Link>
+            <Link
+              href="/admin/en/payroll"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
+            >
+              <BanknotesIcon className="h-5 w-5 shrink-0" />
+              Payroll
+            </Link>
+            <Link
+              href="/admin/en/payroll/balances"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-br-carbon/60 hover:text-br-red-main transition"
+            >
+              Balances
             </Link>
           </nav>
         </div>

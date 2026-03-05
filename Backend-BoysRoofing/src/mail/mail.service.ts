@@ -82,15 +82,25 @@ export class MailService {
       await this.resend.emails.send({
         from: this.from,
         to, // ✅ to es string garantizado
-        subject: `Invoice #${invoice.invoiceNumber} - Boys Roofing`,
+        subject: `Your roofing estimate is ready – Invoice #${invoice.invoiceNumber}`,
         html: `
-          <h2>Your roofing estimate is ready</h2>
-          <p>Hi ${quote.name},</p>
-          <p>Attached you will find the invoice for your roofing project.</p>
-          <p><strong>Invoice #:</strong> ${invoice.invoiceNumber}</p>
-          <p><strong>Total:</strong> $${Number(invoice.total).toFixed(2)}</p>
-          <br />
-          <small>Message sent automatically by Boys Roofing Website.</small>
+          <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; color: #333;">
+            <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); padding: 24px 28px; border-radius: 12px 12px 0 0;">
+              <h1 style="margin: 0; color: #fff; font-size: 22px; font-weight: 700;">Boys Roofing</h1>
+              <p style="margin: 6px 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">Your estimate is ready</p>
+            </div>
+            <div style="padding: 28px; background: #fff; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
+              <p style="margin: 0 0 16px; font-size: 16px;">Hi ${quote.name},</p>
+              <p style="margin: 0 0 20px; font-size: 15px; line-height: 1.5;">Great news — your roofing estimate is ready. You’ll find the invoice attached to this email with all the details of your project.</p>
+              <div style="background: #f8fafc; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px;">
+                <p style="margin: 0 0 8px; font-size: 14px;"><strong>Invoice #</strong> ${invoice.invoiceNumber}</p>
+                <p style="margin: 0; font-size: 18px; font-weight: 700; color: #1e3a5f;">Total: $${Number(invoice.total).toFixed(2)}</p>
+              </div>
+              <p style="margin: 0 0 20px; font-size: 15px;">Visit our website to learn more about our services, read reviews, and get in touch with us.</p>
+              <a href="https://www.boysroofing.company/en" style="display: inline-block; background: #1e3a5f; color: #fff !important; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 15px;">Visit Boys Roofing</a>
+              <p style="margin: 24px 0 0; font-size: 12px; color: #6b7280;">Message sent automatically by Boys Roofing.</p>
+            </div>
+          </div>
         `,
         attachments: [
           {
