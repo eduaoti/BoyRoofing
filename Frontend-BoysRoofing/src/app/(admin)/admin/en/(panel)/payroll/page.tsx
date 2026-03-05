@@ -55,7 +55,7 @@ export default function PayrollEN() {
         startDate,
         endDate,
         label: label.trim() || undefined,
-      },
+      }),
     })
       .then((r) => {
         if (!r.ok) return r.text().then((t) => Promise.reject(new Error(t)));
