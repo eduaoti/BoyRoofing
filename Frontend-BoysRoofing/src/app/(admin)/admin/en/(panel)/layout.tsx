@@ -1,9 +1,10 @@
 // app/admin/en/(panel)/layout.tsx
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { MapPinIcon, HomeIcon, DocumentTextIcon, DocumentPlusIcon, ArrowRightOnRectangleIcon, UserGroupIcon, BanknotesIcon } from "@heroicons/react/24/outline";
+import { MapPinIcon, HomeIcon, DocumentTextIcon, DocumentPlusIcon, ArrowRightOnRectangleIcon, UserGroupIcon, BanknotesIcon, Bars3Icon, XMarkIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
 
 export default function AdminENPanelLayout({
   children,
@@ -11,12 +12,17 @@ export default function AdminENPanelLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   function logout() {
     localStorage.removeItem("br_admin_token");
-    document.cookie =
-      "br_admin_token=; Max-Age=0; path=/; SameSite=Lax; Secure=false;";
+    document.cookie = "br_admin_token=; Max-Age=0; path=/; SameSite=Lax; Secure=false;";
+    setMobileMenuOpen(false);
     router.push("/admin/en/login");
+  }
+
+  function closeMenu() {
+    setMobileMenuOpen(false);
   }
 
   return (
@@ -92,33 +98,80 @@ export default function AdminENPanelLayout({
         </button>
       </aside>
 
-      {/* MOBILE TOPBAR + CONTENT */}
+      {/* MOBILE: navbar + hamburger menu */}
       <div className="flex-1 flex flex-col">
-        <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-br-smoke-light bg-br-smoke/90">
-          <span className="text-sm font-semibold">Boy&apos;s Roofing · Admin</span>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/admin/en/create-invoice"
-              className="flex items-center gap-1.5 text-xs rounded-full border border-br-smoke-light px-3 py-1.5 hover:bg-br-carbon/60"
-            >
-              <DocumentPlusIcon className="h-4 w-4" />
-              Create invoice
-            </Link>
-            <Link
-              href="/admin/en/medir"
-              className="flex items-center gap-1.5 text-xs rounded-full border border-br-smoke-light px-3 py-1.5 hover:bg-br-carbon/60"
-            >
-              <MapPinIcon className="h-4 w-4" />
-              Measure
-            </Link>
-            <button
-              onClick={logout}
-              className="text-xs rounded-full bg-br-red-main px-3 py-1"
-            >
-              Log out
-            </button>
-          </div>
+        <header className="md:hidden sticky top-0 z-40 flex items-center justify-between px-4 py-3 border-b border-br-smoke-light bg-br-smoke/95 backdrop-blur">
+          <span className="text-sm font-semibold text-br-pearl truncate">
+            Boy&apos;s Roofing
+          </span>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 rounded-lg text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition"
+            aria-label="Open menu"
+          >
+            <Bars3Icon className="h-6 w-6" />
+          </button>
         </header>
+
+        {/* Overlay + mobile menu panel */}
+        {mobileMenuOpen && (
+          <>
+            <div
+              className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+              onClick={closeMenu}
+              aria-hidden="true"
+            />
+            <nav
+              className="md:hidden fixed top-0 right-0 z-50 h-full w-[min(100%,280px)] flex flex-col bg-br-smoke border-l border-br-smoke-light shadow-2xl"
+              aria-label="Main menu"
+            >
+              <div className="flex items-center justify-between px-4 py-4 border-b border-br-smoke-light">
+                <h2 className="text-lg font-bold text-br-red-main">Menu</h2>
+                <button
+                  type="button"
+                  onClick={closeMenu}
+                  className="p-2 rounded-lg text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition"
+                  aria-label="Close menu"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+                <Link href="/admin/en/dashboard" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
+                  <HomeIcon className="h-5 w-5 shrink-0" /> Dashboard
+                </Link>
+                <Link href="/admin/en/quotes" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
+                  <DocumentTextIcon className="h-5 w-5 shrink-0" /> Quotes
+                </Link>
+                <Link href="/admin/en/create-invoice" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
+                  <DocumentPlusIcon className="h-5 w-5 shrink-0" /> Create invoice
+                </Link>
+                <Link href="/admin/en/medir" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
+                  <MapPinIcon className="h-5 w-5 shrink-0" /> Measure
+                </Link>
+                <Link href="/admin/en/payroll/workers" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
+                  <UserGroupIcon className="h-5 w-5 shrink-0" /> Workers
+                </Link>
+                <Link href="/admin/en/payroll" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
+                  <BanknotesIcon className="h-5 w-5 shrink-0" /> Payroll
+                </Link>
+                <Link href="/admin/en/payroll/balances" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
+                  <CurrencyDollarIcon className="h-5 w-5 shrink-0" /> Balances
+                </Link>
+              </div>
+              <div className="p-3 border-t border-br-smoke-light">
+                <button
+                  onClick={logout}
+                  className="flex w-full items-center justify-center gap-2 bg-br-red-main hover:bg-br-red-light text-white py-2.5 px-4 rounded-lg text-sm font-semibold transition"
+                >
+                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                  Log out
+                </button>
+              </div>
+            </nav>
+          </>
+        )}
 
         <main className="flex-1 p-4 md:p-8">{children}</main>
       </div>
