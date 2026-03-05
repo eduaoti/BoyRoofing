@@ -7,7 +7,9 @@ import { QuotesModule } from './quotes/quotes.module';
 import { MailModule } from './mail/mail.module';
 import { AuthModule } from './auth/auth.module';
 import { InvoicesModule } from './invoices/invoices.module';
-import { ReviewsModule } from './Reviews/reviews.module'; // 👈 AQUI
+import { ReviewsModule } from './Reviews/reviews.module';
+import { WorkersModule } from './workers/workers.module';
+import { PayrollModule } from './payroll/payroll.module';
 import { PrismaService } from './prisma.service';
 
 @Module({
@@ -16,7 +18,9 @@ import { PrismaService } from './prisma.service';
     MailModule,
     AuthModule,
     InvoicesModule,
-    ReviewsModule, // 👈 Y AQUI
+    ReviewsModule,
+    WorkersModule,
+    PayrollModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

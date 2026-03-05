@@ -79,3 +79,94 @@ model Review {
   message   String
   createdAt DateTime @default(now())
 }
+
+// --------------- NÓMINA ---------------
+
+model Worker {
+  id              Int      @id @default(autoincrement())
+  name            String
+  phone           String?
+  role            String?
+  defaultDayRate  Float    @default(0)
+  isActive        Boolean  @default(true)
+  balance         Float    @default(0)   // saldo acumulado (positivo = yo le debo, negativo = me debe)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  payrollEntries  PayrollEntry[]
+}
+
+enum PayrollPeriodStatus {
+  DRAFT
+  PAID
+  CLOSED
+}
+
+model PayrollPeriod {
+  id          Int                 @id @default(autoincrement())
+  startDate   DateTime
+  endDate     DateTime
+  label       String?
+  status      PayrollPeriodStatus  @default(DRAFT)
+  totalPaid   Float?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  entries     PayrollEntry[]
+}
+
+enum WorkerType {
+  REGULAR
+  OCCASIONAL
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
+}
+
+model PayrollEntry {
+  id             Int            @id @default(autoincrement())
+  payrollPeriodId Int
+  payrollPeriod  PayrollPeriod  @relation(fields: [payrollPeriodId], references: [id], onDelete: Cascade)
+  workerType     WorkerType
+  workerId       Int?
+  worker         Worker?        @relation(fields: [workerId], references: [id], onDelete: SetNull)
+  workerName     String?        // para ocasionales o display
+
+  fullDays       Int            @default(0)
+  halfDays       Int            @default(0)
+  dayRate        Float
+  halfDayRate    Float
+  bonuses        Float          @default(0)
+  deductions     Float          @default(0)
+  notes          String?
+
+  total          Float          @default(0)
+  prevBalance    Float          @default(0)
+  amountPaid     Float          @default(0)
+  balanceAfter   Float          @default(0)
+  paymentStatus  PaymentStatus  @default(UNPAID)
+  paidAt         DateTime?
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  workDays       WorkDay[]
+}
+
+enum WorkDayType {
+  FULL
+  HALF
+  OFF
+}
+
+model WorkDay {
+  id              Int         @id @default(autoincrement())
+  payrollEntryId  Int
+  payrollEntry    PayrollEntry @relation(fields: [payrollEntryId], references: [id], onDelete: Cascade)
+  date            DateTime
+  type            WorkDayType  @default(OFF)
+  createdAt       DateTime    @default(now())
+}

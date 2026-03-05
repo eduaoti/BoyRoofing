@@ -72,7 +72,7 @@ export class InvoicesService {
   }
 
   /**
-   * Genera el PDF del invoice con diseño similar al formato físico.
+   * Genera el PDF del invoice con diseño profesional (marco, cabecera, bloques).
    */
   private generateInvoicePdf(quote: any, invoice: any): Promise<Buffer> {
     return new Promise((resolve, reject) => {
@@ -86,291 +86,264 @@ export class InvoicesService {
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', (err) => reject(err));
 
+      const pageWidth = 612;
+      const margin = 40;
+      const contentWidth = pageWidth - margin * 2;
+      const leftX = margin;
+      const rightEdge = pageWidth - margin;
+      const brandBlue = '#1e3a5f';
+      const brandBlueLight = '#2d5a87';
+      const grayBg = '#f5f7fa';
+      const grayBorder = '#e0e4e9';
+      const grayText = '#4a5568';
+      const darkText = '#1a202c';
+
       // ==========================
-      // ENCABEZADO / LOGO
+      // MARCO EXTERIOR
       // ==========================
-      const logoPath = 'src/assets/boys-roofing-logo.png';
-
-      // Título centrado (BOY'S ROOFING)
+      const frameInset = 8;
       doc
-        .fontSize(22)
-        .fillColor('#111111')
-        .text("BOY'S ROOFING", 40, 40, { align: 'center' });
-
-      // Teléfono y correo (centrados debajo)
-      doc
-        .moveDown(0.2)
-        .fontSize(10)
-        .fillColor('#444444')
-        .text('409-868-8853', 40, doc.y, { align: 'center' })
-        .text('services@boysroofing.company', 40, doc.y, { align: 'center' });
-
-      // Logo a la derecha (más arriba y un poco más chico)
-      try {
-        if (fs.existsSync(logoPath)) {
-          doc.image(logoPath, 430, 5, {
-            width: 90,
-            height: 90,
-          });
-        } else {
-          console.warn('Logo not found at', logoPath);
-        }
-      } catch (e) {
-        console.warn('Error loading logo image:', e);
-      }
-
-      // Línea separadora debajo del encabezado
-      const headerBottomY = 120;
-      doc
-        .moveTo(40, headerBottomY)
-        .lineTo(575, headerBottomY)
-        .lineWidth(1)
-        .strokeColor('#DDDDDD')
+        .lineWidth(1.5)
+        .strokeColor(brandBlue)
+        .rect(frameInset, frameInset, pageWidth - frameInset * 2, 792 - frameInset * 2)
         .stroke();
 
-      doc.moveDown(2);
+      // ==========================
+      // CABECERA CON FONDO (barra azul)
+      // ==========================
+      const headerH = 72;
+      const headerTop = margin;
+      doc
+        .fillColor(brandBlue)
+        .rect(leftX, headerTop, contentWidth, headerH)
+        .fill();
+
+      // Logo a la derecha (sobre la barra o al lado)
+      const logoPath = 'src/assets/boys-roofing-logo.png';
+      try {
+        if (fs.existsSync(logoPath)) {
+          doc.image(logoPath, rightEdge - 72, headerTop + 6, {
+            width: 60,
+            height: 60,
+          });
+        }
+      } catch {
+        // sin logo si falla
+      }
+
+      // Título y contacto en blanco sobre la barra
+      doc
+        .fontSize(20)
+        .fillColor('#ffffff')
+        .text("BOY'S ROOFING", leftX, headerTop + 14, {
+          width: contentWidth - 80,
+          align: 'center',
+        });
+      doc
+        .fontSize(9)
+        .fillColor('#e8eef4')
+        .text('409-868-8853  •  services@boysroofing.company', leftX, headerTop + 42, {
+          width: contentWidth - 80,
+          align: 'center',
+        });
+
+      const headerBottomY = headerTop + headerH;
+      doc.y = headerBottomY + 18;
 
       // ==========================
-      // INFORMACIÓN PRINCIPAL
+      // INFORMACIÓN PRINCIPAL (bloques con fondo)
       // ==========================
-      const leftX = 40;
       const rightX = 320;
+      const blockY = headerBottomY + 18;
+      const billToW = 260;
+      const billToH = 72;
+      const invoiceBoxW = 220;
+      const invoiceBoxH = 58;
 
-      // Posicionamos el cursor un poco abajo de la línea
-      doc.y = headerBottomY + 15;
-
-      // Bill To (similar a la hoja física)
+      // Fondo bloque "Bill to"
       doc
-        .fontSize(11)
-        .fillColor('#111111')
-        .text('Bill to:', leftX, doc.y);
-
+        .fillColor(grayBg)
+        .rect(leftX, blockY, billToW, billToH)
+        .fill();
       doc
-        .moveDown(0.4)
-        .fontSize(10)
-        .fillColor('#333333')
-        .text(invoice.billTo || quote.name, { align: 'left' })
-        .text(invoice.address, { align: 'left' })
-        .text(`${invoice.city}, ${invoice.state} ${invoice.zip}`, {
-          align: 'left',
-        })
-        .moveDown(0.3)
-        .text(`Phone: ${invoice.phone}`, { align: 'left' });
-
-      // Guardar Y actual para usarla de referencia
-      const afterBillToY = doc.y;
-
-      // Phone / Invoice # / Date a la derecha
-      doc.y = headerBottomY + 15;
-
-      doc.fontSize(11).fillColor('#111111').text('Phone:', rightX, doc.y);
+        .lineWidth(0.5)
+        .strokeColor(grayBorder)
+        .rect(leftX, blockY, billToW, billToH)
+        .stroke();
 
       doc
         .fontSize(10)
-        .fillColor('#333333')
-        .text(String(invoice.phone || ''), rightX + 50, doc.y);
-
-      doc.moveDown(0.6);
-      doc
-        .fontSize(11)
-        .fillColor('#111111')
-        .text('Invoice #:', rightX, doc.y);
-
+        .fillColor(brandBlue)
+        .text('Bill to', leftX + 12, blockY + 10);
       doc
         .fontSize(10)
-        .fillColor('#333333')
-        .text(String(invoice.invoiceNumber || ''), rightX + 70, doc.y);
+        .fillColor(darkText)
+        .text(invoice.billTo || quote.name, leftX + 12, blockY + 24)
+        .text(invoice.address || '', leftX + 12, blockY + 38)
+        .text(`${invoice.city || ''}, ${invoice.state || ''} ${invoice.zip || ''}`, leftX + 12, blockY + 52)
+        .text(`Phone: ${invoice.phone || ''}`, leftX + 12, blockY + 66);
 
-      doc.moveDown(0.6);
+      // Fondo bloque Invoice # / Date (derecha)
       doc
-        .fontSize(11)
-        .fillColor('#111111')
-        .text('Invoice Date:', rightX, doc.y);
+        .fillColor(grayBg)
+        .rect(rightEdge - invoiceBoxW, blockY, invoiceBoxW, invoiceBoxH)
+        .fill();
+      doc
+        .strokeColor(grayBorder)
+        .rect(rightEdge - invoiceBoxW, blockY, invoiceBoxW, invoiceBoxH)
+        .stroke();
 
+      doc.fontSize(10).fillColor(brandBlue).text('Invoice #', rightEdge - invoiceBoxW + 12, blockY + 10);
+      doc.fontSize(10).fillColor(darkText).text(String(invoice.invoiceNumber || ''), rightEdge - invoiceBoxW + 75, blockY + 10);
+      doc.fontSize(10).fillColor(brandBlue).text('Date', rightEdge - invoiceBoxW + 12, blockY + 28);
       doc
         .fontSize(10)
-        .fillColor('#333333')
+        .fillColor(darkText)
         .text(
           invoice.invoiceDate instanceof Date
             ? invoice.invoiceDate.toLocaleDateString()
             : new Date(invoice.invoiceDate).toLocaleDateString(),
-          rightX + 80,
-          doc.y,
+          rightEdge - invoiceBoxW + 75,
+          blockY + 28,
         );
+      doc.fontSize(10).fillColor(brandBlue).text('Phone', rightEdge - invoiceBoxW + 12, blockY + 46);
+      doc.fontSize(10).fillColor(darkText).text(String(invoice.phone || ''), rightEdge - invoiceBoxW + 75, blockY + 46);
 
-      // Continuar después del bloque de la izquierda
-      doc.y = Math.max(afterBillToY + 10, doc.y + 20);
+      doc.y = blockY + Math.max(billToH, invoiceBoxH) + 20;
 
-      // Property location (como en el formato)
+      // Property location (título con línea)
       doc
         .fontSize(10)
-        .fillColor('#111111')
-        .text('Property location / roofing invoice:', leftX, doc.y);
-
+        .fillColor(brandBlue)
+        .text('Property location / roofing invoice', leftX, doc.y);
+      doc.y += 14;
       doc
-        .moveDown(0.3)
+        .fillColor(grayBg)
+        .rect(leftX, doc.y, contentWidth, 28)
+        .fill();
+      doc.strokeColor(grayBorder).rect(leftX, doc.y, contentWidth, 28).stroke();
+      doc
         .fontSize(10)
-        .fillColor('#333333')
-        .text(invoice.propertyLocation || quote.propertyLocation || '');
-
-      doc.moveDown(0.8);
-
-      // Línea separadora antes de la tabla de descripción/precios
-      doc
-        .moveTo(40, doc.y)
-        .lineTo(575, doc.y)
-        .lineWidth(1)
-        .strokeColor('#DDDDDD')
-        .stroke();
-
-      doc.moveDown(0.8);
+        .fillColor(grayText)
+        .text(invoice.propertyLocation || quote.propertyLocation || '—', leftX + 10, doc.y + 8, {
+          width: contentWidth - 20,
+        });
+      doc.y += 36;
 
       // ==========================
-      // DESCRIPCIÓN Y PRECIO (tabla)
-      // ✅ FIX: evitar que el texto de descripción se encime con totales
+      // TABLA DESCRIPCIÓN / PRECIO (cabecera con color)
       // ==========================
       const tableStartY = doc.y;
+      const colDateW = 70;
+      const colDescX = leftX + colDateW + 10;
+      const colDescW = 350;
+      const colPriceX = rightEdge - 75;
 
-      doc.fontSize(10).fillColor('#111111').text('Date', leftX, tableStartY);
-      doc.text('Description', leftX + 80, tableStartY);
-      doc.text('Price', 500, tableStartY, { width: 70, align: 'right' });
-
-      // Línea debajo de las cabeceras
       doc
-        .moveTo(40, tableStartY + 14)
-        .lineTo(575, tableStartY + 14)
-        .lineWidth(0.8)
-        .strokeColor('#CCCCCC')
+        .fillColor(brandBlue)
+        .rect(leftX, tableStartY, contentWidth, 22)
+        .fill();
+      doc
+        .fontSize(9)
+        .fillColor('#ffffff')
+        .text('Date', leftX + 8, tableStartY + 6);
+      doc.text('Description', colDescX, tableStartY + 6);
+      doc.text('Price', colPriceX, tableStartY + 6, { width: 70, align: 'right' });
+      doc
+        .lineWidth(0.5)
+        .strokeColor(grayBorder)
+        .rect(leftX, tableStartY, contentWidth, 22)
         .stroke();
 
-      doc.moveDown(1);
+      const rowY = tableStartY + 28;
 
-      const rowY = doc.y;
-
-      // Date
       const invoiceDateStr =
         invoice.invoiceDate instanceof Date
           ? invoice.invoiceDate.toLocaleDateString()
           : new Date(invoice.invoiceDate).toLocaleDateString();
 
-      doc.fontSize(10).fillColor('#333333').text(invoiceDateStr, leftX, rowY);
-
-      // Description (texto largo) -> capturar hasta dónde baja
+      doc.fontSize(10).fillColor(darkText).text(invoiceDateStr, leftX + 8, rowY);
       doc
         .fontSize(10)
-        .fillColor('#333333')
-        .text(invoice.description || '', leftX + 80, rowY, {
-          width: 360, // 👈 deja espacio para que no choque con la columna "Price"
-        });
-
-      const descBottomY = doc.y; // ✅ aquí ya está el final REAL de la descripción
-
-      // Price (NO debe mover doc.y por encima del final de la descripción)
+        .fillColor(grayText)
+        .text(invoice.description || '', colDescX, rowY, { width: colDescW });
+      const descBottomY = doc.y;
       doc
         .fontSize(10)
-        .fillColor('#333333')
-        .text(`$${Number(invoice.price).toFixed(2)}`, 500, rowY, {
+        .fillColor(darkText)
+        .text(`$${Number(invoice.price).toFixed(2)}`, colPriceX, rowY, {
           width: 70,
           align: 'right',
         });
-
-      // ✅ Importantísimo: regresar el cursor abajo del texto más largo
-      doc.y = descBottomY + 12;
+      doc.y = descBottomY + 14;
 
       // ==========================
       // SUBTOTAL / OTHER / TOTAL
       // ==========================
-      const totalsX = 380;
+      const totalsX = rightEdge - 200;
       let yTotals = doc.y;
 
       doc
         .moveTo(totalsX, yTotals)
-        .lineTo(575, yTotals)
-        .lineWidth(0.8)
-        .strokeColor('#CCCCCC')
+        .lineTo(rightEdge, yTotals)
+        .lineWidth(0.5)
+        .strokeColor(grayBorder)
         .stroke();
-
-      yTotals += 6;
-
-      doc.fontSize(10).fillColor('#333333').text('Subtotal', totalsX, yTotals);
-
-      doc.text(`$${Number(invoice.subtotal).toFixed(2)}`, 500, yTotals, {
-        width: 70,
-        align: 'right',
-      });
-
+      yTotals += 8;
+      doc.fontSize(10).fillColor(grayText).text('Subtotal', totalsX, yTotals);
+      doc.text(`$${Number(invoice.subtotal).toFixed(2)}`, colPriceX, yTotals, { width: 70, align: 'right' });
       yTotals += 14;
-      doc.fontSize(10).fillColor('#333333').text('Other', totalsX, yTotals);
-
-      doc.text(`$${Number(invoice.other ?? 0).toFixed(2)}`, 500, yTotals, {
-        width: 70,
-        align: 'right',
-      });
-
+      doc.fontSize(10).fillColor(grayText).text('Other', totalsX, yTotals);
+      doc.text(`$${Number(invoice.other ?? 0).toFixed(2)}`, colPriceX, yTotals, { width: 70, align: 'right' });
       yTotals += 18;
-
       doc
         .moveTo(totalsX, yTotals)
-        .lineTo(575, yTotals)
-        .lineWidth(0.8)
-        .strokeColor('#CCCCCC')
+        .lineTo(rightEdge, yTotals)
+        .strokeColor(grayBorder)
         .stroke();
-
-      yTotals += 6;
-
-      doc.fontSize(11).fillColor('#111111').text('Total', totalsX, yTotals);
-
-      doc.text(`$${Number(invoice.total).toFixed(2)}`, 500, yTotals, {
-        width: 70,
-        align: 'right',
-      });
-
-      // Alinear doc.y al final del bloque de totales
-      doc.y = yTotals + 20;
-
-      doc.moveDown(2);
+      yTotals += 8;
+      doc.fontSize(12).fillColor(brandBlue).text('Total', totalsX, yTotals);
+      doc.fontSize(12).fillColor(darkText).text(`$${Number(invoice.total).toFixed(2)}`, colPriceX, yTotals, { width: 70, align: 'right' });
+      doc.y = yTotals + 24;
 
       // ==========================
       // FIRMA
       // ==========================
       const signatureLabelY = doc.y;
+      doc.fontSize(10).fillColor(brandBlue).text('Signed:', leftX, signatureLabelY);
+      const signatureLineY = signatureLabelY + 16;
       doc
-        .fontSize(10)
-        .fillColor('#333333')
-        .text('Signed:', leftX, signatureLabelY);
-
-      const signatureLineY = signatureLabelY + 15;
-      doc
-        .moveTo(leftX + 50, signatureLineY)
-        .lineTo(300, signatureLineY)
+        .moveTo(leftX + 45, signatureLineY)
+        .lineTo(280, signatureLineY)
         .lineWidth(1)
-        .strokeColor('#444444')
+        .strokeColor(grayBorder)
         .stroke();
 
-      doc.moveDown(4);
+      doc.y = signatureLineY + 24;
 
       // ==========================
-      // FOOTER
+      // FOOTER (con línea superior)
       // ==========================
       doc
-        .fontSize(9)
-        .fillColor('#444444')
-        .text("Make checks payable to Boy's Roofing", 40, doc.y, {
-          align: 'left',
+        .moveTo(leftX, doc.y)
+        .lineTo(rightEdge, doc.y)
+        .lineWidth(0.5)
+        .strokeColor(grayBorder)
+        .stroke();
+      doc.y += 14;
+      doc.fontSize(9).fillColor(grayText).text("Make checks payable to Boy's Roofing", leftX, doc.y);
+      doc.y += 14;
+      doc.fontSize(9).fillColor(grayText).text('Paid Check: ___________________', leftX, doc.y);
+      doc.y += 12;
+      doc.text('Paid cash: ___________________', leftX, doc.y);
+
+      doc
+        .fontSize(10)
+        .fillColor(brandBlue)
+        .text('Thank you for your business!', leftX, 718, {
+          width: contentWidth,
+          align: 'center',
         });
-
-      doc.moveDown(2);
-
-      doc.fontSize(9).fillColor('#444444').text('Paid Check: ___________________', 40, doc.y);
-
-      doc.moveDown(0.8);
-      doc.text('Paid cash: ___________________', 40, doc.y);
-
-      // Mensaje final centrado
-      doc
-        .fontSize(9)
-        .fillColor('#777777')
-        .text('Thank you for your business!!', 40, 720, { align: 'center' });
 
       doc.end();
     });
