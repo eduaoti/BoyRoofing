@@ -91,9 +91,8 @@ export class InvoicesService {
       const contentWidth = pageWidth - margin * 2;
       const leftX = margin;
       const rightEdge = pageWidth - margin;
-      const brandDark = '#2a2a2a';
-      const brandDarkSoft = '#3a3a3a';
-      const accentRed = '#5c3a3a'; /* rojo muy suave, desaturado */
+      const brandDark = '#161A1D';
+      const brandRed = '#BA181B';
       const grayBg = '#f2f2f2';
       const grayBorder = '#e0e0e0';
       const grayText = '#4a4a4a';
@@ -101,7 +100,7 @@ export class InvoicesService {
       const radius = 10;
 
       // ==========================
-      // MARCO EXTERIOR (redondeado)
+      // MARCO EXTERIOR (color de la página: carbon/smoke)
       // ==========================
       const frameInset = 8;
       doc
@@ -111,7 +110,7 @@ export class InvoicesService {
         .stroke();
 
       // ==========================
-      // CABECERA (gris oscuro, esquinas superiores redondeadas)
+      // CABECERA (mismo oscuro que la web: br-smoke)
       // ==========================
       const headerH = 72;
       const headerTop = margin;
@@ -120,14 +119,23 @@ export class InvoicesService {
         .roundedRect(leftX, headerTop, contentWidth, headerH, radius)
         .fill();
 
-      // Logo a la derecha (sobre la barra o al lado)
+      // Logo sobre fondo claro para que se distinga en cabecera oscura
       const logoPath = 'src/assets/boys-roofing-logo.png';
+      const logoX = rightEdge - 72;
+      const logoY = headerTop + 6;
+      const logoSize = 60;
       try {
         if (fs.existsSync(logoPath)) {
-          doc.image(logoPath, rightEdge - 72, headerTop + 6, {
-            width: 60,
-            height: 60,
-          });
+          doc
+            .fillColor('#ffffff')
+            .circle(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2 + 2)
+            .fill();
+          doc
+            .lineWidth(0.5)
+            .strokeColor(grayBorder)
+            .circle(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2 + 2)
+            .stroke();
+          doc.image(logoPath, logoX, logoY, { width: logoSize, height: logoSize });
         }
       } catch {
         // sin logo si falla
@@ -158,11 +166,11 @@ export class InvoicesService {
       const rightX = 320;
       const blockY = headerBottomY + 18;
       const billToW = 260;
-      const billToH = 72;
+      const billToH = 88;
       const invoiceBoxW = 220;
       const invoiceBoxH = 58;
 
-      // Fondo bloque "Bill to" (redondeado)
+      // Fondo bloque "Bill to" (redondeado, altura suficiente para que no se corte el teléfono)
       doc
         .fillColor(grayBg)
         .roundedRect(leftX, blockY, billToW, billToH, 6)
@@ -180,10 +188,10 @@ export class InvoicesService {
       doc
         .fontSize(10)
         .fillColor(darkText)
-        .text(invoice.billTo || quote.name, leftX + 12, blockY + 24)
-        .text(invoice.address || '', leftX + 12, blockY + 38)
-        .text(`${invoice.city || ''}, ${invoice.state || ''} ${invoice.zip || ''}`, leftX + 12, blockY + 52)
-        .text(`Phone: ${invoice.phone || ''}`, leftX + 12, blockY + 66);
+        .text(invoice.billTo || quote.name, leftX + 12, blockY + 24, { width: billToW - 24 })
+        .text(invoice.address || '', leftX + 12, blockY + 38, { width: billToW - 24 })
+        .text(`${invoice.city || ''}, ${invoice.state || ''} ${invoice.zip || ''}`.trim(), leftX + 12, blockY + 52, { width: billToW - 24 });
+      doc.text(`Phone: ${invoice.phone || ''}`, leftX + 12, blockY + 66, { width: billToW - 24 });
 
       // Fondo bloque Invoice # / Date (derecha, redondeado)
       doc
@@ -219,18 +227,22 @@ export class InvoicesService {
         .fillColor(brandDark)
         .text('Property location / roofing invoice', leftX, doc.y);
       doc.y += 14;
+      const propBoxH = 32;
       doc
         .fillColor(grayBg)
-        .roundedRect(leftX, doc.y, contentWidth, 28, 6)
+        .roundedRect(leftX, doc.y, contentWidth, propBoxH, 6)
         .fill();
-      doc.strokeColor(grayBorder).roundedRect(leftX, doc.y, contentWidth, 28, 6).stroke();
+      doc.strokeColor(grayBorder).roundedRect(leftX, doc.y, contentWidth, propBoxH, 6).stroke();
+      const propText = (invoice.propertyLocation || quote.propertyLocation || '—').slice(0, 200);
       doc
-        .fontSize(10)
+        .fontSize(9)
         .fillColor(grayText)
-        .text(invoice.propertyLocation || quote.propertyLocation || '—', leftX + 10, doc.y + 8, {
+        .text(propText + (propText.length >= 200 ? '…' : ''), leftX + 10, doc.y + 8, {
           width: contentWidth - 20,
+          height: propBoxH - 12,
+          ellipsis: true,
         });
-      doc.y += 36;
+      doc.y += propBoxH + 8;
 
       // ==========================
       // TABLA DESCRIPCIÓN / PRECIO (cabecera con color)
@@ -265,11 +277,11 @@ export class InvoicesService {
           : new Date(invoice.invoiceDate).toLocaleDateString();
 
       doc.fontSize(10).fillColor(darkText).text(invoiceDateStr, leftX + 8, rowY);
+      const descText = (invoice.description || '').slice(0, 280);
       doc
-        .fontSize(10)
+        .fontSize(9)
         .fillColor(grayText)
-        .text(invoice.description || '', colDescX, rowY, { width: colDescW });
-      const descBottomY = doc.y;
+        .text(descText + (descText.length >= 280 ? '…' : ''), colDescX, rowY, { width: colDescW, height: 22, ellipsis: true });
       doc
         .fontSize(10)
         .fillColor(darkText)
@@ -277,7 +289,7 @@ export class InvoicesService {
           width: 70,
           align: 'right',
         });
-      doc.y = descBottomY + 14;
+      doc.y = rowY + 22;
 
       // ==========================
       // SUBTOTAL / OTHER / TOTAL
@@ -304,7 +316,7 @@ export class InvoicesService {
         .strokeColor(grayBorder)
         .stroke();
       yTotals += 8;
-      doc.fontSize(12).fillColor(accentRed).text('Total', totalsX, yTotals);
+      doc.fontSize(12).fillColor(brandRed).text('Total', totalsX, yTotals);
       doc.fontSize(12).fillColor(darkText).text(`$${Number(invoice.total).toFixed(2)}`, colPriceX, yTotals, { width: 70, align: 'right' });
       doc.y = yTotals + 24;
 
@@ -341,7 +353,7 @@ export class InvoicesService {
 
       doc
         .fontSize(10)
-        .fillColor(accentRed)
+        .fillColor(brandRed)
         .text('Thank you for your business!', leftX, 718, {
           width: contentWidth,
           align: 'center',

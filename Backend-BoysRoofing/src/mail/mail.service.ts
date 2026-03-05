@@ -85,7 +85,7 @@ export class MailService {
         subject: `Your roofing estimate is ready – Invoice #${invoice.invoiceNumber}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; color: #333;">
-            <div style="background: #3d2a2a; padding: 24px 28px; border-radius: 12px 12px 0 0;">
+            <div style="background: #161A1D; padding: 24px 28px; border-radius: 12px 12px 0 0;">
               <h1 style="margin: 0; color: #fff; font-size: 22px; font-weight: 700;">Boys Roofing</h1>
               <p style="margin: 6px 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">Your estimate is ready</p>
             </div>
@@ -94,10 +94,10 @@ export class MailService {
               <p style="margin: 0 0 20px; font-size: 15px; line-height: 1.5;">Great news — your roofing estimate is ready. You’ll find the invoice attached to this email with all the details of your project.</p>
               <div style="background: #ebebeb; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; border: 1px solid #e0e0e0;">
                 <p style="margin: 0 0 8px; font-size: 14px; color: #4a4a4a;"><strong>Invoice #</strong> ${invoice.invoiceNumber}</p>
-                <p style="margin: 0; font-size: 18px; font-weight: 700; color: #5c3a3a;">Total: $${Number(invoice.total).toFixed(2)}</p>
+                <p style="margin: 0; font-size: 18px; font-weight: 700; color: #BA181B;">Total: $${Number(invoice.total).toFixed(2)}</p>
               </div>
               <p style="margin: 0 0 20px; font-size: 15px;">Visit our website to learn more about our services, read reviews, and get in touch with us.</p>
-              <a href="https://www.boysroofing.company/en" style="display: inline-block; background: #5c3a3a; color: #fff !important; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; font-size: 15px;">Visit Boys Roofing</a>
+              <a href="https://www.boysroofing.company/en" style="display: inline-block; background: #BA181B; color: #fff !important; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; font-size: 15px;">Visit Boys Roofing</a>
               <p style="margin: 24px 0 0; font-size: 12px; color: #6b6b6b;">Message sent automatically by Boys Roofing.</p>
             </div>
           </div>
