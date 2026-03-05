@@ -63,7 +63,7 @@ export default function Reviews() {
         {reviews.map((review) => (
           <div
             key={review.id}
-            className="bg-white p-5 rounded-lg shadow-md border"
+            className="bg-[#f5f5f5] border border-[#e0e0e0] p-5 rounded-xl shadow-md"
           >
             <h4 className="font-semibold text-lg">{review.name}</h4>
 

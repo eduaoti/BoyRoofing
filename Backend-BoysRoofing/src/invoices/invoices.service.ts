@@ -91,31 +91,33 @@ export class InvoicesService {
       const contentWidth = pageWidth - margin * 2;
       const leftX = margin;
       const rightEdge = pageWidth - margin;
-      const brandBlue = '#1e3a5f';
-      const brandBlueLight = '#2d5a87';
-      const grayBg = '#f5f7fa';
-      const grayBorder = '#e0e4e9';
-      const grayText = '#4a5568';
-      const darkText = '#1a202c';
+      const brandDark = '#2a2a2a';
+      const brandDarkSoft = '#3a3a3a';
+      const accentRed = '#5c3a3a'; /* rojo muy suave, desaturado */
+      const grayBg = '#f2f2f2';
+      const grayBorder = '#e0e0e0';
+      const grayText = '#4a4a4a';
+      const darkText = '#1a1a1a';
+      const radius = 10;
 
       // ==========================
-      // MARCO EXTERIOR
+      // MARCO EXTERIOR (redondeado)
       // ==========================
       const frameInset = 8;
       doc
         .lineWidth(1.5)
-        .strokeColor(brandBlue)
-        .rect(frameInset, frameInset, pageWidth - frameInset * 2, 792 - frameInset * 2)
+        .strokeColor(brandDark)
+        .roundedRect(frameInset, frameInset, pageWidth - frameInset * 2, 792 - frameInset * 2, radius)
         .stroke();
 
       // ==========================
-      // CABECERA CON FONDO (barra azul)
+      // CABECERA (gris oscuro, esquinas superiores redondeadas)
       // ==========================
       const headerH = 72;
       const headerTop = margin;
       doc
-        .fillColor(brandBlue)
-        .rect(leftX, headerTop, contentWidth, headerH)
+        .fillColor(brandDark)
+        .roundedRect(leftX, headerTop, contentWidth, headerH, radius)
         .fill();
 
       // Logo a la derecha (sobre la barra o al lado)
@@ -160,20 +162,20 @@ export class InvoicesService {
       const invoiceBoxW = 220;
       const invoiceBoxH = 58;
 
-      // Fondo bloque "Bill to"
+      // Fondo bloque "Bill to" (redondeado)
       doc
         .fillColor(grayBg)
-        .rect(leftX, blockY, billToW, billToH)
+        .roundedRect(leftX, blockY, billToW, billToH, 6)
         .fill();
       doc
         .lineWidth(0.5)
         .strokeColor(grayBorder)
-        .rect(leftX, blockY, billToW, billToH)
+        .roundedRect(leftX, blockY, billToW, billToH, 6)
         .stroke();
 
       doc
         .fontSize(10)
-        .fillColor(brandBlue)
+        .fillColor(brandDark)
         .text('Bill to', leftX + 12, blockY + 10);
       doc
         .fontSize(10)
@@ -183,19 +185,19 @@ export class InvoicesService {
         .text(`${invoice.city || ''}, ${invoice.state || ''} ${invoice.zip || ''}`, leftX + 12, blockY + 52)
         .text(`Phone: ${invoice.phone || ''}`, leftX + 12, blockY + 66);
 
-      // Fondo bloque Invoice # / Date (derecha)
+      // Fondo bloque Invoice # / Date (derecha, redondeado)
       doc
         .fillColor(grayBg)
-        .rect(rightEdge - invoiceBoxW, blockY, invoiceBoxW, invoiceBoxH)
+        .roundedRect(rightEdge - invoiceBoxW, blockY, invoiceBoxW, invoiceBoxH, 6)
         .fill();
       doc
         .strokeColor(grayBorder)
-        .rect(rightEdge - invoiceBoxW, blockY, invoiceBoxW, invoiceBoxH)
+        .roundedRect(rightEdge - invoiceBoxW, blockY, invoiceBoxW, invoiceBoxH, 6)
         .stroke();
 
-      doc.fontSize(10).fillColor(brandBlue).text('Invoice #', rightEdge - invoiceBoxW + 12, blockY + 10);
+      doc.fontSize(10).fillColor(brandDark).text('Invoice #', rightEdge - invoiceBoxW + 12, blockY + 10);
       doc.fontSize(10).fillColor(darkText).text(String(invoice.invoiceNumber || ''), rightEdge - invoiceBoxW + 75, blockY + 10);
-      doc.fontSize(10).fillColor(brandBlue).text('Date', rightEdge - invoiceBoxW + 12, blockY + 28);
+      doc.fontSize(10).fillColor(brandDark).text('Date', rightEdge - invoiceBoxW + 12, blockY + 28);
       doc
         .fontSize(10)
         .fillColor(darkText)
@@ -206,22 +208,22 @@ export class InvoicesService {
           rightEdge - invoiceBoxW + 75,
           blockY + 28,
         );
-      doc.fontSize(10).fillColor(brandBlue).text('Phone', rightEdge - invoiceBoxW + 12, blockY + 46);
+      doc.fontSize(10).fillColor(brandDark).text('Phone', rightEdge - invoiceBoxW + 12, blockY + 46);
       doc.fontSize(10).fillColor(darkText).text(String(invoice.phone || ''), rightEdge - invoiceBoxW + 75, blockY + 46);
 
       doc.y = blockY + Math.max(billToH, invoiceBoxH) + 20;
 
-      // Property location (título con línea)
+      // Property location (título, caja redondeada)
       doc
         .fontSize(10)
-        .fillColor(brandBlue)
+        .fillColor(brandDark)
         .text('Property location / roofing invoice', leftX, doc.y);
       doc.y += 14;
       doc
         .fillColor(grayBg)
-        .rect(leftX, doc.y, contentWidth, 28)
+        .roundedRect(leftX, doc.y, contentWidth, 28, 6)
         .fill();
-      doc.strokeColor(grayBorder).rect(leftX, doc.y, contentWidth, 28).stroke();
+      doc.strokeColor(grayBorder).roundedRect(leftX, doc.y, contentWidth, 28, 6).stroke();
       doc
         .fontSize(10)
         .fillColor(grayText)
@@ -240,8 +242,8 @@ export class InvoicesService {
       const colPriceX = rightEdge - 75;
 
       doc
-        .fillColor(brandBlue)
-        .rect(leftX, tableStartY, contentWidth, 22)
+        .fillColor(brandDark)
+        .roundedRect(leftX, tableStartY, contentWidth, 22, 6)
         .fill();
       doc
         .fontSize(9)
@@ -252,7 +254,7 @@ export class InvoicesService {
       doc
         .lineWidth(0.5)
         .strokeColor(grayBorder)
-        .rect(leftX, tableStartY, contentWidth, 22)
+        .roundedRect(leftX, tableStartY, contentWidth, 22, 6)
         .stroke();
 
       const rowY = tableStartY + 28;
@@ -302,7 +304,7 @@ export class InvoicesService {
         .strokeColor(grayBorder)
         .stroke();
       yTotals += 8;
-      doc.fontSize(12).fillColor(brandBlue).text('Total', totalsX, yTotals);
+      doc.fontSize(12).fillColor(accentRed).text('Total', totalsX, yTotals);
       doc.fontSize(12).fillColor(darkText).text(`$${Number(invoice.total).toFixed(2)}`, colPriceX, yTotals, { width: 70, align: 'right' });
       doc.y = yTotals + 24;
 
@@ -310,7 +312,7 @@ export class InvoicesService {
       // FIRMA
       // ==========================
       const signatureLabelY = doc.y;
-      doc.fontSize(10).fillColor(brandBlue).text('Signed:', leftX, signatureLabelY);
+      doc.fontSize(10).fillColor(brandDark).text('Signed:', leftX, signatureLabelY);
       const signatureLineY = signatureLabelY + 16;
       doc
         .moveTo(leftX + 45, signatureLineY)
@@ -339,7 +341,7 @@ export class InvoicesService {
 
       doc
         .fontSize(10)
-        .fillColor(brandBlue)
+        .fillColor(accentRed)
         .text('Thank you for your business!', leftX, 718, {
           width: contentWidth,
           align: 'center',

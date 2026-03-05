@@ -16,7 +16,6 @@ module.exports = {
         "br-red-light": "#E5383B",
         "br-red-muted": "#8B6B6C",
         "br-red-soft": "#6B4A4B",
-        "br-blue-muted": "#4A5F6E",
         "br-stone": "#B1A7A6",
         "br-pearl": "#D3D3D3",
         "br-smoke-light": "#F5F3F4",
