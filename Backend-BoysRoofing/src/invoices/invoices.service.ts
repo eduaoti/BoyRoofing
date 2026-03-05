@@ -276,12 +276,14 @@ export class InvoicesService {
           ? invoice.invoiceDate.toLocaleDateString()
           : new Date(invoice.invoiceDate).toLocaleDateString();
 
+      // Descripción completa: puede ocupar varias páginas
       doc.fontSize(10).fillColor(darkText).text(invoiceDateStr, leftX + 8, rowY);
       doc
         .fontSize(9)
         .fillColor(grayText)
         .text(invoice.description || '—', colDescX, rowY, { width: colDescW });
       const descBottomY = doc.y;
+      // Precio junto a la primera línea de la fila (misma altura que fecha/descripción)
       doc
         .fontSize(10)
         .fillColor(darkText)
@@ -292,8 +294,17 @@ export class InvoicesService {
       doc.y = descBottomY + 14;
 
       // ==========================
-      // SUBTOTAL / OTHER / TOTAL
+      // SUBTOTAL / OTHER / TOTAL + FIRMA + PIE (juntos al final)
+      // Medir espacio restante; si no alcanza, salto de página antes de dibujarlos.
       // ==========================
+      const spaceForTotalsSignatureFooter = 220; // totales + firma + "Thank you"
+      const pageHeight = 792;
+      const bottomMargin = 50;
+      const spaceRemaining = pageHeight - bottomMargin - doc.y;
+      if (spaceRemaining < spaceForTotalsSignatureFooter) {
+        doc.addPage();
+        doc.y = margin + 20;
+      }
       const totalsX = rightEdge - 200;
       let yTotals = doc.y;
 
@@ -351,10 +362,11 @@ export class InvoicesService {
       doc.y += 12;
       doc.text('Paid cash: ___________________', leftX, doc.y);
 
+      doc.y += 32;
       doc
         .fontSize(10)
         .fillColor(brandRed)
-        .text('Thank you for your business!', leftX, 718, {
+        .text('Thank you for your business!', leftX, doc.y, {
           width: contentWidth,
           align: 'center',
         });
