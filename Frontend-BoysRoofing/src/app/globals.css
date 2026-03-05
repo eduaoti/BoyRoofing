@@ -1,21 +1,32 @@
 /* Importa Tailwind v4 */
 @import "tailwindcss";
 
+/* Estética Boys Roofing: colores no saturados, bordes redondeados. */
 /* Definimos la paleta de Boys Roofing como theme variables */
 @theme {
-  /* Colores de marca */
+  /* Colores de marca (evitar saturados: priorizar tonos suaves que no saturen la vista) */
   --color-br-carbon: #0B090A;
   --color-br-smoke: #161A1D;
   --color-br-red-deep: #660708;
   --color-br-red-dark: #A4161A;
   --color-br-red-main: #BA181B;
   --color-br-red-light: #E5383B;
+  /* Variantes suaves / desaturadas para UI */
+  --color-br-red-muted: #8B6B6C;
+  --color-br-red-soft: #6B4A4B;
+  --color-br-blue-muted: #4A5F6E;
   --color-br-stone: #B1A7A6;
   --color-br-pearl: #D3D3D3;
   --color-br-smoke-light: #F5F3F4;
   --color-br-white: #FFFFFF;
 
-  /* Fuente utilitaria: font-body */
+  /* Bordes siempre redondeados (estética consistente) */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+
   --font-body: var(--font-roboto, system-ui, sans-serif);
 }
 
@@ -74,8 +85,9 @@ body {
   bottom: 0;
   height: 2px;
   width: 0;
-  background-color: var(--color-br-red-main);
+  background-color: var(--color-br-red-muted, #8B6B6C);
   transition: width 0.3s ease-in-out;
+  border-radius: 1px;
 }
 
 .nav-link:hover::after {
@@ -106,20 +118,20 @@ body {
 @keyframes pulse-soft {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 0px rgba(229, 56, 59, 0.4);
+    box-shadow: 0 0 0px rgba(139, 107, 108, 0.3);
   }
   50% {
     transform: scale(1.04);
-    box-shadow: 0 0 20px rgba(229, 56, 59, 0.35);
+    box-shadow: 0 0 20px rgba(139, 107, 108, 0.25);
   }
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0px rgba(229, 56, 59, 0.4);
+    box-shadow: 0 0 0px rgba(139, 107, 108, 0.3);
   }
 }
 
 .footer-gradient {
-  background: linear-gradient(90deg, #0B090A, #660708, #BA181B, #0B090A);
+  background: linear-gradient(90deg, #0B090A, #4A2A2B, #6B4A4B, #0B090A);
   background-size: 300% 100%;
   animation: footerMove 12s ease infinite;
 }
@@ -205,23 +217,24 @@ body {
 .animate-slideLight {
   animation: slideLight 6s ease-in-out infinite;
 }
-/* Swiper: flechas y bullets (tema Boys Roofing) */
+/* Swiper: flechas y bullets (tonos suaves, sin saturar) */
 .swiper-button-prev,
 .swiper-button-next {
-  color: #bb1c21 !important;
-  fill: #bb1c21 !important;
-  stroke: #bb1c21 !important;
-  text-shadow: 0 0 8px rgba(255, 50, 50, 0.6);
+  color: #9A6B6C !important;
+  fill: #9A6B6C !important;
+  stroke: #9A6B6C !important;
+  text-shadow: 0 0 8px rgba(139, 107, 108, 0.4);
   width: 55px !important;
   height: 55px !important;
   scale: 1.15;
   transition: all 0.3s ease;
+  border-radius: 9999px;
 }
 
 .swiper-button-prev:hover,
 .swiper-button-next:hover {
-  color: #e5383b !important;
-  filter: drop-shadow(0 0 10px rgba(229, 56, 59, 0.8));
+  color: #b07a7b !important;
+  filter: drop-shadow(0 0 10px rgba(139, 107, 108, 0.5));
   transform: scale(1.3);
 }
 
@@ -232,12 +245,13 @@ body {
 }
 
 .swiper-pagination-bullet {
-  background: #30080A !important;
+  background: #4A3A3B !important;
   opacity: 0.6;
+  border-radius: 9999px;
 }
 
 .swiper-pagination-bullet-active {
-  background: #581015 !important;
+  background: #6B4A4B !important;
   opacity: 1;
 }
 
