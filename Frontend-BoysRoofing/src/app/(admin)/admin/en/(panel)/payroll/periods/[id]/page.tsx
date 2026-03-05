@@ -63,6 +63,9 @@ export default function PayrollPeriodDetailEN() {
   const [occNotes, setOccNotes] = useState("");
   const [partialPayId, setPartialPayId] = useState<number | null>(null);
   const [partialAmount, setPartialAmount] = useState("");
+  const [showAddWorker, setShowAddWorker] = useState(false);
+  const [workersList, setWorkersList] = useState<{ id: number; name: string }[]>([]);
+  const [addingWorkerId, setAddingWorkerId] = useState<number | null>(null);
 
   const load = useCallback(() => {
     if (!id) return;
@@ -196,6 +199,36 @@ export default function PayrollPeriodDetailEN() {
       .catch((err) => alert(err.message));
   }
 
+  function openAddWorkerModal() {
+    setShowAddWorker(true);
+    apiFetch("/workers")
+      .then((r) => r.ok ? r.json() : [])
+      .then((data: { id: number; name: string; isActive?: boolean }[]) => {
+        const inPeriod = new Set((period?.entries ?? []).map((e) => e.workerId).filter(Boolean));
+        setWorkersList(
+          (Array.isArray(data) ? data : [])
+            .filter((w) => w.isActive !== false && !inPeriod.has(w.id))
+            .map((w) => ({ id: w.id, name: w.name })),
+        );
+      })
+      .catch(() => setWorkersList([]));
+  }
+
+  function addWorkerToPeriod(workerId: number) {
+    setAddingWorkerId(workerId);
+    apiFetch(`/payroll/periods/${id}/add-worker`, {
+      method: "POST",
+      body: JSON.stringify({ workerId }),
+    })
+      .then((r) => {
+        if (!r.ok) return r.text().then((t) => Promise.reject(new Error(t)));
+        setShowAddWorker(false);
+        load();
+      })
+      .catch((e) => alert(e.message))
+      .finally(() => setAddingWorkerId(null));
+  }
+
   if (loading && !period) {
     return (
       <div className="p-6">
@@ -248,14 +281,75 @@ export default function PayrollPeriodDetailEN() {
               {periodStatusLabel(period.status)}
             </span>
           </div>
-          <button
-            onClick={() => setShowAddOccasional(true)}
-            className="rounded-xl border border-br-red-main/50 bg-br-red-main/10 px-4 py-2.5 text-sm font-medium text-br-red-main hover:bg-br-red-main hover:text-white transition"
-          >
-            + Add occasional
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={openAddWorkerModal}
+              className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-medium text-br-pearl hover:bg-white/10 transition"
+            >
+              + From crew
+            </button>
+            <button
+              onClick={() => setShowAddOccasional(true)}
+              className="rounded-xl border border-br-red-main/50 bg-br-red-main/10 px-4 py-2.5 text-sm font-medium text-br-red-main hover:bg-br-red-main hover:text-white transition"
+            >
+              + Occasional
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Modal: add worker from crew */}
+      {showAddWorker && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={() => setShowAddWorker(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-add-worker-title"
+        >
+          <div
+            className="relative w-full max-w-sm rounded-2xl border border-white/10 bg-br-carbon shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+              <h2 id="modal-add-worker-title" className="text-lg font-semibold text-br-pearl">
+                Add from crew
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowAddWorker(false)}
+                className="rounded-lg p-2 text-br-white/60 hover:bg-white/10 hover:text-white transition"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="max-h-64 overflow-y-auto p-4">
+              {workersList.length === 0 ? (
+                <p className="text-sm text-br-white/60">No more crew workers to add.</p>
+              ) : (
+                <ul className="space-y-1">
+                  {workersList.map((w) => (
+                    <li key={w.id}>
+                      <button
+                        type="button"
+                        onClick={() => addWorkerToPeriod(w.id)}
+                        disabled={addingWorkerId === w.id}
+                        className="w-full rounded-lg border border-white/10 bg-br-smoke/40 px-4 py-2.5 text-left text-sm font-medium text-br-pearl hover:bg-white/10 disabled:opacity-50 transition"
+                      >
+                        {w.name}
+                        {addingWorkerId === w.id ? " …" : ""}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {showAddOccasional && (
         <form
@@ -309,14 +403,119 @@ export default function PayrollPeriodDetailEN() {
         </form>
       )}
 
-      {/* Workers table */}
+      {/* Workers in this period */}
       <div className="rounded-2xl border border-white/10 bg-br-smoke/40 overflow-hidden shadow-xl">
         <div className="px-4 py-3 border-b border-white/10 bg-br-carbon/60">
           <h2 className="text-base font-semibold text-br-pearl">Workers in this period</h2>
           <p className="text-xs text-br-white/60 mt-0.5">Edit days and rates. Total = (full days × $/day) + (half days × $/½ day) + bonuses − deductions.</p>
-          <p className="text-xs text-br-white/50 mt-1 md:hidden">Swipe horizontally to see all columns.</p>
         </div>
-        <div className="overflow-x-auto -mx-4 md:mx-0 md:rounded-b-2xl">
+
+        {/* Mobile: card per worker */}
+        <div className="md:hidden divide-y divide-white/5">
+          {period.entries.map((entry) => (
+            <div key={entry.id} className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-br-pearl">{displayName(entry)}</p>
+                <span className={entry.workerType === "OCCASIONAL" ? "text-amber-400 text-xs" : "text-br-white/60 text-xs"}>
+                  {entry.workerType === "REGULAR" ? "Crew" : "Occasional"}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <label className="text-br-white/60 text-xs">Full</label>
+                  <input
+                    key={`m-${entry.id}-fd-${entry.fullDays}`}
+                    type="number"
+                    min="0"
+                    className="mt-0.5 w-full rounded-lg border border-white/10 bg-br-carbon/60 px-2 py-1.5 text-center text-white focus:ring-2 focus:ring-br-red-main/40"
+                    defaultValue={entry.fullDays}
+                    onBlur={(e) => {
+                      const v = Number(e.target.value);
+                      if (!isNaN(v) && v >= 0 && v !== entry.fullDays) handleSaveEntry(entry, "fullDays", v);
+                    }}
+                  />
+                </div>
+                <div>
+                  <label className="text-br-white/60 text-xs">Half</label>
+                  <input
+                    key={`m-${entry.id}-hd-${entry.halfDays}`}
+                    type="number"
+                    min="0"
+                    className="mt-0.5 w-full rounded-lg border border-white/10 bg-br-carbon/60 px-2 py-1.5 text-center text-white focus:ring-2 focus:ring-br-red-main/40"
+                    defaultValue={entry.halfDays}
+                    onBlur={(e) => {
+                      const v = Number(e.target.value);
+                      if (!isNaN(v) && v >= 0 && v !== entry.halfDays) handleSaveEntry(entry, "halfDays", v);
+                    }}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-br-white/60 text-xs">$/day</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="mt-0.5 w-full rounded-lg border border-white/10 bg-br-carbon/60 px-2 py-1.5 text-right text-white focus:ring-2 focus:ring-br-red-main/40"
+                    defaultValue={entry.dayRate}
+                    onBlur={(e) => {
+                      const v = Number(e.target.value);
+                      if (!isNaN(v) && v !== entry.dayRate) handleSaveEntry(entry, "dayRate", v);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-br-white/60">Total</span>
+                <span className="font-semibold text-br-pearl">${Number(entry.total).toFixed(2)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>{statusBadge(entry.paymentStatus)}</span>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => markFullPaid(entry.id)}
+                    disabled={savingId === entry.id}
+                    className="rounded-lg bg-green-500/20 text-green-400 px-2 py-1 text-xs font-medium"
+                  >
+                    Mark paid
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setPartialPayId(entry.id); setPartialAmount(String(entry.amountPaid)); }}
+                    className="rounded-lg border border-amber-500/40 text-amber-400 px-2 py-1 text-xs"
+                  >
+                    Partial
+                  </button>
+                  {entry.workerType === "OCCASIONAL" && (
+                    <button
+                      type="button"
+                      onClick={() => deleteEntry(entry.id)}
+                      className="rounded-lg border border-red-400/40 text-red-400 px-2 py-1 text-xs"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+              {partialPayId === entry.id && (
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="$"
+                    value={partialAmount}
+                    onChange={(e) => setPartialAmount(e.target.value)}
+                    className="w-24 rounded-lg border border-white/10 bg-br-carbon/60 px-2 py-1 text-white text-sm"
+                  />
+                  <button type="button" onClick={() => submitPartialPay(entry.id)} className="rounded-lg bg-br-red-main/20 text-br-red-main px-2 py-1 text-xs">Apply</button>
+                  <button type="button" onClick={() => { setPartialPayId(null); setPartialAmount(""); }} className="rounded-lg border border-white/20 px-2 py-1 text-xs">Cancel</button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: table */}
+        <div className="hidden md:block overflow-x-auto -mx-4 md:mx-0 md:rounded-b-2xl">
           <table className="w-full min-w-[1000px] text-left text-sm">
             <thead>
               <tr className="bg-br-carbon/80 text-br-white/90">
@@ -344,10 +543,30 @@ export default function PayrollPeriodDetailEN() {
                     <span className={entry.workerType === "OCCASIONAL" ? "text-amber-400" : "text-br-white/80"}>{entry.workerType === "REGULAR" ? "Crew" : "Occasional"}</span>
                   </td>
                   <td className="px-3 py-2.5 text-center">
-                    <input type="number" min="0" className="w-14 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-center text-white text-sm focus:ring-2 focus:ring-br-red-main/40" value={entry.fullDays} onBlur={(e) => { const v = Number(e.target.value); if (!isNaN(v) && v !== entry.fullDays) handleSaveEntry(entry, "fullDays", v); }} />
+                    <input
+                      key={`${entry.id}-fd-${entry.fullDays}`}
+                      type="number"
+                      min="0"
+                      className="w-14 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-center text-white text-sm focus:ring-2 focus:ring-br-red-main/40"
+                      defaultValue={entry.fullDays}
+                      onBlur={(e) => {
+                        const v = Number(e.target.value);
+                        if (!isNaN(v) && v >= 0 && v !== entry.fullDays) handleSaveEntry(entry, "fullDays", v);
+                      }}
+                    />
                   </td>
                   <td className="px-3 py-2.5 text-center">
-                    <input type="number" min="0" className="w-14 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-center text-white text-sm focus:ring-2 focus:ring-br-red-main/40" value={entry.halfDays} onBlur={(e) => { const v = Number(e.target.value); if (!isNaN(v) && v !== entry.halfDays) handleSaveEntry(entry, "halfDays", v); }} />
+                    <input
+                      key={`${entry.id}-hd-${entry.halfDays}`}
+                      type="number"
+                      min="0"
+                      className="w-14 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-center text-white text-sm focus:ring-2 focus:ring-br-red-main/40"
+                      defaultValue={entry.halfDays}
+                      onBlur={(e) => {
+                        const v = Number(e.target.value);
+                        if (!isNaN(v) && v >= 0 && v !== entry.halfDays) handleSaveEntry(entry, "halfDays", v);
+                      }}
+                    />
                   </td>
                   <td className="px-3 py-2.5 text-right">
                     <input type="number" step="0.01" className="w-20 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-right text-white text-sm focus:ring-2 focus:ring-br-red-main/40" defaultValue={entry.dayRate} onBlur={(e) => { const v = Number(e.target.value); if (!isNaN(v) && v !== entry.dayRate) handleSaveEntry(entry, "dayRate", v); }} />

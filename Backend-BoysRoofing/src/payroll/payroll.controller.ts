@@ -36,6 +36,14 @@ export class PayrollController {
     return this.payrollService.createPeriod(dto);
   }
 
+  @Post('periods/:id/add-worker')
+  addWorkerToPeriod(
+    @Param('id') id: string,
+    @Body('workerId') workerId: number,
+  ) {
+    return this.payrollService.addWorkerToPeriod(+id, workerId);
+  }
+
   @Patch('periods/:id/status')
   updatePeriodStatus(
     @Param('id') id: string,
