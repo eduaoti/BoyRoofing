@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { apiFetch } from "@/lib/api";
 
 type Period = {
@@ -24,6 +25,8 @@ export default function NominaES() {
   const [endDate, setEndDate] = useState("");
   const [label, setLabel] = useState("");
   const [saving, setSaving] = useState(false);
+  const startInputRef = useRef<HTMLInputElement>(null);
+  const endInputRef = useRef<HTMLInputElement>(null);
 
   function load() {
     setLoading(true);
@@ -123,23 +126,47 @@ export default function NominaES() {
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
             <div>
               <label className="block text-sm text-br-white/70">Fecha inicio</label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="mt-1 w-full rounded border border-br-smoke-light bg-br-carbon px-3 py-2 text-white"
-                required
-              />
+              <div className="mt-1 flex rounded border border-br-smoke-light bg-br-carbon overflow-hidden">
+                <input
+                  ref={startInputRef}
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  max={endDate || undefined}
+                  className="flex-1 min-w-0 bg-transparent px-3 py-2 text-white text-sm [color-scheme:dark]"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => startInputRef.current?.showPicker?.() ?? startInputRef.current?.click()}
+                  className="px-3 py-2 text-br-pearl/80 hover:text-br-red-main transition shrink-0"
+                  aria-label="Abrir calendario"
+                >
+                  <CalendarDaysIcon className="h-5 w-5" />
+                </button>
+              </div>
             </div>
             <div>
               <label className="block text-sm text-br-white/70">Fecha fin</label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="mt-1 w-full rounded border border-br-smoke-light bg-br-carbon px-3 py-2 text-white"
-                required
-              />
+              <div className="mt-1 flex rounded border border-br-smoke-light bg-br-carbon overflow-hidden">
+                <input
+                  ref={endInputRef}
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  min={startDate || undefined}
+                  className="flex-1 min-w-0 bg-transparent px-3 py-2 text-white text-sm [color-scheme:dark]"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => endInputRef.current?.showPicker?.() ?? endInputRef.current?.click()}
+                  className="px-3 py-2 text-br-pearl/80 hover:text-br-red-main transition shrink-0"
+                  aria-label="Abrir calendario"
+                >
+                  <CalendarDaysIcon className="h-5 w-5" />
+                </button>
+              </div>
             </div>
             <div>
               <label className="block text-sm text-br-white/70">Etiqueta (opcional)</label>
