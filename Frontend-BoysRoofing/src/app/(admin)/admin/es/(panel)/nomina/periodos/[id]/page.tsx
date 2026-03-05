@@ -361,8 +361,9 @@ export default function NominaPeriodoDetalleES() {
         <div className="px-4 py-3 border-b border-white/10 bg-br-carbon/60">
           <h2 className="text-base font-semibold text-br-pearl">Trabajadores del periodo</h2>
           <p className="text-xs text-br-white/60 mt-0.5">Edita días y tarifas. Total = (días completos × $/día) + (medios días × $/½ día) + bonos − deducciones.</p>
+          <p className="text-xs text-br-white/50 mt-1 md:hidden">Desliza horizontalmente para ver todas las columnas.</p>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto -mx-4 md:mx-0 md:rounded-b-2xl">
           <table className="w-full min-w-[1000px] text-left text-sm">
             <thead>
               <tr className="bg-br-carbon/80 text-br-white/90">

@@ -314,8 +314,9 @@ export default function PayrollPeriodDetailEN() {
         <div className="px-4 py-3 border-b border-white/10 bg-br-carbon/60">
           <h2 className="text-base font-semibold text-br-pearl">Workers in this period</h2>
           <p className="text-xs text-br-white/60 mt-0.5">Edit days and rates. Total = (full days × $/day) + (half days × $/½ day) + bonuses − deductions.</p>
+          <p className="text-xs text-br-white/50 mt-1 md:hidden">Swipe horizontally to see all columns.</p>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto -mx-4 md:mx-0 md:rounded-b-2xl">
           <table className="w-full min-w-[1000px] text-left text-sm">
             <thead>
               <tr className="bg-br-carbon/80 text-br-white/90">
@@ -337,7 +338,7 @@ export default function PayrollPeriodDetailEN() {
             </thead>
             <tbody>
               {period.entries.map((entry) => (
-                <tr key={entry.id} className="border-t border-white/5 hover:bg-white/[0.03] transition">
+                <tr key={entry.id} className="border-t border-white/5 hover:bg-white/5 transition">
                   <td className="px-3 py-2.5 font-medium text-br-pearl">{displayName(entry)}</td>
                   <td className="px-3 py-2.5">
                     <span className={entry.workerType === "OCCASIONAL" ? "text-amber-400" : "text-br-white/80"}>{entry.workerType === "REGULAR" ? "Crew" : "Occasional"}</span>
