@@ -250,4 +250,49 @@ export class PayrollService {
     }
     return this.prisma.payrollEntry.delete({ where: { id: entryId } });
   }
+
+  /** Añade un trabajador ya registrado (plantilla) al periodo. */
+  async addWorkerToPeriod(periodId: number, workerId: number) {
+    const period = await this.prisma.payrollPeriod.findUnique({
+      where: { id: periodId },
+      include: { entries: true },
+    });
+    if (!period) throw new Error('Period not found');
+
+    const existing = period.entries.some((e) => e.workerId === workerId);
+    if (existing) throw new Error('Worker already in this period');
+
+    const worker = await this.prisma.worker.findUnique({
+      where: { id: workerId },
+    });
+    if (!worker) throw new Error('Worker not found');
+    if (!worker.isActive) throw new Error('Worker is inactive');
+
+    const dayRate = worker.defaultDayRate;
+    const halfDayRate = dayRate / 2;
+    const total = 0;
+    const prevBalance = worker.balance;
+
+    await this.prisma.payrollEntry.create({
+      data: {
+        payrollPeriodId: period.id,
+        workerType: WorkerType.REGULAR,
+        workerId: worker.id,
+        workerName: worker.name,
+        fullDays: 0,
+        halfDays: 0,
+        dayRate,
+        halfDayRate,
+        bonuses: 0,
+        deductions: 0,
+        total,
+        prevBalance,
+        amountPaid: 0,
+        balanceAfter: prevBalance,
+        paymentStatus: PaymentStatus.UNPAID,
+      },
+    });
+
+    return this.getPeriod(periodId);
+  }
 }
