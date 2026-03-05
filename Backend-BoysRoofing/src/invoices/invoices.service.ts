@@ -277,11 +277,11 @@ export class InvoicesService {
           : new Date(invoice.invoiceDate).toLocaleDateString();
 
       doc.fontSize(10).fillColor(darkText).text(invoiceDateStr, leftX + 8, rowY);
-      const descText = (invoice.description || '').slice(0, 280);
       doc
         .fontSize(9)
         .fillColor(grayText)
-        .text(descText + (descText.length >= 280 ? '…' : ''), colDescX, rowY, { width: colDescW, height: 22, ellipsis: true });
+        .text(invoice.description || '—', colDescX, rowY, { width: colDescW });
+      const descBottomY = doc.y;
       doc
         .fontSize(10)
         .fillColor(darkText)
@@ -289,7 +289,7 @@ export class InvoicesService {
           width: 70,
           align: 'right',
         });
-      doc.y = rowY + 22;
+      doc.y = descBottomY + 14;
 
       // ==========================
       // SUBTOTAL / OTHER / TOTAL
