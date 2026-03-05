@@ -217,12 +217,12 @@ export default function PayrollPeriodDetailEN() {
   }
 
   const statusBadge = (s: string) => {
-    const c =
-      s === "PAID" ? "bg-green-900/50 text-green-300" :
-      s === "PARTIAL" ? "bg-amber-900/50 text-amber-300" :
-      "bg-br-smoke text-br-white/70";
+    const styles =
+      s === "PAID" ? "bg-green-500/20 text-green-400 border border-green-500/30" :
+      s === "PARTIAL" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" :
+      "bg-white/10 text-br-white/80 border border-white/10";
     const label = s === "UNPAID" ? "Unpaid" : s === "PARTIAL" ? "Partial" : "Paid";
-    return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${c}`}>{label}</span>;
+    return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${styles}`}>{label}</span>;
   };
 
   const periodStatusLabel = (s: string) => (s === "DRAFT" ? "Draft" : s === "PAID" ? "Paid" : s === "CLOSED" ? "Closed" : s);
@@ -230,308 +230,165 @@ export default function PayrollPeriodDetailEN() {
   const displayName = (entry: Entry) => entry.worker?.name || entry.workerName || "—";
 
   return (
-    <div className="space-y-6 p-6 text-white">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <Link href="/admin/en/payroll" className="text-sm text-br-white/60 hover:underline">
-            ← Payroll
-          </Link>
-          <h1 className="mt-1 text-2xl font-bold">
-            {period.label || `${period.startDate} – ${period.endDate}`}
-          </h1>
-          <p className="text-sm text-br-white/60">
-            {new Date(period.startDate).toLocaleDateString()} – {new Date(period.endDate).toLocaleDateString()}
-            {" · "}
-            <span className="inline-flex rounded-full bg-br-smoke/80 px-2 py-0.5 text-xs font-medium">{periodStatusLabel(period.status)}</span>
-          </p>
+    <div className="space-y-6 p-4 md:p-6 text-white">
+      {/* Header card */}
+      <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-br-smoke/90 to-br-carbon/80 p-5 shadow-xl">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <Link href="/admin/en/payroll" className="inline-flex items-center gap-1 text-sm text-br-pearl/80 hover:text-br-red-main transition">
+              ← Back to Payroll
+            </Link>
+            <h1 className="mt-2 text-2xl md:text-3xl font-bold text-br-pearl">
+              {period.label || `${period.startDate} – ${period.endDate}`}
+            </h1>
+            <p className="mt-1 text-sm text-br-white/60">
+              {new Date(period.startDate).toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" })} – {new Date(period.endDate).toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+            </p>
+            <span className={`inline-flex mt-2 rounded-full px-3 py-1 text-xs font-semibold ${period.status === "DRAFT" ? "bg-amber-500/20 text-amber-400" : period.status === "PAID" ? "bg-green-500/20 text-green-400" : "bg-br-smoke text-br-pearl/80"}`}>
+              {periodStatusLabel(period.status)}
+            </span>
+          </div>
+          <button
+            onClick={() => setShowAddOccasional(true)}
+            className="rounded-xl border border-br-red-main/50 bg-br-red-main/10 px-4 py-2.5 text-sm font-medium text-br-red-main hover:bg-br-red-main hover:text-white transition"
+          >
+            + Add occasional
+          </button>
         </div>
-        <button
-          onClick={() => setShowAddOccasional(true)}
-          className="rounded-lg border border-br-smoke-light px-4 py-2 text-sm hover:bg-br-carbon/60"
-        >
-          Add occasional worker
-        </button>
-      </header>
+      </div>
 
       {showAddOccasional && (
         <form
           onSubmit={addOccasional}
-          className="rounded-xl border border-br-smoke-light bg-br-smoke/40 p-6"
+          className="rounded-2xl border border-white/10 bg-br-smoke/60 p-6 shadow-xl"
         >
-          <h2 className="text-lg font-semibold">Add occasional worker</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+          <h2 className="text-lg font-semibold text-br-pearl">Add occasional worker</h2>
+          <p className="mt-1 text-sm text-br-white/60">For someone not on the regular crew who worked this period only.</p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 md:grid-cols-4">
             <div>
               <label className="block text-sm text-br-white/70">Name *</label>
-              <input
-                type="text"
-                value={occName}
-                onChange={(e) => setOccName(e.target.value)}
-                className="mt-1 w-full rounded border border-br-smoke-light bg-br-carbon px-3 py-2 text-white"
-                required
-              />
+              <input type="text" value={occName} onChange={(e) => setOccName(e.target.value)} className="mt-1 w-full rounded-lg border border-white/10 bg-br-carbon/80 px-3 py-2 text-white focus:ring-2 focus:ring-br-red-main/50 focus:border-br-red-main/50" required />
             </div>
             <div>
               <label className="block text-sm text-br-white/70">Phone</label>
-              <input
-                type="text"
-                value={occPhone}
-                onChange={(e) => setOccPhone(e.target.value)}
-                className="mt-1 w-full rounded border border-br-smoke-light bg-br-carbon px-3 py-2 text-white"
-              />
+              <input type="text" value={occPhone} onChange={(e) => setOccPhone(e.target.value)} className="mt-1 w-full rounded-lg border border-white/10 bg-br-carbon/80 px-3 py-2 text-white focus:ring-2 focus:ring-br-red-main/50 focus:border-br-red-main/50" />
             </div>
             <div>
               <label className="block text-sm text-br-white/70">Full days</label>
-              <input
-                type="number"
-                min="0"
-                value={occFull}
-                onChange={(e) => setOccFull(Number(e.target.value))}
-                className="mt-1 w-full rounded border border-br-smoke-light bg-br-carbon px-3 py-2 text-white"
-              />
+              <input type="number" min="0" value={occFull} onChange={(e) => setOccFull(Number(e.target.value))} className="mt-1 w-full rounded-lg border border-white/10 bg-br-carbon/80 px-3 py-2 text-white focus:ring-2 focus:ring-br-red-main/50 focus:border-br-red-main/50" />
             </div>
             <div>
               <label className="block text-sm text-br-white/70">Half days</label>
-              <input
-                type="number"
-                min="0"
-                value={occHalf}
-                onChange={(e) => setOccHalf(Number(e.target.value))}
-                className="mt-1 w-full rounded border border-br-smoke-light bg-br-carbon px-3 py-2 text-white"
-              />
+              <input type="number" min="0" value={occHalf} onChange={(e) => setOccHalf(Number(e.target.value))} className="mt-1 w-full rounded-lg border border-white/10 bg-br-carbon/80 px-3 py-2 text-white focus:ring-2 focus:ring-br-red-main/50 focus:border-br-red-main/50" />
             </div>
             <div>
               <label className="block text-sm text-br-white/70">Day rate ($)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={occDayRate}
-                onChange={(e) => setOccDayRate(e.target.value)}
-                className="mt-1 w-full rounded border border-br-smoke-light bg-br-carbon px-3 py-2 text-white"
-              />
+              <input type="number" step="0.01" min="0" value={occDayRate} onChange={(e) => setOccDayRate(e.target.value)} className="mt-1 w-full rounded-lg border border-white/10 bg-br-carbon/80 px-3 py-2 text-white focus:ring-2 focus:ring-br-red-main/50 focus:border-br-red-main/50" />
             </div>
             <div>
               <label className="block text-sm text-br-white/70">Bonuses</label>
-              <input
-                type="number"
-                step="0.01"
-                value={occBonuses}
-                onChange={(e) => setOccBonuses(e.target.value)}
-                className="mt-1 w-full rounded border border-br-smoke-light bg-br-carbon px-3 py-2 text-white"
-              />
+              <input type="number" step="0.01" value={occBonuses} onChange={(e) => setOccBonuses(e.target.value)} className="mt-1 w-full rounded-lg border border-white/10 bg-br-carbon/80 px-3 py-2 text-white focus:ring-2 focus:ring-br-red-main/50 focus:border-br-red-main/50" />
             </div>
             <div>
               <label className="block text-sm text-br-white/70">Deductions</label>
-              <input
-                type="number"
-                step="0.01"
-                value={occDeductions}
-                onChange={(e) => setOccDeductions(e.target.value)}
-                className="mt-1 w-full rounded border border-br-smoke-light bg-br-carbon px-3 py-2 text-white"
-              />
+              <input type="number" step="0.01" value={occDeductions} onChange={(e) => setOccDeductions(e.target.value)} className="mt-1 w-full rounded-lg border border-white/10 bg-br-carbon/80 px-3 py-2 text-white focus:ring-2 focus:ring-br-red-main/50 focus:border-br-red-main/50" />
             </div>
             <div>
               <label className="block text-sm text-br-white/70">Notes</label>
-              <input
-                type="text"
-                value={occNotes}
-                onChange={(e) => setOccNotes(e.target.value)}
-                className="mt-1 w-full rounded border border-br-smoke-light bg-br-carbon px-3 py-2 text-white"
-              />
+              <input type="text" value={occNotes} onChange={(e) => setOccNotes(e.target.value)} className="mt-1 w-full rounded-lg border border-white/10 bg-br-carbon/80 px-3 py-2 text-white focus:ring-2 focus:ring-br-red-main/50 focus:border-br-red-main/50" />
             </div>
           </div>
-          <div className="mt-4 flex gap-2">
-            <button
-              type="submit"
-              disabled={savingId === -1}
-              className="rounded-lg bg-br-red-main px-4 py-2 text-sm font-medium disabled:opacity-60"
-            >
+          <div className="mt-5 flex gap-3">
+            <button type="submit" disabled={savingId === -1} className="rounded-xl bg-br-red-main px-5 py-2.5 text-sm font-medium text-white hover:bg-br-red-light disabled:opacity-60 transition">
               {savingId === -1 ? "Adding…" : "Add"}
             </button>
-            <button
-              type="button"
-              onClick={() => setShowAddOccasional(false)}
-              className="rounded-lg border border-br-smoke-light px-4 py-2 text-sm"
-            >
+            <button type="button" onClick={() => setShowAddOccasional(false)} className="rounded-xl border border-white/20 px-5 py-2.5 text-sm text-br-pearl hover:bg-white/5 transition">
               Cancel
             </button>
           </div>
         </form>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-br-smoke-light">
-        <table className="w-full min-w-[1000px] text-left text-sm">
-          <thead className="bg-br-smoke/80">
-            <tr>
-              <th className="px-3 py-2 font-semibold">Name</th>
-              <th className="px-3 py-2 font-semibold">Type</th>
-              <th className="px-3 py-2 font-semibold text-center w-20">Full</th>
-              <th className="px-3 py-2 font-semibold text-center w-20">Half</th>
-              <th className="px-3 py-2 font-semibold text-right w-24">Day $</th>
-              <th className="px-3 py-2 font-semibold text-right w-24">½ day $</th>
-              <th className="px-3 py-2 font-semibold text-right w-20">Bonus</th>
-              <th className="px-3 py-2 font-semibold text-right w-20">Ded.</th>
-              <th className="px-3 py-2 font-semibold text-right w-24">Total</th>
-              <th className="px-3 py-2 font-semibold text-right w-20">Prev bal</th>
-              <th className="px-3 py-2 font-semibold text-right w-24">Paid $</th>
-              <th className="px-3 py-2 font-semibold text-right w-24">Balance</th>
-              <th className="px-3 py-2 font-semibold w-20">Status</th>
-              <th className="px-3 py-2 font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {period.entries.map((entry) => (
-              <tr key={entry.id} className="border-t border-br-smoke-light">
-                <td className="px-3 py-2 font-medium">{displayName(entry)}</td>
-                <td className="px-3 py-2">
-                  <span className={entry.workerType === "OCCASIONAL" ? "text-amber-400" : ""}>
-                    {entry.workerType}
-                  </span>
-                </td>
-                <td className="px-3 py-2 text-center">
-                  <input
-                    type="number"
-                    min="0"
-                    className="w-14 rounded border border-br-smoke-light bg-br-carbon px-1 py-0.5 text-center text-white"
-                    value={entry.fullDays}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v) && v !== entry.fullDays) handleSaveEntry(entry, "fullDays", v);
-                    }}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (v === "" || /^\d+$/.test(v)) e.target.value = v;
-                    }}
-                  />
-                </td>
-                <td className="px-3 py-2 text-center">
-                  <input
-                    type="number"
-                    min="0"
-                    className="w-14 rounded border border-br-smoke-light bg-br-carbon px-1 py-0.5 text-center text-white"
-                    value={entry.halfDays}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v) && v !== entry.halfDays) handleSaveEntry(entry, "halfDays", v);
-                    }}
-                  />
-                </td>
-                <td className="px-3 py-2 text-right">
-                  <input
-                    type="number"
-                    step="0.01"
-                    className="w-20 rounded border border-br-smoke-light bg-br-carbon px-1 py-0.5 text-right text-white"
-                    defaultValue={entry.dayRate}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v) && v !== entry.dayRate) handleSaveEntry(entry, "dayRate", v);
-                    }}
-                  />
-                </td>
-                <td className="px-3 py-2 text-right">
-                  <input
-                    type="number"
-                    step="0.01"
-                    className="w-20 rounded border border-br-smoke-light bg-br-carbon px-1 py-0.5 text-right text-white"
-                    defaultValue={entry.halfDayRate}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v) && v !== entry.halfDayRate) handleSaveEntry(entry, "halfDayRate", v);
-                    }}
-                  />
-                </td>
-                <td className="px-3 py-2 text-right">
-                  <input
-                    type="number"
-                    step="0.01"
-                    className="w-16 rounded border border-br-smoke-light bg-br-carbon px-1 py-0.5 text-right text-white"
-                    defaultValue={entry.bonuses}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v) && v !== entry.bonuses) handleSaveEntry(entry, "bonuses", v);
-                    }}
-                  />
-                </td>
-                <td className="px-3 py-2 text-right">
-                  <input
-                    type="number"
-                    step="0.01"
-                    className="w-16 rounded border border-br-smoke-light bg-br-carbon px-1 py-0.5 text-right text-white"
-                    defaultValue={entry.deductions}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v) && v !== entry.deductions) handleSaveEntry(entry, "deductions", v);
-                    }}
-                  />
-                </td>
-                <td className="px-3 py-2 text-right font-medium">${Number(entry.total).toFixed(2)}</td>
-                <td className="px-3 py-2 text-right">${Number(entry.prevBalance).toFixed(2)}</td>
-                <td className="px-3 py-2 text-right">${Number(entry.amountPaid).toFixed(2)}</td>
-                <td className="px-3 py-2 text-right">
-                  <span className={entry.balanceAfter > 0 ? "text-amber-400" : entry.balanceAfter < 0 ? "text-green-400" : ""}>
-                    ${Number(entry.balanceAfter).toFixed(2)}
-                  </span>
-                </td>
-                <td className="px-3 py-2">{statusBadge(entry.paymentStatus)}</td>
-                <td className="px-3 py-2">
-                  {partialPayId === entry.id ? (
-                    <div className="flex items-center gap-1">
-                      <input
-                        type="number"
-                        step="0.01"
-                        placeholder="Amount"
-                        value={partialAmount}
-                        onChange={(e) => setPartialAmount(e.target.value)}
-                        className="w-20 rounded border border-br-smoke-light bg-br-carbon px-1 py-0.5 text-white"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => submitPartialPay(entry.id)}
-                        className="text-xs text-br-red-main hover:underline"
-                      >
-                        Ok
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setPartialPayId(null); setPartialAmount(""); }}
-                        className="text-xs hover:underline"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-1">
-                      <button
-                        type="button"
-                        onClick={() => markFullPaid(entry.id)}
-                        disabled={savingId === entry.id}
-                        className="text-xs text-br-red-main hover:underline disabled:opacity-50"
-                      >
-                        Mark paid
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setPartialPayId(entry.id); setPartialAmount(String(entry.amountPaid)); }}
-                        className="text-xs text-br-red-main hover:underline"
-                      >
-                        Partial
-                      </button>
-                      {entry.workerType === "OCCASIONAL" && (
-                        <button
-                          type="button"
-                          onClick={() => deleteEntry(entry.id)}
-                          className="text-xs text-red-400 hover:underline"
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </td>
+      {/* Workers table */}
+      <div className="rounded-2xl border border-white/10 bg-br-smoke/40 overflow-hidden shadow-xl">
+        <div className="px-4 py-3 border-b border-white/10 bg-br-carbon/60">
+          <h2 className="text-base font-semibold text-br-pearl">Workers in this period</h2>
+          <p className="text-xs text-br-white/60 mt-0.5">Edit days and rates. Total = (full days × $/day) + (half days × $/½ day) + bonuses − deductions.</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[1000px] text-left text-sm">
+            <thead>
+              <tr className="bg-br-carbon/80 text-br-white/90">
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider">Name</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider w-20">Type</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-center w-20" title="Full days">Full</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-center w-20" title="Half days">Half</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-24">$/day</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-24">$/½ day</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-20">Bonus</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-20">Ded.</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-24">Total</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-24">Prev bal</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-24">Paid</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-24">Balance</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider w-24">Status</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {period.entries.map((entry) => (
+                <tr key={entry.id} className="border-t border-white/5 hover:bg-white/[0.03] transition">
+                  <td className="px-3 py-2.5 font-medium text-br-pearl">{displayName(entry)}</td>
+                  <td className="px-3 py-2.5">
+                    <span className={entry.workerType === "OCCASIONAL" ? "text-amber-400" : "text-br-white/80"}>{entry.workerType === "REGULAR" ? "Crew" : "Occasional"}</span>
+                  </td>
+                  <td className="px-3 py-2.5 text-center">
+                    <input type="number" min="0" className="w-14 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-center text-white text-sm focus:ring-2 focus:ring-br-red-main/40" value={entry.fullDays} onBlur={(e) => { const v = Number(e.target.value); if (!isNaN(v) && v !== entry.fullDays) handleSaveEntry(entry, "fullDays", v); }} />
+                  </td>
+                  <td className="px-3 py-2.5 text-center">
+                    <input type="number" min="0" className="w-14 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-center text-white text-sm focus:ring-2 focus:ring-br-red-main/40" value={entry.halfDays} onBlur={(e) => { const v = Number(e.target.value); if (!isNaN(v) && v !== entry.halfDays) handleSaveEntry(entry, "halfDays", v); }} />
+                  </td>
+                  <td className="px-3 py-2.5 text-right">
+                    <input type="number" step="0.01" className="w-20 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-right text-white text-sm focus:ring-2 focus:ring-br-red-main/40" defaultValue={entry.dayRate} onBlur={(e) => { const v = Number(e.target.value); if (!isNaN(v) && v !== entry.dayRate) handleSaveEntry(entry, "dayRate", v); }} />
+                  </td>
+                  <td className="px-3 py-2.5 text-right">
+                    <input type="number" step="0.01" className="w-20 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-right text-white text-sm focus:ring-2 focus:ring-br-red-main/40" defaultValue={entry.halfDayRate} onBlur={(e) => { const v = Number(e.target.value); if (!isNaN(v) && v !== entry.halfDayRate) handleSaveEntry(entry, "halfDayRate", v); }} />
+                  </td>
+                  <td className="px-3 py-2.5 text-right">
+                    <input type="number" step="0.01" className="w-16 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-right text-white text-sm focus:ring-2 focus:ring-br-red-main/40" defaultValue={entry.bonuses} onBlur={(e) => { const v = Number(e.target.value); if (!isNaN(v) && v !== entry.bonuses) handleSaveEntry(entry, "bonuses", v); }} />
+                  </td>
+                  <td className="px-3 py-2.5 text-right">
+                    <input type="number" step="0.01" className="w-16 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-right text-white text-sm focus:ring-2 focus:ring-br-red-main/40" defaultValue={entry.deductions} onBlur={(e) => { const v = Number(e.target.value); if (!isNaN(v) && v !== entry.deductions) handleSaveEntry(entry, "deductions", v); }} />
+                  </td>
+                  <td className="px-3 py-2.5 text-right font-semibold text-br-pearl">${Number(entry.total).toFixed(2)}</td>
+                  <td className="px-3 py-2.5 text-right text-br-white/80">${Number(entry.prevBalance).toFixed(2)}</td>
+                  <td className="px-3 py-2.5 text-right text-br-white/80">${Number(entry.amountPaid).toFixed(2)}</td>
+                  <td className="px-3 py-2.5 text-right">
+                    <span className={`font-medium ${entry.balanceAfter > 0 ? "text-amber-400" : entry.balanceAfter < 0 ? "text-green-400" : "text-br-white/80"}`}>${Number(entry.balanceAfter).toFixed(2)}</span>
+                  </td>
+                  <td className="px-3 py-2.5">{statusBadge(entry.paymentStatus)}</td>
+                  <td className="px-3 py-2.5">
+                    {partialPayId === entry.id ? (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <input type="number" step="0.01" placeholder="$" value={partialAmount} onChange={(e) => setPartialAmount(e.target.value)} className="w-20 rounded-lg border border-white/10 bg-br-carbon/60 px-2 py-1 text-white text-sm focus:ring-2 focus:ring-br-red-main/40" />
+                        <button type="button" onClick={() => submitPartialPay(entry.id)} className="rounded-lg bg-br-red-main/20 text-br-red-main px-2 py-1 text-xs font-medium hover:bg-br-red-main hover:text-white transition">Apply</button>
+                        <button type="button" onClick={() => { setPartialPayId(null); setPartialAmount(""); }} className="rounded-lg border border-white/20 px-2 py-1 text-xs hover:bg-white/5 transition">Cancel</button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-1.5">
+                        <button type="button" onClick={() => markFullPaid(entry.id)} disabled={savingId === entry.id} className="rounded-lg bg-green-500/20 text-green-400 px-2.5 py-1 text-xs font-medium hover:bg-green-500/30 disabled:opacity-50 transition">Mark paid</button>
+                        <button type="button" onClick={() => { setPartialPayId(entry.id); setPartialAmount(String(entry.amountPaid)); }} className="rounded-lg border border-amber-500/40 text-amber-400 px-2.5 py-1 text-xs font-medium hover:bg-amber-500/20 transition">Partial</button>
+                        {entry.workerType === "OCCASIONAL" && (
+                          <button type="button" onClick={() => deleteEntry(entry.id)} className="rounded-lg border border-red-400/40 text-red-400 px-2.5 py-1 text-xs font-medium hover:bg-red-500/20 transition">Remove</button>
+                        )}
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
