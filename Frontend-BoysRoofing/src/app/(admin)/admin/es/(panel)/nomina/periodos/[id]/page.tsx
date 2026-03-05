@@ -384,7 +384,7 @@ export default function NominaPeriodoDetalleES() {
             </thead>
             <tbody>
               {period.entries.map((entry) => (
-                <tr key={entry.id} className="border-t border-white/5 hover:bg-white/[0.03] transition">
+                <tr key={entry.id} className="border-t border-white/5 hover:bg-white/5 transition">
                 <td className="px-3 py-2.5 font-medium text-br-pearl">{displayName(entry)}</td>
                 <td className="px-3 py-2.5">
                   <span className={entry.workerType === "OCCASIONAL" ? "text-amber-400" : ""}>
@@ -531,6 +531,7 @@ export default function NominaPeriodoDetalleES() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
