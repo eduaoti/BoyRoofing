@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
+import { ToastMessage, type ToastType } from "@/components/ToastMessage";
 
 type QuoteStatus = "PENDING" | "IN_REVIEW" | "SENT" | "CLOSED" | string;
 
@@ -16,6 +17,7 @@ type Quote = {
   service: string;
   status: QuoteStatus;
   createdAt?: string;
+  invoice?: { id: number } | null;
 };
 
 const STATUS_OPTIONS = ["ALL", "PENDING", "IN_REVIEW", "SENT", "CLOSED"] as const;
@@ -28,6 +30,8 @@ export default function QuotesES() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [search, setSearch] = useState("");
+  const [deletingId, setDeletingId] = useState<number | string | null>(null);
+  const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
   useEffect(() => {
     async function loadQuotes() {
@@ -68,6 +72,30 @@ export default function QuotesES() {
     loadQuotes();
   }, [router]);
 
+  async function handleDeleteInvoice(quoteId: number | string) {
+    if (!confirm("¿Borrar la factura de esta cotización? La cotización volverá a PENDING. No se puede deshacer.")) return;
+    setDeletingId(quoteId);
+    try {
+      const res = await apiFetch(`/invoices/quote/${quoteId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setToast({ type: "error", message: err?.message || "Error al borrar la factura" });
+        return;
+      }
+      setQuotes((prev) =>
+        prev.map((q) =>
+          q.id === quoteId ? { ...q, invoice: null, status: "PENDING" as QuoteStatus } : q
+        )
+      );
+      setToast({ type: "success", message: "Factura borrada. La cotización volvió a PENDING." });
+    } catch (e) {
+      console.error(e);
+      setToast({ type: "error", message: "Error al borrar la factura" });
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   const filteredQuotes = useMemo(() => {
     let result = [...quotes];
 
@@ -105,6 +133,9 @@ export default function QuotesES() {
 
   return (
     <div className="space-y-6 p-6 text-white">
+      {toast && (
+        <ToastMessage type={toast.type} message={toast.message} onDismiss={() => setToast(null)} />
+      )}
       {/* HEADER */}
       <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
@@ -247,12 +278,24 @@ export default function QuotesES() {
                       </td>
 
                       <td className="px-6 py-3 align-middle text-right">
-                        <Link
-                          href={`/admin/es/quotes/${q.id}`}
-                          className="text-xs font-semibold text-br-red-main hover:text-br-red-light underline underline-offset-4"
-                        >
-                          Ver detalle
-                        </Link>
+                        <div className="flex flex-wrap items-center justify-end gap-2">
+                          <Link
+                            href={`/admin/es/quotes/${q.id}`}
+                            className="text-xs font-semibold text-br-red-main hover:text-br-red-light underline underline-offset-4"
+                          >
+                            Ver detalle
+                          </Link>
+                          {q.invoice && (
+                            <button
+                              type="button"
+                              disabled={deletingId === q.id}
+                              onClick={() => handleDeleteInvoice(q.id)}
+                              className="text-xs font-medium text-br-white/70 hover:text-red-400 underline underline-offset-4 disabled:opacity-50"
+                            >
+                              {deletingId === q.id ? "Borrando…" : "Borrar factura"}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );

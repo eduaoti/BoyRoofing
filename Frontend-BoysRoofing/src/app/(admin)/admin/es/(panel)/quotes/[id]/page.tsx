@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
+import { ToastMessage, type ToastType } from "@/components/ToastMessage";
 
 type QuoteStatus = "PENDING" | "IN_REVIEW" | "SENT" | "CLOSED" | string;
 
@@ -26,6 +27,7 @@ export default function QuoteDetailES() {
   const [quote, setQuote] = useState<Quote | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
   async function loadQuote() {
     try {
@@ -103,7 +105,7 @@ export default function QuoteDetailES() {
       if (!res.ok) {
         console.error("Error al eliminar la cotización:", await res.text());
         setDeleting(false);
-        alert("Hubo un problema al eliminar la cotización. Intenta de nuevo.");
+        setToast({ type: "error", message: "Hubo un problema al eliminar la cotización. Intenta de nuevo." });
         return;
       }
 
@@ -111,7 +113,7 @@ export default function QuoteDetailES() {
     } catch (err) {
       console.error("Error al eliminar la cotización:", err);
       setDeleting(false);
-      alert("Hubo un problema al eliminar la cotización. Intenta de nuevo.");
+      setToast({ type: "error", message: "Hubo un problema al eliminar la cotización. Intenta de nuevo." });
     }
   }
 
@@ -160,6 +162,9 @@ export default function QuoteDetailES() {
 
   return (
     <div className="max-w-4xl space-y-6">
+      {toast && (
+        <ToastMessage type={toast.type} message={toast.message} onDismiss={() => setToast(null)} />
+      )}
       {/* BREADCRUMB / HEADER */}
       <div className="flex items-center justify-between gap-3">
         <div>

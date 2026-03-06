@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
+import { ToastMessage, type ToastType } from "@/components/ToastMessage";
 
 type Entry = {
   id: number;
@@ -66,6 +67,7 @@ export default function NominaPeriodoDetalleES() {
   const [showAddWorker, setShowAddWorker] = useState(false);
   const [workersList, setWorkersList] = useState<{ id: number; name: string }[]>([]);
   const [addingWorkerId, setAddingWorkerId] = useState<number | null>(null);
+  const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
   const load = useCallback(() => {
     if (!id) return;
@@ -99,7 +101,7 @@ export default function NominaPeriodoDetalleES() {
         if (!r.ok) return r.text().then((t) => Promise.reject(new Error(t)));
         load();
       })
-      .catch((e) => alert(e.message))
+      .catch((e) => setToast({ type: "error", message: e?.message || "Error" }))
       .finally(() => setSavingId(null));
   }
 
@@ -123,14 +125,14 @@ export default function NominaPeriodoDetalleES() {
         if (!r.ok) return r.text().then((t) => Promise.reject(new Error(t)));
         load();
       })
-      .catch((e) => alert(e.message))
+      .catch((e) => setToast({ type: "error", message: e?.message || "Error" }))
       .finally(() => setSavingId(null));
   }
 
   function submitPartialPay(entryId: number) {
     const amt = Number(partialAmount);
     if (isNaN(amt) || amt < 0) {
-      alert("Ingresa un monto válido");
+      setToast({ type: "error", message: "Ingresa un monto válido" });
       return;
     }
     setSavingId(entryId);
@@ -144,7 +146,7 @@ export default function NominaPeriodoDetalleES() {
         setPartialAmount("");
         load();
       })
-      .catch((e) => alert(e.message))
+      .catch((e) => setToast({ type: "error", message: e?.message || "Error" }))
       .finally(() => setSavingId(null));
   }
 
@@ -180,7 +182,7 @@ export default function NominaPeriodoDetalleES() {
         setOccNotes("");
         load();
       })
-      .catch((err) => alert(err.message))
+      .catch((err) => setToast({ type: "error", message: err?.message || "Error" }))
       .finally(() => setSavingId(null));
   }
 
@@ -188,7 +190,7 @@ export default function NominaPeriodoDetalleES() {
     if (!confirm("¿Quitar esta fila? El saldo del trabajador se revertirá para este periodo.")) return;
     apiFetch(`/payroll/entries/${entryId}`, { method: "DELETE" })
       .then((r) => r.ok && load())
-      .catch((err) => alert(err.message));
+      .catch((err) => setToast({ type: "error", message: err?.message || "Error" }));
   }
 
   function openAddWorkerModal() {
@@ -217,7 +219,7 @@ export default function NominaPeriodoDetalleES() {
         setShowAddWorker(false);
         load();
       })
-      .catch((e) => alert(e.message))
+      .catch((e) => setToast({ type: "error", message: e?.message || "Error" }))
       .finally(() => setAddingWorkerId(null));
   }
 
@@ -256,6 +258,9 @@ export default function NominaPeriodoDetalleES() {
 
   return (
     <div className="space-y-6 p-4 md:p-6 text-white">
+      {toast && (
+        <ToastMessage type={toast.type} message={toast.message} onDismiss={() => setToast(null)} />
+      )}
       {/* Header card */}
       <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-br-smoke/90 to-br-carbon/80 p-5 shadow-xl">
         <div className="flex flex-wrap items-start justify-between gap-4">

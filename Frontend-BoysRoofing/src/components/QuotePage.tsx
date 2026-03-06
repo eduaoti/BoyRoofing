@@ -3,9 +3,11 @@
 import useTranslation from "@/hooks/useTranslation";
 import { useState } from "react";
 import { apiFetch } from "@/lib/api";
+import { ToastMessage, type ToastType } from "@/components/ToastMessage";
 
 export default function QuotePage() {
   const { t } = useTranslation();
+  const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -44,7 +46,7 @@ export default function QuotePage() {
         throw new Error("Error al enviar la cotización");
       }
 
-      alert("¡Cotización enviada con éxito!");
+      setToast({ type: "success", message: "¡Cotización enviada con éxito!" });
 
       setForm({
         name: "",
@@ -60,7 +62,7 @@ export default function QuotePage() {
       });
     } catch (error) {
       console.error("Error:", error);
-      alert("Hubo un error al enviar tu solicitud. Inténtalo más tarde.");
+      setToast({ type: "error", message: "Hubo un error al enviar tu solicitud. Inténtalo más tarde." });
     }
   };
 
@@ -73,6 +75,9 @@ export default function QuotePage() {
 
   return (
     <div className="bg-[#0F0F0F] min-h-screen text-br-white py-20">
+      {toast && (
+        <ToastMessage type={toast.type} message={toast.message} onDismiss={() => setToast(null)} />
+      )}
       <div className="mx-auto max-w-4xl px-4">
         {/* Encabezado */}
         <div className="mb-10">

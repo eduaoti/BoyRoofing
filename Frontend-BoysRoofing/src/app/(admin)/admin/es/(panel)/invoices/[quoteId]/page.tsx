@@ -4,6 +4,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
+import { ToastMessage, type ToastType } from "@/components/ToastMessage";
 
 type QuoteStatus = "PENDING" | "IN_REVIEW" | "SENT" | "CLOSED" | string;
 
@@ -30,6 +31,7 @@ export default function InvoiceCreateES() {
   const [quote, setQuote] = useState<Quote | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
   // ---- campos del formulario ----
   const [billTo, setBillTo] = useState("");
@@ -165,7 +167,7 @@ export default function InvoiceCreateES() {
 
       if (!res.ok) {
         console.error("Error al crear la factura:", await res.text());
-        alert("Hubo un problema al crear la factura.");
+        setToast({ type: "error", message: "Hubo un problema al crear la factura." });
         setSubmitting(false);
         return;
       }
@@ -181,13 +183,11 @@ export default function InvoiceCreateES() {
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      alert(
-        "Factura creada, enviada al cliente por correo y descargada en PDF."
-      );
-      router.push(`/admin/es/quotes/${quote.id}`);
+      setToast({ type: "success", message: "Factura creada, enviada al cliente por correo y descargada en PDF." });
+      setTimeout(() => router.push(`/admin/es/quotes/${quote.id}`), 1500);
     } catch (err) {
       console.error("Error enviando factura:", err);
-      alert("Error inesperado al crear la factura.");
+      setToast({ type: "error", message: "Error inesperado al crear la factura." });
       setSubmitting(false);
     }
   }
@@ -202,6 +202,9 @@ export default function InvoiceCreateES() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+      {toast && (
+        <ToastMessage type={toast.type} message={toast.message} onDismiss={() => setToast(null)} />
+      )}
       {/* Header */}
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>

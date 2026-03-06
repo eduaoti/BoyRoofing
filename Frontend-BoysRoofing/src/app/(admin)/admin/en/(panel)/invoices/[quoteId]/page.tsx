@@ -4,6 +4,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
+import { ToastMessage, type ToastType } from "@/components/ToastMessage";
 
 type QuoteStatus = "PENDING" | "IN_REVIEW" | "SENT" | "CLOSED" | string;
 
@@ -30,6 +31,7 @@ export default function InvoiceCreateEN() {
   const [quote, setQuote] = useState<Quote | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
   // ---- campos del formulario ----
   const [billTo, setBillTo] = useState("");
@@ -156,7 +158,7 @@ export default function InvoiceCreateEN() {
 
       if (!res.ok) {
         console.error("Error creating invoice:", await res.text());
-        alert("There was a problem creating the invoice.");
+        setToast({ type: "error", message: "There was a problem creating the invoice." });
         setSubmitting(false);
         return;
       }
@@ -172,11 +174,11 @@ export default function InvoiceCreateEN() {
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      alert("Invoice created, emailed to the customer and downloaded as PDF.");
-      router.push(`/admin/en/quotes/${quote.id}`);
+      setToast({ type: "success", message: "Invoice created, emailed to the customer and downloaded as PDF." });
+      setTimeout(() => router.push(`/admin/en/quotes/${quote.id}`), 1500);
     } catch (err) {
       console.error("Error submitting invoice:", err);
-      alert("Unexpected error while creating invoice.");
+      setToast({ type: "error", message: "Unexpected error while creating invoice." });
       setSubmitting(false);
     }
   }
@@ -191,6 +193,9 @@ export default function InvoiceCreateEN() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+      {toast && (
+        <ToastMessage type={toast.type} message={toast.message} onDismiss={() => setToast(null)} />
+      )}
       {/* Header */}
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>

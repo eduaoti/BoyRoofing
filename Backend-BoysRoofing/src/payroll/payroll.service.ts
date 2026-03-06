@@ -42,6 +42,13 @@ export class PayrollService {
     });
   }
 
+  async deletePeriod(id: number) {
+    const period = await this.prisma.payrollPeriod.findUnique({ where: { id } });
+    if (!period) throw new Error('Period not found');
+    await this.prisma.payrollPeriod.delete({ where: { id } });
+    return { ok: true };
+  }
+
   async createPeriod(dto: CreatePeriodDto) {
     const start = new Date(dto.startDate);
     const end = new Date(dto.endDate);
