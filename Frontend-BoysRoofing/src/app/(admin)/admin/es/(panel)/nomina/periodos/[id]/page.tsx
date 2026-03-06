@@ -39,12 +39,21 @@ type Period = {
 /* Iniciales días: D, L, M, M, J, V, S (getDay 0=domingo) */
 const DAY_INITIALS = ["D", "L", "M", "M", "J", "V", "S"];
 
+/* Parse YYYY-MM-DD as local date (evitar que UTC cambie el día) */
+function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1);
+}
+
 function getDaysInPeriod(startDate: string, endDate: string): { dateStr: string; initial: string }[] {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+  const start = parseLocalDate(startDate);
+  const end = parseLocalDate(endDate);
   const days: { dateStr: string; initial: string }[] = [];
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    const dateStr = d.toISOString().slice(0, 10);
+  for (let d = new Date(start.getTime()); d <= end; d.setDate(d.getDate() + 1)) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const dateStr = `${y}-${m}-${day}`;
     days.push({ dateStr, initial: DAY_INITIALS[d.getDay()] });
   }
   return days;
@@ -219,6 +228,20 @@ export default function NominaPeriodoDetalleES() {
   function markFullPaid(entryId: number) {
     setSavingId(entryId);
     apiFetch(`/payroll/entries/${entryId}/mark-full-paid`, { method: "POST" })
+      .then((r) => {
+        if (!r.ok) return r.text().then((t) => Promise.reject(new Error(t)));
+        load();
+      })
+      .catch((e) => setToast({ type: "error", message: e?.message || "Error" }))
+      .finally(() => setSavingId(null));
+  }
+
+  function markUnpaid(entryId: number) {
+    setSavingId(entryId);
+    apiFetch(`/payroll/entries/${entryId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ amountPaid: 0 }),
+    })
       .then((r) => {
         if (!r.ok) return r.text().then((t) => Promise.reject(new Error(t)));
         load();
@@ -699,6 +722,16 @@ export default function NominaPeriodoDetalleES() {
                   >
                     Parcial
                   </button>
+                  {(entry.amountPaid > 0 || entry.paymentStatus !== "UNPAID") && (
+                    <button
+                      type="button"
+                      onClick={() => markUnpaid(entry.id)}
+                      disabled={savingId === entry.id}
+                      className="rounded-lg border border-white/30 text-br-white/70 px-2 py-1 text-xs hover:bg-white/10"
+                    >
+                      Marcar sin pagar
+                    </button>
+                  )}
                   {entry.workerType === "OCCASIONAL" && (
                     <button
                       type="button"
@@ -883,6 +916,9 @@ export default function NominaPeriodoDetalleES() {
                       >
                         Parcial
                       </button>
+                      {(entry.amountPaid > 0 || entry.paymentStatus !== "UNPAID") && (
+                        <button type="button" onClick={() => markUnpaid(entry.id)} disabled={savingId === entry.id} className="rounded-lg border border-white/30 text-br-white/70 px-2.5 py-1 text-xs font-medium hover:bg-white/10 disabled:opacity-50 transition">Marcar sin pagar</button>
+                      )}
                       {entry.workerType === "OCCASIONAL" && (
                         <button
                           type="button"

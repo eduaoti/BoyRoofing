@@ -17,6 +17,70 @@ type Period = {
   entries?: { total: number; amountPaid: number }[];
 };
 
+function DateRangeCalendar({
+  startDate,
+  endDate,
+  pendingStart,
+  onDayClick,
+}: {
+  startDate: string;
+  endDate: string;
+  pendingStart: string | null;
+  onDayClick: (dayStr: string) => void;
+}) {
+  const base = startDate ? new Date(startDate + "T12:00:00") : new Date();
+  const year = base.getFullYear();
+  const month = base.getMonth();
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month + 1, 0);
+  const offset = first.getDay();
+  const daysInMonth = last.getDate();
+  const cells: (string | null)[] = [];
+  for (let i = 0; i < offset; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    cells.push(dateStr);
+  }
+  const weekDays = ["S", "M", "T", "W", "T", "F", "S"];
+  const isInRange = (d: string | null) => {
+    if (!d || !startDate || !endDate) return false;
+    return d >= startDate && d <= endDate;
+  };
+  const isSelected = (d: string | null) => d === startDate || d === endDate || d === pendingStart;
+
+  return (
+    <div className="min-w-[280px]">
+      <div className="grid grid-cols-7 gap-0.5 text-center text-xs">
+        {weekDays.map((w) => (
+          <div key={w} className="py-1 font-medium text-br-white/50">
+            {w}
+          </div>
+        ))}
+        {cells.map((d, i) =>
+          d ? (
+            <button
+              key={d}
+              type="button"
+              onClick={() => onDayClick(d)}
+              className={`h-8 rounded text-sm transition ${
+                isSelected(d)
+                  ? "bg-br-red-main text-white"
+                  : isInRange(d)
+                  ? "bg-br-red-main/30 text-white"
+                  : "text-br-pearl hover:bg-white/10"
+              }`}
+            >
+              {new Date(d + "T12:00:00").getDate()}
+            </button>
+          ) : (
+            <div key={`e-${i}`} />
+          )
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function PayrollEN() {
   const router = useRouter();
   const [periods, setPeriods] = useState<Period[]>([]);
@@ -29,8 +93,9 @@ export default function PayrollEN() {
   const [label, setLabel] = useState("");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
-  const startInputRef = useRef<HTMLInputElement>(null);
-  const endInputRef = useRef<HTMLInputElement>(null);
+  const [rangeOpen, setRangeOpen] = useState(false);
+  const [pendingStart, setPendingStart] = useState<string | null>(null);
+  const rangeRef = useRef<HTMLDivElement>(null);
 
   function load() {
     setLoading(true);
@@ -53,6 +118,15 @@ export default function PayrollEN() {
     load();
   }, []);
 
+  useEffect(() => {
+    if (!rangeOpen) return;
+    function onDocClick(e: MouseEvent) {
+      if (rangeRef.current && !rangeRef.current.contains(e.target as Node)) setRangeOpen(false);
+    }
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, [rangeOpen]);
+
   function createPeriod(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -74,6 +148,33 @@ export default function PayrollEN() {
       })
       .catch((err) => setToast({ type: "error", message: err?.message || "Failed to create period" }))
       .finally(() => setSaving(false));
+  }
+
+  function formatRangeLabel(s: string, e: string) {
+    if (!s || !e) return "Select start and end date";
+    const start = new Date(s + "T12:00:00");
+    const end = new Date(e + "T12:00:00");
+    return start.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) + " – " + end.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  function handleRangeDayClick(dayStr: string) {
+    if (!pendingStart) {
+      setStartDate(dayStr);
+      setEndDate(dayStr);
+      setPendingStart(dayStr);
+    } else {
+      const a = pendingStart;
+      const b = dayStr;
+      if (a <= b) {
+        setStartDate(a);
+        setEndDate(b);
+      } else {
+        setStartDate(b);
+        setEndDate(a);
+      }
+      setPendingStart(null);
+      setRangeOpen(false);
+    }
   }
 
   function confirmDeletePeriod() {
@@ -144,52 +245,30 @@ export default function PayrollEN() {
               <p className="mt-1 text-sm text-br-white/60">
                 A row will be created for each active worker. You can edit days and amounts in the period view.
               </p>
-              <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                <div>
-                  <label className="block text-sm text-br-white/70">Start date</label>
-                  <div className="mt-1 flex rounded border border-br-smoke-light bg-br-carbon overflow-hidden">
-                    <input
-                      ref={startInputRef}
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      max={endDate || undefined}
-                      className="flex-1 min-w-0 bg-transparent px-3 py-2 text-white text-sm [color-scheme:dark]"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => startInputRef.current?.showPicker?.() ?? startInputRef.current?.click()}
-                      className="px-3 py-2 text-br-pearl/80 hover:text-br-red-main transition shrink-0"
-                      aria-label="Open calendar"
-                    >
-                      <CalendarDaysIcon className="h-5 w-5" />
-                    </button>
-                  </div>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="relative sm:col-span-2" ref={rangeRef}>
+                  <label className="block text-sm text-br-white/70">Date range</label>
+                  <button
+                    type="button"
+                    onClick={() => { setRangeOpen((o) => !o); setPendingStart(null); }}
+                    className="mt-1 flex w-full items-center justify-between rounded border border-br-smoke-light bg-br-carbon px-3 py-2.5 text-left text-sm text-white"
+                  >
+                    <span className={startDate && endDate ? "" : "text-br-white/50"}>{formatRangeLabel(startDate, endDate)}</span>
+                    <CalendarDaysIcon className="h-5 w-5 shrink-0 text-br-pearl/80" />
+                  </button>
+                  {rangeOpen && (
+                    <div className="absolute left-0 top-full z-10 mt-1 rounded-lg border border-white/10 bg-br-carbon p-3 shadow-xl">
+                      <p className="mb-2 text-xs text-br-white/60">Click start date, then end date (same calendar)</p>
+                      <DateRangeCalendar
+                        startDate={startDate}
+                        endDate={endDate}
+                        pendingStart={pendingStart}
+                        onDayClick={handleRangeDayClick}
+                      />
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-sm text-br-white/70">End date</label>
-                  <div className="mt-1 flex rounded border border-br-smoke-light bg-br-carbon overflow-hidden">
-                    <input
-                      ref={endInputRef}
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      min={startDate || undefined}
-                      className="flex-1 min-w-0 bg-transparent px-3 py-2 text-white text-sm [color-scheme:dark]"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => endInputRef.current?.showPicker?.() ?? endInputRef.current?.click()}
-                      className="px-3 py-2 text-br-pearl/80 hover:text-br-red-main transition shrink-0"
-                      aria-label="Open calendar"
-                    >
-                      <CalendarDaysIcon className="h-5 w-5" />
-                    </button>
-                  </div>
-                </div>
-                <div>
+                <div className="sm:col-span-2">
                   <label className="block text-sm text-br-white/70">Label (optional)</label>
                   <input
                     type="text"
@@ -203,7 +282,7 @@ export default function PayrollEN() {
               <div className="mt-6 flex gap-2">
                 <button
                   type="submit"
-                  disabled={saving}
+                  disabled={saving || !startDate || !endDate}
                   className="admin-btn-primary rounded-xl px-4 py-2.5 text-sm font-medium disabled:opacity-60"
                 >
                   {saving ? "Creating…" : "Create period"}
