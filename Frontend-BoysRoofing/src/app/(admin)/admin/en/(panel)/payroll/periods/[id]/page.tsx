@@ -39,12 +39,21 @@ type Period = {
 /* Day initials: Domingo, Lunes, Martes, Miércoles, Jueves, Viernes, Sábado (getDay 0=Sun) */
 const DAY_INITIALS = ["D", "L", "M", "M", "J", "V", "S"];
 
+/* Parse YYYY-MM-DD as local date (avoid UTC shifting day) */
+function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1);
+}
+
 function getDaysInPeriod(startDate: string, endDate: string): { dateStr: string; initial: string }[] {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+  const start = parseLocalDate(startDate);
+  const end = parseLocalDate(endDate);
   const days: { dateStr: string; initial: string }[] = [];
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    const dateStr = d.toISOString().slice(0, 10);
+  for (let d = new Date(start.getTime()); d <= end; d.setDate(d.getDate() + 1)) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const dateStr = `${y}-${m}-${day}`;
     days.push({ dateStr, initial: DAY_INITIALS[d.getDay()] });
   }
   return days;
@@ -228,6 +237,20 @@ export default function PayrollPeriodDetailEN() {
   function markFullPaid(entryId: number) {
     setSavingId(entryId);
     apiFetch(`/payroll/entries/${entryId}/mark-full-paid`, { method: "POST" })
+      .then((r) => {
+        if (!r.ok) return r.text().then((t) => Promise.reject(new Error(t)));
+        load();
+      })
+      .catch((e) => setToast({ type: "error", message: e?.message || "Error" }))
+      .finally(() => setSavingId(null));
+  }
+
+  function markUnpaid(entryId: number) {
+    setSavingId(entryId);
+    apiFetch(`/payroll/entries/${entryId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ amountPaid: 0 }),
+    })
       .then((r) => {
         if (!r.ok) return r.text().then((t) => Promise.reject(new Error(t)));
         load();
@@ -653,6 +676,16 @@ export default function PayrollPeriodDetailEN() {
                   >
                     Partial
                   </button>
+                  {(entry.amountPaid > 0 || entry.paymentStatus !== "UNPAID") && (
+                    <button
+                      type="button"
+                      onClick={() => markUnpaid(entry.id)}
+                      disabled={savingId === entry.id}
+                      className="rounded-lg border border-white/30 text-br-white/70 px-2 py-1 text-xs hover:bg-white/10"
+                    >
+                      Mark unpaid
+                    </button>
+                  )}
                   {entry.workerType === "OCCASIONAL" && (
                     <button
                       type="button"
@@ -765,6 +798,9 @@ export default function PayrollPeriodDetailEN() {
                       <div className="flex flex-wrap gap-1.5">
                         <button type="button" onClick={() => markFullPaid(entry.id)} disabled={savingId === entry.id} className="rounded-lg bg-green-500/20 text-green-400 px-2.5 py-1 text-xs font-medium hover:bg-green-500/30 disabled:opacity-50 transition">Mark paid</button>
                         <button type="button" onClick={() => { setPartialPayId(entry.id); setPartialAmount(String(entry.amountPaid)); }} className="rounded-lg border border-amber-500/40 text-amber-400 px-2.5 py-1 text-xs font-medium hover:bg-amber-500/20 transition">Partial</button>
+                        {(entry.amountPaid > 0 || entry.paymentStatus !== "UNPAID") && (
+                          <button type="button" onClick={() => markUnpaid(entry.id)} disabled={savingId === entry.id} className="rounded-lg border border-white/30 text-br-white/70 px-2.5 py-1 text-xs font-medium hover:bg-white/10 disabled:opacity-50 transition">Mark unpaid</button>
+                        )}
                         {entry.workerType === "OCCASIONAL" && (
                           <button type="button" onClick={() => openDeleteEntryConfirm(entry.id)} className="rounded-lg border border-red-400/40 text-red-400 px-2.5 py-1 text-xs font-medium hover:bg-red-500/20 transition">Remove</button>
                         )}
