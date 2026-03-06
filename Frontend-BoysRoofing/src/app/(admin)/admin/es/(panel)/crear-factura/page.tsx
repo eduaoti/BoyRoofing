@@ -193,11 +193,11 @@ export default function CrearFacturaES() {
           onDismiss={() => setToast(null)}
         />
       )}
-      <header>
-        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-br-pearl">
+      <header className="animate-fade-up">
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight admin-page-title">
           Crear factura
         </h1>
-        <p className="mt-1 text-sm text-br-white/60">
+        <p className="mt-2 text-sm text-br-white/60">
           Llena el formulario desde cero. La factura en PDF se enviará al correo
           que indiques abajo.
         </p>
@@ -205,7 +205,7 @@ export default function CrearFacturaES() {
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-6 rounded-2xl border border-br-smoke-light bg-br-smoke/25 p-6 shadow-lg"
+        className="admin-card-glow space-y-6 p-6"
       >
         {/* CORREO DESTINO */}
         <section className="rounded-lg border border-br-red-main/40 bg-br-red-main/5 p-4">
@@ -393,7 +393,7 @@ export default function CrearFacturaES() {
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center justify-center rounded-full bg-br-red-main px-6 py-2 text-xs font-semibold text-white hover:bg-br-red-light disabled:opacity-60 disabled:cursor-not-allowed transition"
+            className="admin-btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {submitting ? "Creando factura..." : "Crear y enviar factura"}
           </button>

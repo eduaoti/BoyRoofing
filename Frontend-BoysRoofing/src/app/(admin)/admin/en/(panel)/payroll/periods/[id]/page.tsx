@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import { ToastMessage, type ToastType } from "@/components/ToastMessage";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 type Entry = {
   id: number;
@@ -67,6 +68,8 @@ export default function PayrollPeriodDetailEN() {
   const [showAddWorker, setShowAddWorker] = useState(false);
   const [workersList, setWorkersList] = useState<{ id: number; name: string }[]>([]);
   const [addingWorkerId, setAddingWorkerId] = useState<number | null>(null);
+  const [confirmDeleteEntryId, setConfirmDeleteEntryId] = useState<number | null>(null);
+  const [deletingEntryId, setDeletingEntryId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
   const load = useCallback(() => {
@@ -194,11 +197,27 @@ export default function PayrollPeriodDetailEN() {
       .finally(() => setSavingId(null));
   }
 
-  function deleteEntry(entryId: number) {
-    if (!confirm("Remove this row? Worker balance will be reverted for this period.")) return;
-    apiFetch(`/payroll/entries/${entryId}`, { method: "DELETE" })
-      .then((r) => r.ok && load())
-      .catch((err) => setToast({ type: "error", message: err?.message || "Error" }));
+  function openDeleteEntryConfirm(entryId: number) {
+    setConfirmDeleteEntryId(entryId);
+  }
+
+  async function doDeleteEntry() {
+    if (confirmDeleteEntryId == null) return;
+    setDeletingEntryId(confirmDeleteEntryId);
+    try {
+      const r = await apiFetch(`/payroll/entries/${confirmDeleteEntryId}`, { method: "DELETE" });
+      if (r.ok) {
+        setConfirmDeleteEntryId(null);
+        load();
+      } else {
+        const text = await r.text();
+        setToast({ type: "error", message: text || "Error" });
+      }
+    } catch (err) {
+      setToast({ type: "error", message: (err as Error)?.message || "Error" });
+    } finally {
+      setDeletingEntryId(null);
+    }
   }
 
   function openAddWorkerModal() {
@@ -269,6 +288,17 @@ export default function PayrollPeriodDetailEN() {
       {toast && (
         <ToastMessage type={toast.type} message={toast.message} onDismiss={() => setToast(null)} />
       )}
+      <ConfirmModal
+        open={confirmDeleteEntryId != null}
+        onClose={() => setConfirmDeleteEntryId(null)}
+        title="Remove row"
+        message="Remove this row? Worker balance will be reverted for this period."
+        confirmLabel="Remove"
+        cancelLabel="Cancel"
+        onConfirm={doDeleteEntry}
+        loading={deletingEntryId != null}
+        danger
+      />
       {/* Header card */}
       <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-br-smoke/90 to-br-carbon/80 p-5 shadow-xl">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -493,7 +523,7 @@ export default function PayrollPeriodDetailEN() {
                   {entry.workerType === "OCCASIONAL" && (
                     <button
                       type="button"
-                      onClick={() => deleteEntry(entry.id)}
+                      onClick={() => openDeleteEntryConfirm(entry.id)}
                       className="rounded-lg border border-red-400/40 text-red-400 px-2 py-1 text-xs"
                     >
                       Remove
@@ -604,7 +634,7 @@ export default function PayrollPeriodDetailEN() {
                         <button type="button" onClick={() => markFullPaid(entry.id)} disabled={savingId === entry.id} className="rounded-lg bg-green-500/20 text-green-400 px-2.5 py-1 text-xs font-medium hover:bg-green-500/30 disabled:opacity-50 transition">Mark paid</button>
                         <button type="button" onClick={() => { setPartialPayId(entry.id); setPartialAmount(String(entry.amountPaid)); }} className="rounded-lg border border-amber-500/40 text-amber-400 px-2.5 py-1 text-xs font-medium hover:bg-amber-500/20 transition">Partial</button>
                         {entry.workerType === "OCCASIONAL" && (
-                          <button type="button" onClick={() => deleteEntry(entry.id)} className="rounded-lg border border-red-400/40 text-red-400 px-2.5 py-1 text-xs font-medium hover:bg-red-500/20 transition">Remove</button>
+                          <button type="button" onClick={() => openDeleteEntryConfirm(entry.id)} className="rounded-lg border border-red-400/40 text-red-400 px-2.5 py-1 text-xs font-medium hover:bg-red-500/20 transition">Remove</button>
                         )}
                       </div>
                     )}
