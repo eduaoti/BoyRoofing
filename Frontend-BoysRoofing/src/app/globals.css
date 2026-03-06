@@ -356,8 +356,16 @@ section {
   }
 }
 
-/* Botón primario con brillo suave al hover */
+/* Botón primario: redondeado y con brillo suave al hover */
 .admin-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  border-radius: 0.75rem;
   background: linear-gradient(135deg, #BA181B 0%, #A4161A 100%);
   box-shadow: 0 4px 14px -2px rgba(186, 24, 27, 0.4);
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
@@ -373,8 +381,16 @@ section {
   transform: translateY(0);
 }
 
-/* Botón secundario (outline) */
+/* Botón secundario: redondeado (outline) */
 .admin-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #D3D3D3;
+  border-radius: 0.75rem;
   border: 1px solid rgba(245, 243, 244, 0.2);
   background: rgba(22, 26, 29, 0.5);
   transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
@@ -386,8 +402,9 @@ section {
   transform: translateY(-1px);
 }
 
-/* Sidebar: link activo con barra y glow */
+/* Sidebar: link activo con barra y glow, esquinas redondeadas */
 .admin-nav-active {
+  border-radius: 0.5rem;
   background: linear-gradient(90deg, rgba(186, 24, 27, 0.15) 0%, transparent 100%);
   border-left: 3px solid #BA181B;
   color: #E5383B;
