@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { ToastMessage, type ToastType } from "@/components/ToastMessage";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 type QuoteStatus = "PENDING" | "IN_REVIEW" | "SENT" | "CLOSED" | string;
 
@@ -31,6 +32,7 @@ export default function QuotesEN() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [search, setSearch] = useState("");
   const [deletingId, setDeletingId] = useState<number | string | null>(null);
+  const [confirmDeleteInvoiceId, setConfirmDeleteInvoiceId] = useState<number | string | null>(null);
   const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
   useEffect(() => {
@@ -75,8 +77,13 @@ export default function QuotesEN() {
     loadQuotes();
   }, [router]);
 
-  async function handleDeleteInvoice(quoteId: number | string) {
-    if (!confirm("Delete the invoice for this quote? The quote will go back to PENDING. This cannot be undone.")) return;
+  function openDeleteInvoiceConfirm(quoteId: number | string) {
+    setConfirmDeleteInvoiceId(quoteId);
+  }
+
+  async function doDeleteInvoice() {
+    if (confirmDeleteInvoiceId == null) return;
+    const quoteId = confirmDeleteInvoiceId;
     setDeletingId(quoteId);
     try {
       const res = await apiFetch(`/invoices/quote/${quoteId}`, { method: "DELETE" });
@@ -91,6 +98,7 @@ export default function QuotesEN() {
         )
       );
       setToast({ type: "success", message: "Invoice deleted. Quote is back to PENDING." });
+      setConfirmDeleteInvoiceId(null);
     } catch (e) {
       console.error(e);
       setToast({ type: "error", message: "Failed to delete invoice" });
@@ -142,13 +150,24 @@ export default function QuotesEN() {
       {toast && (
         <ToastMessage type={toast.type} message={toast.message} onDismiss={() => setToast(null)} />
       )}
+      <ConfirmModal
+        open={confirmDeleteInvoiceId != null}
+        onClose={() => setConfirmDeleteInvoiceId(null)}
+        title="Delete invoice"
+        message="Delete the invoice for this quote? The quote will go back to PENDING. This cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={doDeleteInvoice}
+        loading={deletingId === confirmDeleteInvoiceId}
+        danger
+      />
       {/* HEADER */}
-      <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between animate-fade-up">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-br-pearl">
+          <h1 className="text-3xl font-extrabold tracking-tight admin-page-title">
             Quotes
           </h1>
-          <p className="mt-1 text-sm text-br-white/60">
+          <p className="mt-2 text-sm text-br-white/60">
             Manage all customer quote requests from this panel.
           </p>
         </div>
@@ -164,7 +183,7 @@ export default function QuotesEN() {
       </header>
 
       {/* FILTERS */}
-      <section className="flex flex-col gap-3 rounded-2xl border border-br-smoke-light bg-br-smoke/40 p-4 shadow-lg md:flex-row md:items-center md:justify-between">
+      <section className="admin-card-glow flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-1 items-center gap-3">
           <label className="text-xs font-medium text-br-white/70">
             Search
@@ -202,7 +221,7 @@ export default function QuotesEN() {
       </section>
 
       {/* LIST / TABLE */}
-      <section className="rounded-2xl border border-br-smoke-light bg-br-smoke/30 shadow-lg">
+      <section className="admin-card-glow overflow-hidden">
         {filteredQuotes.length === 0 ? (
           <div className="px-6 py-10 text-center text-sm text-br-white/60">
             No quotes found with the current filters.
@@ -227,7 +246,7 @@ export default function QuotesEN() {
                 </tr>
               </thead>
               <tbody>
-                {filteredQuotes.map((q) => {
+                {filteredQuotes.map((q, idx) => {
                   const createdAt = q.createdAt
                     ? new Date(q.createdAt).toLocaleString()
                     : "—";
@@ -244,7 +263,8 @@ export default function QuotesEN() {
                   return (
                     <tr
                       key={q.id}
-                      className="rounded-lg bg-br-smoke/40 hover:bg-br-smoke/70 transition-colors"
+                      className="admin-list-item rounded-lg bg-br-smoke/40 hover:bg-br-smoke/70 transition-colors"
+                      style={{ animationDelay: `${idx * 50}ms` }}
                     >
                       <td className="px-6 py-3 align-middle">
                         <div className="font-medium text-br-pearl">
@@ -287,7 +307,7 @@ export default function QuotesEN() {
                             <button
                               type="button"
                               disabled={deletingId === q.id}
-                              onClick={() => handleDeleteInvoice(q.id)}
+                              onClick={() => openDeleteInvoiceConfirm(q.id)}
                               className="text-xs font-medium text-br-white/70 hover:text-red-400 underline underline-offset-4 disabled:opacity-50"
                             >
                               {deletingId === q.id ? "Deleting…" : "Delete invoice"}

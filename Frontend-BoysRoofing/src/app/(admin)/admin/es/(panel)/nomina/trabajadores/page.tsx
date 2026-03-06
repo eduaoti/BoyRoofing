@@ -114,24 +114,18 @@ export default function NominaTrabajadoresES() {
       {toast && (
         <ToastMessage type={toast.type} message={toast.message} onDismiss={() => setToast(null)} />
       )}
-      <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between animate-fade-up">
         <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-br-pearl">Trabajadores de plantilla</h1>
-          <p className="mt-1 text-sm text-br-white/60">
+          <h1 className="text-2xl md:text-3xl font-extrabold admin-page-title">Trabajadores de plantilla</h1>
+          <p className="mt-2 text-sm text-br-white/60">
             Se añaden automáticamente al crear un periodo de nómina.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link
-            href="/admin/es/nomina/balances"
-            className="rounded-lg border border-br-smoke-light px-4 py-2 text-sm hover:bg-br-carbon/60"
-          >
+          <Link href="/admin/es/nomina/balances" className="admin-btn-secondary">
             Balances
           </Link>
-          <button
-            onClick={openAdd}
-            className="rounded-lg bg-br-red-main px-4 py-2 text-sm font-medium hover:bg-br-red-light"
-          >
+          <button onClick={openAdd} className="admin-btn-primary">
             Añadir trabajador
           </button>
         </div>
@@ -231,14 +225,15 @@ export default function NominaTrabajadoresES() {
       {/* Vista móvil: cards */}
       <div className="md:hidden space-y-3">
         {workers.length === 0 ? (
-          <div className="rounded-xl border border-br-smoke-light bg-br-smoke/40 px-4 py-8 text-center text-br-white/60">
+          <div className="admin-card-glow px-4 py-8 text-center text-br-white/60">
             No hay trabajadores. Añade uno para empezar.
           </div>
         ) : (
-          workers.map((w) => (
+          workers.map((w, idx) => (
             <div
               key={w.id}
-              className="rounded-xl border border-br-smoke-light bg-br-smoke/40 p-4"
+              className="admin-list-item admin-card-glow p-4"
+              style={{ animationDelay: `${idx * 50}ms` }}
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
@@ -278,9 +273,9 @@ export default function NominaTrabajadoresES() {
       </div>
 
       {/* Vista escritorio: tabla */}
-      <div className="hidden md:block overflow-x-auto rounded-xl border border-br-smoke-light">
-        <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="bg-br-smoke/80">
+      <div className="admin-card-glow hidden md:block overflow-x-auto">
+        <table className="w-full min-w-[640px] border-separate border-spacing-y-1 text-left text-sm">
+          <thead className="text-br-white/70">
             <tr>
               <th className="px-4 py-3 font-semibold">Nombre</th>
               <th className="px-4 py-3 font-semibold">Teléfono</th>
@@ -299,8 +294,12 @@ export default function NominaTrabajadoresES() {
                 </td>
               </tr>
             ) : (
-              workers.map((w) => (
-                <tr key={w.id} className="border-t border-br-smoke-light">
+              workers.map((w, idx) => (
+                <tr
+                  key={w.id}
+                  className="admin-list-item border-t border-white/10 rounded-lg bg-br-smoke/40 hover:bg-br-smoke/70 transition-colors"
+                  style={{ animationDelay: `${idx * 50}ms` }}
+                >
                   <td className="px-4 py-3">{w.name}</td>
                   <td className="px-4 py-3">{w.phone || "—"}</td>
                   <td className="px-4 py-3">{w.role || "—"}</td>

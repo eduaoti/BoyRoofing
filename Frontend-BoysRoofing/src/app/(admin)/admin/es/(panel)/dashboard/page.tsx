@@ -80,12 +80,12 @@ export default function AdminESDashboard() {
   return (
     <div className="space-y-8">
       {/* HEADER */}
-      <header className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+      <header className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between animate-fade-up">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-br-pearl">
+          <h1 className="text-3xl font-extrabold tracking-tight admin-page-title">
             Panel de Administración
           </h1>
-          <p className="text-sm text-br-white/60 mt-1">
+          <p className="text-sm text-br-white/60 mt-2">
             Resumen de las cotizaciones recibidas y su estado actual.
           </p>
         </div>
@@ -101,7 +101,7 @@ export default function AdminESDashboard() {
       {/* TOP STATS */}
       <section className="grid gap-5 md:grid-cols-3">
         {/* Total */}
-        <div className="relative overflow-hidden rounded-2xl border border-br-smoke-light bg-br-smoke/40 px-5 py-4 shadow-lg">
+        <div className="admin-card-glow relative overflow-hidden px-5 py-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.18em] text-br-white/50">
@@ -118,7 +118,7 @@ export default function AdminESDashboard() {
         </div>
 
         {/* Pending */}
-        <div className="relative overflow-hidden rounded-2xl border border-br-smoke-light bg-gradient-to-br from-br-smoke/80 to-br-carbon px-5 py-4 shadow-lg">
+        <div className="admin-card-glow relative overflow-hidden px-5 py-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.18em] text-br-white/50">
@@ -144,7 +144,7 @@ export default function AdminESDashboard() {
         </div>
 
         {/* Status breakdown */}
-        <div className="relative overflow-hidden rounded-2xl border border-br-smoke-light bg-br-smoke/40 px-5 py-4 shadow-lg">
+        <div className="admin-card-glow relative overflow-hidden px-5 py-4">
           <p className="text-xs uppercase tracking-[0.18em] text-br-white/50">
             Desglose por estado
           </p>
@@ -172,8 +172,8 @@ export default function AdminESDashboard() {
       </section>
 
       {/* RECENT QUOTES */}
-      <section className="rounded-2xl border border-br-smoke-light bg-br-smoke/30 shadow-lg">
-        <div className="border-b border-br-smoke-light px-6 py-4 flex items-center justify-between">
+      <section className="admin-card-glow overflow-hidden">
+        <div className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-br-pearl">
               Cotizaciones recientes
@@ -184,7 +184,7 @@ export default function AdminESDashboard() {
           </div>
           <a
             href="/admin/es/quotes"
-            className="text-xs font-medium text-br-red-main hover:text-br-red-light underline underline-offset-4"
+            className="text-xs font-medium text-br-red-main hover:text-br-red-light underline underline-offset-4 transition-colors"
           >
             Ver todas
           </a>
@@ -208,7 +208,7 @@ export default function AdminESDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {stats.recent.map((q) => {
+                {stats.recent.map((q, idx) => {
                   const badgeClass =
                     q.status === "PENDING"
                       ? "bg-yellow-500/10 text-yellow-300 border border-yellow-500/40"
@@ -221,7 +221,8 @@ export default function AdminESDashboard() {
                   return (
                     <tr
                       key={q.id}
-                      className="rounded-lg bg-br-smoke/40 hover:bg-br-smoke/70 transition-colors"
+                      className="admin-list-item rounded-lg bg-br-smoke/40 hover:bg-br-smoke/70 transition-colors"
+                      style={{ animationDelay: `${idx * 60}ms` }}
                     >
                       <td className="px-6 py-3 text-br-pearl">
                         <div className="font-medium">{q.name}</div>

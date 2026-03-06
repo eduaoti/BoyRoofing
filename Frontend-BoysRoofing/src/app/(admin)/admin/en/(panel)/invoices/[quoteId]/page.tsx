@@ -185,7 +185,7 @@ export default function InvoiceCreateEN() {
 
   if (loading || !quote) {
     return (
-      <div className="max-w-4xl mx-auto mt-6 rounded-2xl border border-br-smoke-light bg-br-smoke/30 p-6 text-sm text-br-white/70">
+      <div className="admin-card-glow max-w-4xl mx-auto mt-6 p-6 text-sm text-br-white/70">
         {loading ? "Loading quote data..." : "Quote not found."}
       </div>
     );
@@ -197,7 +197,7 @@ export default function InvoiceCreateEN() {
         <ToastMessage type={toast.type} message={toast.message} onDismiss={() => setToast(null)} />
       )}
       {/* Header */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between animate-fade-up">
         <div>
           <button
             onClick={() => router.push(`/admin/en/quotes/${quote.id}`)}
@@ -205,7 +205,7 @@ export default function InvoiceCreateEN() {
           >
             ← Back to quote
           </button>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-br-pearl">
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight admin-page-title">
             Create invoice
           </h1>
           <p className="mt-1 text-xs text-br-white/60">
@@ -229,7 +229,7 @@ export default function InvoiceCreateEN() {
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="space-y-6 rounded-2xl border border-br-smoke-light bg-br-smoke/25 p-6 shadow-lg"
+        className="admin-card-glow space-y-6 p-6"
       >
         {/* BILLING / CONTACT */}
         <section className="grid gap-4 md:grid-cols-2">
@@ -407,11 +407,11 @@ export default function InvoiceCreateEN() {
         </section>
 
         {/* ACTIONS */}
-        <div className="flex flex-col gap-3 border-t border-br-smoke-light pt-4 sm:flex-row sm:justify-between sm:items-center">
+        <div className="flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:justify-between sm:items-center">
           <button
             type="button"
             onClick={() => router.push(`/admin/en/quotes/${quote.id}`)}
-            className="inline-flex items-center justify-center rounded-full border border-br-smoke-light bg-br-smoke/40 px-5 py-2 text-xs font-medium text-br-pearl hover:bg-br-smoke-light/60 transition"
+            className="admin-btn-secondary"
           >
             Cancel
           </button>
@@ -419,7 +419,7 @@ export default function InvoiceCreateEN() {
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center justify-center rounded-full bg-br-red-main px-6 py-2 text-xs font-semibold text-white hover:bg-br-red-light disabled:opacity-60 disabled:cursor-not-allowed transition"
+            className="admin-btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {submitting ? "Creating invoice..." : "Create & send invoice"}
           </button>

@@ -12,9 +12,9 @@ const RoofMeasureMap = dynamic(() => import("./RoofMeasureMap"), { ssr: false })
 export default function MeasurePage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between animate-fade-up">
         <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-br-pearl">
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight admin-page-title">
             Medir techo
           </h1>
           <p className="mt-1 text-sm text-br-white/60">
@@ -40,7 +40,7 @@ export default function MeasurePage() {
         </p>
       </header>
 
-      <div className="rounded-2xl border border-br-smoke-light bg-br-smoke/25 p-4 md:p-6 shadow-lg">
+      <div className="admin-card-glow p-4 md:p-6">
         <RoofMeasureMap />
       </div>
     </div>
