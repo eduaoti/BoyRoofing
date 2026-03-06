@@ -36,6 +36,48 @@ type Period = {
   entries: Entry[];
 };
 
+/* Day initials: Domingo, Lunes, Martes, Miércoles, Jueves, Viernes, Sábado (getDay 0=Sun) */
+const DAY_INITIALS = ["D", "L", "M", "M", "J", "V", "S"];
+
+function getDaysInPeriod(startDate: string, endDate: string): { dateStr: string; initial: string }[] {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const days: { dateStr: string; initial: string }[] = [];
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const dateStr = d.toISOString().slice(0, 10);
+    days.push({ dateStr, initial: DAY_INITIALS[d.getDay()] });
+  }
+  return days;
+}
+
+function initEntryDayStates(
+  entries: Entry[],
+  startDate: string,
+  endDate: string
+): Record<string, Record<string, 0 | 1 | 2>> {
+  const days = getDaysInPeriod(startDate, endDate);
+  const state: Record<string, Record<string, 0 | 1 | 2>> = {};
+  entries.forEach((entry) => {
+    const dayState: Record<string, 0 | 1 | 2> = {};
+    days.forEach((day) => {
+      dayState[day.dateStr] = 0;
+    });
+    let full = entry.fullDays;
+    let half = entry.halfDays;
+    days.forEach((day) => {
+      if (full > 0) {
+        dayState[day.dateStr] = 1;
+        full--;
+      } else if (half > 0) {
+        dayState[day.dateStr] = 2;
+        half--;
+      }
+    });
+    state[String(entry.id)] = dayState;
+  });
+  return state;
+}
+
 function calcTotal(
   full: number,
   half: number,
@@ -71,6 +113,7 @@ export default function PayrollPeriodDetailEN() {
   const [confirmDeleteEntryId, setConfirmDeleteEntryId] = useState<number | null>(null);
   const [deletingEntryId, setDeletingEntryId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
+  const [entryDayStates, setEntryDayStates] = useState<Record<string, Record<string, 0 | 1 | 2>>>({});
 
   const load = useCallback(() => {
     if (!id) return;
@@ -93,6 +136,59 @@ export default function PayrollPeriodDetailEN() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (period?.entries?.length && period.startDate && period.endDate) {
+      setEntryDayStates(initEntryDayStates(period.entries, period.startDate, period.endDate));
+    }
+  }, [period]);
+
+  function handleSaveDays(entry: Entry, fullDays: number, halfDays: number) {
+    const halfDayRate = entry.dayRate / 2;
+    const total = calcTotal(fullDays, halfDays, entry.dayRate, halfDayRate, entry.bonuses, entry.deductions);
+    setSavingId(entry.id);
+    apiFetch(`/payroll/entries/${entry.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        fullDays,
+        halfDays,
+        dayRate: entry.dayRate,
+        halfDayRate,
+        bonuses: entry.bonuses,
+        deductions: entry.deductions,
+        notes: entry.notes,
+      }),
+    })
+      .then((r) => {
+        if (!r.ok) return r.text().then((t) => Promise.reject(new Error(t)));
+        load();
+      })
+      .catch((e) => setToast({ type: "error", message: e?.message || "Error" }))
+      .finally(() => setSavingId(null));
+  }
+
+  function handleDayCircleClick(entry: Entry, dateStr: string) {
+    const key = String(entry.id);
+    const current = entryDayStates[key]?.[dateStr] ?? 0;
+    const next: 0 | 1 | 2 = current === 0 ? 1 : current === 1 ? 2 : 0;
+    const newState = {
+      ...entryDayStates,
+      [key]: {
+        ...(entryDayStates[key] || {}),
+        [dateStr]: next,
+      },
+    };
+    setEntryDayStates(newState);
+    const days = getDaysInPeriod(period!.startDate, period!.endDate);
+    let full = 0,
+      half = 0;
+    days.forEach((d) => {
+      const v = newState[key]?.[d.dateStr] ?? 0;
+      if (v === 1) full++;
+      if (v === 2) half++;
+    });
+    handleSaveDays(entry, full, half);
+  }
 
   function updateEntry(entryId: number, payload: Record<string, unknown>) {
     setSavingId(entryId);
@@ -333,6 +429,44 @@ export default function PayrollPeriodDetailEN() {
         </div>
       </div>
 
+      {/* Stats summary */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="admin-card-glow p-4 animate-fade-up" style={{ animationDelay: "0ms" }}>
+          <p className="text-xs uppercase tracking-wider text-br-white/50">Workers</p>
+          <p className="mt-1 text-2xl font-bold text-br-pearl">{period.entries.length}</p>
+        </div>
+        <div className="admin-card-glow p-4 animate-fade-up" style={{ animationDelay: "50ms" }}>
+          <p className="text-xs uppercase tracking-wider text-br-white/50">Total to pay</p>
+          <p className="mt-1 text-2xl font-bold text-br-pearl">
+            ${period.entries.reduce((s, e) => s + Number(e.total), 0).toFixed(2)}
+          </p>
+        </div>
+        <div className="admin-card-glow p-4 animate-fade-up" style={{ animationDelay: "100ms" }}>
+          <p className="text-xs uppercase tracking-wider text-br-white/50">Total paid</p>
+          <p className="mt-1 text-2xl font-bold text-emerald-400">
+            ${period.entries.reduce((s, e) => s + Number(e.amountPaid), 0).toFixed(2)}
+          </p>
+        </div>
+        <div className="admin-card-glow p-4 animate-fade-up" style={{ animationDelay: "150ms" }}>
+          <p className="text-xs uppercase tracking-wider text-br-white/50">Balance</p>
+          <p className="mt-1 text-2xl font-bold text-amber-400">
+            ${period.entries.reduce((s, e) => s + Number(e.balanceAfter), 0).toFixed(2)}
+          </p>
+        </div>
+        <div className="admin-card-glow p-4 animate-fade-up" style={{ animationDelay: "200ms" }}>
+          <p className="text-xs uppercase tracking-wider text-br-white/50">Full days</p>
+          <p className="mt-1 text-2xl font-bold text-br-pearl">
+            {period.entries.reduce((s, e) => s + (e.fullDays || 0), 0)}
+          </p>
+        </div>
+        <div className="admin-card-glow p-4 animate-fade-up" style={{ animationDelay: "250ms" }}>
+          <p className="text-xs uppercase tracking-wider text-br-white/50">Half days</p>
+          <p className="mt-1 text-2xl font-bold text-br-pearl">
+            {period.entries.reduce((s, e) => s + (e.halfDays || 0), 0)}
+          </p>
+        </div>
+      </div>
+
       {/* Modal: add worker from crew */}
       {showAddWorker && (
         <div
@@ -439,15 +573,18 @@ export default function PayrollPeriodDetailEN() {
       )}
 
       {/* Workers in this period */}
-      <div className="rounded-2xl border border-white/10 bg-br-smoke/40 overflow-hidden shadow-xl">
-        <div className="px-4 py-3 border-b border-white/10 bg-br-carbon/60">
+      <div className="admin-card-glow overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/10">
           <h2 className="text-base font-semibold text-br-pearl">Workers in this period</h2>
-          <p className="text-xs text-br-white/60 mt-0.5">Edit days and rates. Total = (full days × $/day) + (half days × $/½ day) + bonuses − deductions.</p>
+          <p className="text-xs text-br-white/60 mt-0.5">Click day circles: once = full day, twice = half day, three times = clear. Total = (full × $/day) + (half × $/½ day) + bonuses − deductions.</p>
         </div>
 
         {/* Mobile: card per worker */}
         <div className="md:hidden divide-y divide-white/5">
-          {period.entries.map((entry) => (
+          {period.entries.map((entry) => {
+            const days = getDaysInPeriod(period.startDate, period.endDate);
+            const dayState = entryDayStates[String(entry.id)] || {};
+            return (
             <div key={entry.id} className="p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-br-pearl">{displayName(entry)}</p>
@@ -455,36 +592,33 @@ export default function PayrollPeriodDetailEN() {
                   {entry.workerType === "REGULAR" ? "Crew" : "Occasional"}
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <label className="text-br-white/60 text-xs">Full</label>
-                  <input
-                    key={`m-${entry.id}-fd-${entry.fullDays}`}
-                    type="number"
-                    min="0"
-                    className="mt-0.5 w-full rounded-lg border border-white/10 bg-br-carbon/60 px-2 py-1.5 text-center text-white focus:ring-2 focus:ring-br-red-main/40"
-                    defaultValue={entry.fullDays}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v) && v >= 0 && v !== entry.fullDays) handleSaveEntry(entry, "fullDays", v);
-                    }}
-                  />
+              <div>
+                <label className="text-br-white/60 text-xs block mb-1.5">Days (L–D)</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {days.map((day) => {
+                    const state = dayState[day.dateStr] ?? 0;
+                    return (
+                      <button
+                        key={day.dateStr}
+                        type="button"
+                        disabled={savingId === entry.id}
+                        onClick={() => handleDayCircleClick(entry, day.dateStr)}
+                        title={`${day.dateStr}: ${state === 0 ? "empty" : state === 1 ? "full" : "half"}`}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all shrink-0 ${
+                          state === 0
+                            ? "border-2 border-white/30 bg-br-carbon/60 text-br-white/70 hover:border-br-red-main/50"
+                            : state === 1
+                            ? "bg-br-red-main text-white border-2 border-br-red-main"
+                            : "bg-br-red-main/50 text-white border-2 border-br-red-main/70"
+                        }`}
+                      >
+                        {day.initial}
+                      </button>
+                    );
+                  })}
                 </div>
-                <div>
-                  <label className="text-br-white/60 text-xs">Half</label>
-                  <input
-                    key={`m-${entry.id}-hd-${entry.halfDays}`}
-                    type="number"
-                    min="0"
-                    className="mt-0.5 w-full rounded-lg border border-white/10 bg-br-carbon/60 px-2 py-1.5 text-center text-white focus:ring-2 focus:ring-br-red-main/40"
-                    defaultValue={entry.halfDays}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v) && v >= 0 && v !== entry.halfDays) handleSaveEntry(entry, "halfDays", v);
-                    }}
-                  />
-                </div>
-                <div className="col-span-2">
+              </div>
+              <div>
                   <label className="text-br-white/60 text-xs">$/day</label>
                   <input
                     type="number"
@@ -496,7 +630,6 @@ export default function PayrollPeriodDetailEN() {
                       if (!isNaN(v) && v !== entry.dayRate) handleSaveEntry(entry, "dayRate", v);
                     }}
                   />
-                </div>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-br-white/60">Total</span>
@@ -546,7 +679,8 @@ export default function PayrollPeriodDetailEN() {
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Desktop: table */}
@@ -556,8 +690,7 @@ export default function PayrollPeriodDetailEN() {
               <tr className="bg-br-carbon/80 text-br-white/90">
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider">Name</th>
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider w-20">Type</th>
-                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-center w-20" title="Full days">Full</th>
-                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-center w-20" title="Half days">Half</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-center" title="Click: 1=full, 2=half, 3=clear">Days</th>
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-24">$/day</th>
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-24">$/½ day</th>
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-20">Bonus</th>
@@ -577,31 +710,30 @@ export default function PayrollPeriodDetailEN() {
                   <td className="px-3 py-2.5">
                     <span className={entry.workerType === "OCCASIONAL" ? "text-amber-400" : "text-br-white/80"}>{entry.workerType === "REGULAR" ? "Crew" : "Occasional"}</span>
                   </td>
-                  <td className="px-3 py-2.5 text-center">
-                    <input
-                      key={`${entry.id}-fd-${entry.fullDays}`}
-                      type="number"
-                      min="0"
-                      className="w-14 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-center text-white text-sm focus:ring-2 focus:ring-br-red-main/40"
-                      defaultValue={entry.fullDays}
-                      onBlur={(e) => {
-                        const v = Number(e.target.value);
-                        if (!isNaN(v) && v >= 0 && v !== entry.fullDays) handleSaveEntry(entry, "fullDays", v);
-                      }}
-                    />
-                  </td>
-                  <td className="px-3 py-2.5 text-center">
-                    <input
-                      key={`${entry.id}-hd-${entry.halfDays}`}
-                      type="number"
-                      min="0"
-                      className="w-14 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-center text-white text-sm focus:ring-2 focus:ring-br-red-main/40"
-                      defaultValue={entry.halfDays}
-                      onBlur={(e) => {
-                        const v = Number(e.target.value);
-                        if (!isNaN(v) && v >= 0 && v !== entry.halfDays) handleSaveEntry(entry, "halfDays", v);
-                      }}
-                    />
+                  <td className="px-3 py-2.5">
+                    <div className="flex flex-wrap gap-1 justify-center">
+                      {getDaysInPeriod(period.startDate, period.endDate).map((day) => {
+                        const state = (entryDayStates[String(entry.id)] || {})[day.dateStr] ?? 0;
+                        return (
+                          <button
+                            key={day.dateStr}
+                            type="button"
+                            disabled={savingId === entry.id}
+                            onClick={() => handleDayCircleClick(entry, day.dateStr)}
+                            title={`${day.dateStr}: ${state === 0 ? "empty" : state === 1 ? "full" : "half"}`}
+                            className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold transition-all shrink-0 ${
+                              state === 0
+                                ? "border border-white/30 bg-br-carbon/60 text-br-white/70 hover:border-br-red-main/50"
+                                : state === 1
+                                ? "bg-br-red-main text-white border border-br-red-main"
+                                : "bg-br-red-main/50 text-white border border-br-red-main/70"
+                            }`}
+                          >
+                            {day.initial}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </td>
                   <td className="px-3 py-2.5 text-right">
                     <input type="number" step="0.01" className="w-20 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-right text-white text-sm focus:ring-2 focus:ring-br-red-main/40" defaultValue={entry.dayRate} onBlur={(e) => { const v = Number(e.target.value); if (!isNaN(v) && v !== entry.dayRate) handleSaveEntry(entry, "dayRate", v); }} />

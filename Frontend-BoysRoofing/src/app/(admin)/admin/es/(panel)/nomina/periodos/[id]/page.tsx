@@ -36,6 +36,48 @@ type Period = {
   entries: Entry[];
 };
 
+/* Iniciales días: D, L, M, M, J, V, S (getDay 0=domingo) */
+const DAY_INITIALS = ["D", "L", "M", "M", "J", "V", "S"];
+
+function getDaysInPeriod(startDate: string, endDate: string): { dateStr: string; initial: string }[] {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const days: { dateStr: string; initial: string }[] = [];
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const dateStr = d.toISOString().slice(0, 10);
+    days.push({ dateStr, initial: DAY_INITIALS[d.getDay()] });
+  }
+  return days;
+}
+
+function initEntryDayStates(
+  entries: Entry[],
+  startDate: string,
+  endDate: string
+): Record<string, Record<string, 0 | 1 | 2>> {
+  const days = getDaysInPeriod(startDate, endDate);
+  const state: Record<string, Record<string, 0 | 1 | 2>> = {};
+  entries.forEach((entry) => {
+    const dayState: Record<string, 0 | 1 | 2> = {};
+    days.forEach((day) => {
+      dayState[day.dateStr] = 0;
+    });
+    let full = entry.fullDays;
+    let half = entry.halfDays;
+    days.forEach((day) => {
+      if (full > 0) {
+        dayState[day.dateStr] = 1;
+        full--;
+      } else if (half > 0) {
+        dayState[day.dateStr] = 2;
+        half--;
+      }
+    });
+    state[String(entry.id)] = dayState;
+  });
+  return state;
+}
+
 function calcTotal(
   full: number,
   half: number,
@@ -71,6 +113,7 @@ export default function NominaPeriodoDetalleES() {
   const [confirmDeleteEntryId, setConfirmDeleteEntryId] = useState<number | null>(null);
   const [deletingEntryId, setDeletingEntryId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
+  const [entryDayStates, setEntryDayStates] = useState<Record<string, Record<string, 0 | 1 | 2>>>({});
 
   const load = useCallback(() => {
     if (!id) return;
@@ -93,6 +136,58 @@ export default function NominaPeriodoDetalleES() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (period?.entries?.length && period.startDate && period.endDate) {
+      setEntryDayStates(initEntryDayStates(period.entries, period.startDate, period.endDate));
+    }
+  }, [period]);
+
+  function handleSaveDays(entry: Entry, fullDays: number, halfDays: number) {
+    const halfDayRate = entry.dayRate / 2;
+    setSavingId(entry.id);
+    apiFetch(`/payroll/entries/${entry.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        fullDays,
+        halfDays,
+        dayRate: entry.dayRate,
+        halfDayRate,
+        bonuses: entry.bonuses,
+        deductions: entry.deductions,
+        notes: entry.notes,
+      }),
+    })
+      .then((r) => {
+        if (!r.ok) return r.text().then((t) => Promise.reject(new Error(t)));
+        load();
+      })
+      .catch((e) => setToast({ type: "error", message: e?.message || "Error" }))
+      .finally(() => setSavingId(null));
+  }
+
+  function handleDayCircleClick(entry: Entry, dateStr: string) {
+    const key = String(entry.id);
+    const current = entryDayStates[key]?.[dateStr] ?? 0;
+    const next: 0 | 1 | 2 = current === 0 ? 1 : current === 1 ? 2 : 0;
+    const newState = {
+      ...entryDayStates,
+      [key]: {
+        ...(entryDayStates[key] || {}),
+        [dateStr]: next,
+      },
+    };
+    setEntryDayStates(newState);
+    const days = getDaysInPeriod(period!.startDate, period!.endDate);
+    let full = 0,
+      half = 0;
+    days.forEach((d) => {
+      const v = newState[key]?.[d.dateStr] ?? 0;
+      if (v === 1) full++;
+      if (v === 2) half++;
+    });
+    handleSaveDays(entry, full, half);
+  }
 
   function updateEntry(entryId: number, payload: Record<string, unknown>) {
     setSavingId(entryId);
@@ -325,6 +420,44 @@ export default function NominaPeriodoDetalleES() {
         </div>
       </div>
 
+      {/* Resumen estadísticas */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="admin-card-glow p-4 animate-fade-up" style={{ animationDelay: "0ms" }}>
+          <p className="text-xs uppercase tracking-wider text-br-white/50">Trabajadores</p>
+          <p className="mt-1 text-2xl font-bold text-br-pearl">{period.entries.length}</p>
+        </div>
+        <div className="admin-card-glow p-4 animate-fade-up" style={{ animationDelay: "50ms" }}>
+          <p className="text-xs uppercase tracking-wider text-br-white/50">Total a pagar</p>
+          <p className="mt-1 text-2xl font-bold text-br-pearl">
+            ${period.entries.reduce((s, e) => s + Number(e.total), 0).toFixed(2)}
+          </p>
+        </div>
+        <div className="admin-card-glow p-4 animate-fade-up" style={{ animationDelay: "100ms" }}>
+          <p className="text-xs uppercase tracking-wider text-br-white/50">Total pagado</p>
+          <p className="mt-1 text-2xl font-bold text-emerald-400">
+            ${period.entries.reduce((s, e) => s + Number(e.amountPaid), 0).toFixed(2)}
+          </p>
+        </div>
+        <div className="admin-card-glow p-4 animate-fade-up" style={{ animationDelay: "150ms" }}>
+          <p className="text-xs uppercase tracking-wider text-br-white/50">Saldo</p>
+          <p className="mt-1 text-2xl font-bold text-amber-400">
+            ${period.entries.reduce((s, e) => s + Number(e.balanceAfter), 0).toFixed(2)}
+          </p>
+        </div>
+        <div className="admin-card-glow p-4 animate-fade-up" style={{ animationDelay: "200ms" }}>
+          <p className="text-xs uppercase tracking-wider text-br-white/50">Días completos</p>
+          <p className="mt-1 text-2xl font-bold text-br-pearl">
+            {period.entries.reduce((s, e) => s + (e.fullDays || 0), 0)}
+          </p>
+        </div>
+        <div className="admin-card-glow p-4 animate-fade-up" style={{ animationDelay: "250ms" }}>
+          <p className="text-xs uppercase tracking-wider text-br-white/50">Medios días</p>
+          <p className="mt-1 text-2xl font-bold text-br-pearl">
+            {period.entries.reduce((s, e) => s + (e.halfDays || 0), 0)}
+          </p>
+        </div>
+      </div>
+
       {/* Modal: añadir trabajador de plantilla */}
       {showAddWorker && (
         <div
@@ -486,15 +619,18 @@ export default function NominaPeriodoDetalleES() {
       )}
 
       {/* Trabajadores del periodo */}
-      <div className="rounded-2xl border border-white/10 bg-br-smoke/40 overflow-hidden shadow-xl">
-        <div className="px-4 py-3 border-b border-white/10 bg-br-carbon/60">
+      <div className="admin-card-glow overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/10">
           <h2 className="text-base font-semibold text-br-pearl">Trabajadores del periodo</h2>
-          <p className="text-xs text-br-white/60 mt-0.5">Edita días y tarifas. Total = (días completos × $/día) + (medios días × $/½ día) + bonos − deducciones.</p>
+          <p className="text-xs text-br-white/60 mt-0.5">Clic en círculos: una vez = día completo, dos = medio día, tres = borrar. Total = (completos × $/día) + (medios × $/½ día) + bonos − deducciones.</p>
         </div>
 
         {/* Vista móvil: tarjeta por trabajador */}
         <div className="md:hidden divide-y divide-white/5">
-          {period.entries.map((entry) => (
+          {period.entries.map((entry) => {
+            const days = getDaysInPeriod(period.startDate, period.endDate);
+            const dayState = entryDayStates[String(entry.id)] || {};
+            return (
             <div key={entry.id} className="p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-br-pearl">{displayName(entry)}</p>
@@ -502,36 +638,33 @@ export default function NominaPeriodoDetalleES() {
                   {entry.workerType === "REGULAR" ? "Plantilla" : "Ocasional"}
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <label className="text-br-white/60 text-xs">Compl.</label>
-                  <input
-                    key={`m-${entry.id}-fd-${entry.fullDays}`}
-                    type="number"
-                    min="0"
-                    className="mt-0.5 w-full rounded-lg border border-white/10 bg-br-carbon/60 px-2 py-1.5 text-center text-white focus:ring-2 focus:ring-br-red-main/40"
-                    defaultValue={entry.fullDays}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v) && v >= 0 && v !== entry.fullDays) handleSaveEntry(entry, "fullDays", v);
-                    }}
-                  />
+              <div>
+                <label className="text-br-white/60 text-xs block mb-1.5">Días (L–D)</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {days.map((day) => {
+                    const state = dayState[day.dateStr] ?? 0;
+                    return (
+                      <button
+                        key={day.dateStr}
+                        type="button"
+                        disabled={savingId === entry.id}
+                        onClick={() => handleDayCircleClick(entry, day.dateStr)}
+                        title={`${day.dateStr}: ${state === 0 ? "vacío" : state === 1 ? "completo" : "medio"}`}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all shrink-0 ${
+                          state === 0
+                            ? "border-2 border-white/30 bg-br-carbon/60 text-br-white/70 hover:border-br-red-main/50"
+                            : state === 1
+                            ? "bg-br-red-main text-white border-2 border-br-red-main"
+                            : "bg-br-red-main/50 text-white border-2 border-br-red-main/70"
+                        }`}
+                      >
+                        {day.initial}
+                      </button>
+                    );
+                  })}
                 </div>
-                <div>
-                  <label className="text-br-white/60 text-xs">½ día</label>
-                  <input
-                    key={`m-${entry.id}-hd-${entry.halfDays}`}
-                    type="number"
-                    min="0"
-                    className="mt-0.5 w-full rounded-lg border border-white/10 bg-br-carbon/60 px-2 py-1.5 text-center text-white focus:ring-2 focus:ring-br-red-main/40"
-                    defaultValue={entry.halfDays}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v) && v >= 0 && v !== entry.halfDays) handleSaveEntry(entry, "halfDays", v);
-                    }}
-                  />
-                </div>
-                <div className="col-span-2">
+              </div>
+              <div>
                   <label className="text-br-white/60 text-xs">$/día</label>
                   <input
                     type="number"
@@ -543,7 +676,6 @@ export default function NominaPeriodoDetalleES() {
                       if (!isNaN(v) && v !== entry.dayRate) handleSaveEntry(entry, "dayRate", v);
                     }}
                   />
-                </div>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-br-white/60">Total</span>
@@ -593,7 +725,8 @@ export default function NominaPeriodoDetalleES() {
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Vista escritorio: tabla */}
@@ -603,8 +736,7 @@ export default function NominaPeriodoDetalleES() {
               <tr className="bg-br-carbon/80 text-br-white/90">
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider">Nombre</th>
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider w-20">Tipo</th>
-                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-center w-20" title="Días completos">Compl.</th>
-                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-center w-20" title="Medios días">½</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-center" title="Clic: 1=completo, 2=medio, 3=borrar">Días</th>
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-24">$/día</th>
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-24">$/½ día</th>
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-20">Bono</th>
@@ -627,30 +759,29 @@ export default function NominaPeriodoDetalleES() {
                   </span>
                 </td>
                 <td className="px-3 py-2.5">
-                  <input
-                    key={`${entry.id}-fd-${entry.fullDays}`}
-                    type="number"
-                    min="0"
-                    className="w-14 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-center text-white text-sm focus:ring-2 focus:ring-br-red-main/40 focus:border-br-red-main/50"
-                    defaultValue={entry.fullDays}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v) && v >= 0 && v !== entry.fullDays) handleSaveEntry(entry, "fullDays", v);
-                    }}
-                  />
-                </td>
-                <td className="px-3 py-2.5 text-center">
-                  <input
-                    key={`${entry.id}-hd-${entry.halfDays}`}
-                    type="number"
-                    min="0"
-                    className="w-14 rounded-lg border border-white/10 bg-br-carbon/60 px-1.5 py-1 text-center text-white text-sm focus:ring-2 focus:ring-br-red-main/40 focus:border-br-red-main/50"
-                    defaultValue={entry.halfDays}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v) && v >= 0 && v !== entry.halfDays) handleSaveEntry(entry, "halfDays", v);
-                    }}
-                  />
+                  <div className="flex flex-wrap gap-1 justify-center">
+                    {getDaysInPeriod(period.startDate, period.endDate).map((day) => {
+                      const state = (entryDayStates[String(entry.id)] || {})[day.dateStr] ?? 0;
+                      return (
+                        <button
+                          key={day.dateStr}
+                          type="button"
+                          disabled={savingId === entry.id}
+                          onClick={() => handleDayCircleClick(entry, day.dateStr)}
+                          title={`${day.dateStr}: ${state === 0 ? "vacío" : state === 1 ? "completo" : "medio"}`}
+                          className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold transition-all shrink-0 ${
+                            state === 0
+                              ? "border border-white/30 bg-br-carbon/60 text-br-white/70 hover:border-br-red-main/50"
+                              : state === 1
+                              ? "bg-br-red-main text-white border border-br-red-main"
+                              : "bg-br-red-main/50 text-white border border-br-red-main/70"
+                          }`}
+                        >
+                          {day.initial}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </td>
                 <td className="px-3 py-2.5 text-right">
                   <input
