@@ -39,9 +39,10 @@ type Period = {
 /* Iniciales días: D, L, M, M, J, V, S (getDay 0=domingo) */
 const DAY_INITIALS = ["D", "L", "M", "M", "J", "V", "S"];
 
-/* Parse YYYY-MM-DD as local date (evitar que UTC cambie el día) */
+/* Parse YYYY-MM-DD as local date (soporta ISO con hora, ej. 2026-03-01T00:00:00.000Z) */
 function parseLocalDate(dateStr: string): Date {
-  const [y, m, d] = dateStr.split("-").map(Number);
+  const dateOnly = dateStr.slice(0, 10);
+  const [y, m, d] = dateOnly.split("-").map(Number);
   return new Date(y, (m ?? 1) - 1, d ?? 1);
 }
 
