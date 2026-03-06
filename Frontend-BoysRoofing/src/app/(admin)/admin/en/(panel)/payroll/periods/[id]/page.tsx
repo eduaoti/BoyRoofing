@@ -49,7 +49,9 @@ function getDaysInPeriod(startDate: string, endDate: string): { dateStr: string;
   const start = parseLocalDate(startDate);
   const end = parseLocalDate(endDate);
   const days: { dateStr: string; initial: string }[] = [];
-  for (let d = new Date(start.getTime()); d <= end; d.setDate(d.getDate() + 1)) {
+  const from = start <= end ? start : end;
+  const to = start <= end ? end : start;
+  for (let d = new Date(from.getTime()); d <= to; d.setDate(d.getDate() + 1)) {
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
@@ -629,10 +631,10 @@ export default function PayrollPeriodDetailEN() {
                         title={`${day.dateStr}: ${state === 0 ? "empty" : state === 1 ? "full" : "half"}`}
                         className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all shrink-0 ${
                           state === 0
-                            ? "border-2 border-white/30 bg-br-carbon/60 text-br-white/70 hover:border-br-red-main/50"
+                            ? "border-2 border-white/40 bg-br-carbon/70 text-br-pearl hover:border-br-red-main/60"
                             : state === 1
                             ? "bg-br-red-main text-white border-2 border-br-red-main"
-                            : "bg-br-red-main/50 text-white border-2 border-br-red-main/70"
+                            : "bg-br-red-main/60 text-white border-2 border-br-red-main/80"
                         }`}
                       >
                         {day.initial}
@@ -723,7 +725,7 @@ export default function PayrollPeriodDetailEN() {
               <tr className="bg-br-carbon/80 text-br-white/90">
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider">Name</th>
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider w-20">Type</th>
-                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-center" title="Click: 1=full, 2=half, 3=clear">Days</th>
+                <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-center min-w-[140px]" title="Click: 1=full, 2=half, 3=clear">Days</th>
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-24">$/day</th>
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-24">$/½ day</th>
                 <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-right w-20">Bonus</th>
@@ -743,8 +745,8 @@ export default function PayrollPeriodDetailEN() {
                   <td className="px-3 py-2.5">
                     <span className={entry.workerType === "OCCASIONAL" ? "text-amber-400" : "text-br-white/80"}>{entry.workerType === "REGULAR" ? "Crew" : "Occasional"}</span>
                   </td>
-                  <td className="px-3 py-2.5">
-                    <div className="flex flex-wrap gap-1 justify-center">
+                  <td className="px-3 py-2.5 min-w-[140px]">
+                    <div className="flex flex-wrap gap-1.5 justify-center">
                       {getDaysInPeriod(period.startDate, period.endDate).map((day) => {
                         const state = (entryDayStates[String(entry.id)] || {})[day.dateStr] ?? 0;
                         return (
@@ -754,12 +756,12 @@ export default function PayrollPeriodDetailEN() {
                             disabled={savingId === entry.id}
                             onClick={() => handleDayCircleClick(entry, day.dateStr)}
                             title={`${day.dateStr}: ${state === 0 ? "empty" : state === 1 ? "full" : "half"}`}
-                            className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold transition-all shrink-0 ${
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all shrink-0 ${
                               state === 0
-                                ? "border border-white/30 bg-br-carbon/60 text-br-white/70 hover:border-br-red-main/50"
+                                ? "border-2 border-white/40 bg-br-carbon/70 text-br-pearl hover:border-br-red-main/60"
                                 : state === 1
-                                ? "bg-br-red-main text-white border border-br-red-main"
-                                : "bg-br-red-main/50 text-white border border-br-red-main/70"
+                                ? "bg-br-red-main text-white border-2 border-br-red-main"
+                                : "bg-br-red-main/60 text-white border-2 border-br-red-main/80"
                             }`}
                           >
                             {day.initial}
