@@ -31,6 +31,11 @@ export class PayrollController {
     return this.payrollService.getPeriod(+id);
   }
 
+  @Delete('periods/:id')
+  deletePeriod(@Param('id') id: string) {
+    return this.payrollService.deletePeriod(+id);
+  }
+
   @Post('periods')
   createPeriod(@Body() dto: CreatePeriodDto) {
     return this.payrollService.createPeriod(dto);

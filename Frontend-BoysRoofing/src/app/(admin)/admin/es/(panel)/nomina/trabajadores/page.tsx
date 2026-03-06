@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
+import { ToastMessage, type ToastType } from "@/components/ToastMessage";
 
 type Worker = {
   id: number;
@@ -26,6 +27,7 @@ export default function NominaTrabajadoresES() {
   const [role, setRole] = useState("");
   const [defaultDayRate, setDefaultDayRate] = useState("");
   const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
   function load() {
     setLoading(true);
@@ -85,7 +87,7 @@ export default function NominaTrabajadoresES() {
           load();
         } else return r.text().then((t) => Promise.reject(new Error(t)));
       })
-      .catch((err) => alert(err.message))
+      .catch((err) => setToast({ type: "error", message: err?.message || "Error al guardar" }))
       .finally(() => setSaving(false));
   }
 
@@ -95,7 +97,7 @@ export default function NominaTrabajadoresES() {
       body: JSON.stringify({ isActive: !w.isActive }),
     })
       .then((r) => r.ok && load())
-      .catch((e) => alert(e.message));
+      .catch((e) => setToast({ type: "error", message: e?.message || "Error al actualizar" }));
   }
 
   if (loading) {
@@ -109,6 +111,9 @@ export default function NominaTrabajadoresES() {
 
   return (
     <div className="space-y-4 md:space-y-6 p-4 md:p-6 text-white">
+      {toast && (
+        <ToastMessage type={toast.type} message={toast.message} onDismiss={() => setToast(null)} />
+      )}
       <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-br-pearl">Trabajadores de plantilla</h1>

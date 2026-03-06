@@ -264,3 +264,139 @@ body {
 section {
   border-color: #2a2a2a !important;
 }
+
+/* ---------------------------- */
+/* ADMIN PANEL: diseño moderno con movimiento y animaciones */
+/* ---------------------------- */
+
+/* Fondo principal: gradiente que se mueve suavemente */
+.admin-mesh {
+  position: relative;
+  background: linear-gradient(135deg, #0B090A 0%, #161A1D 25%, #1a1518 50%, #161A1D 75%, #0B090A 100%);
+  background-size: 400% 400%;
+  animation: adminMesh 18s ease infinite;
+}
+
+.admin-mesh::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 50% at 70% 20%, rgba(186, 24, 27, 0.08) 0%, transparent 50%),
+              radial-gradient(ellipse 60% 40% at 20% 80%, rgba(186, 24, 27, 0.05) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+@keyframes adminMesh {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Card tipo glass con borde sutil y hover */
+.admin-card {
+  background: rgba(22, 26, 29, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(245, 243, 244, 0.06);
+  border-radius: 1rem;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.admin-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(186, 24, 27, 0.08);
+  border-color: rgba(186, 24, 27, 0.15);
+}
+
+/* Card con borde en gradiente animado (sutil) */
+.admin-card-glow {
+  position: relative;
+  background: linear-gradient(135deg, rgba(22, 26, 29, 0.85) 0%, rgba(11, 9, 10, 0.9) 100%);
+  backdrop-filter: blur(16px);
+  border-radius: 1.25rem;
+  border: 1px solid rgba(245, 243, 244, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-card-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(186, 24, 27, 0.2), transparent 40%, transparent 60%, rgba(186, 24, 27, 0.1));
+  background-size: 200% 200%;
+  animation: adminBorderGlow 8s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.admin-card-glow:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.6), 0 0 30px -10px rgba(186, 24, 27, 0.2);
+}
+
+@keyframes adminBorderGlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Entrada de lista con aparición escalonada */
+.admin-list-item {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: adminItemIn 0.5s ease forwards;
+}
+
+@keyframes adminItemIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Botón primario con brillo suave al hover */
+.admin-btn-primary {
+  background: linear-gradient(135deg, #BA181B 0%, #A4161A 100%);
+  box-shadow: 0 4px 14px -2px rgba(186, 24, 27, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.admin-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -4px rgba(186, 24, 27, 0.5);
+  filter: brightness(1.08);
+}
+
+.admin-btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Botón secundario (outline) */
+.admin-btn-secondary {
+  border: 1px solid rgba(245, 243, 244, 0.2);
+  background: rgba(22, 26, 29, 0.5);
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.admin-btn-secondary:hover {
+  border-color: rgba(186, 24, 27, 0.4);
+  background: rgba(186, 24, 27, 0.08);
+  transform: translateY(-1px);
+}
+
+/* Sidebar: link activo con barra y glow */
+.admin-nav-active {
+  background: linear-gradient(90deg, rgba(186, 24, 27, 0.15) 0%, transparent 100%);
+  border-left: 3px solid #BA181B;
+  color: #E5383B;
+}
+
+/* Título de página con gradiente de texto opcional */
+.admin-page-title {
+  background: linear-gradient(135deg, #D3D3D3 0%, #B1A7A6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

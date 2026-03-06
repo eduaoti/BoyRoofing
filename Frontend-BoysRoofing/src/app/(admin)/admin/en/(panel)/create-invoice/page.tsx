@@ -1,9 +1,10 @@
 // src/app/admin/en/(panel)/create-invoice/page.tsx
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
+import { ToastMessage, type ToastType } from "@/components/ToastMessage";
 
 function getDefaultInvoiceMeta() {
   const today = new Date();
@@ -14,6 +15,7 @@ function getDefaultInvoiceMeta() {
 export default function CreateInvoiceEN() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
   const [email, setEmail] = useState("");
   const [billTo, setBillTo] = useState("");
@@ -30,6 +32,24 @@ export default function CreateInvoiceEN() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState<string>("0");
   const [other, setOther] = useState<string>("0");
+
+  const resetForm = useCallback(() => {
+    const meta = getDefaultInvoiceMeta();
+    setEmail("");
+    setBillTo("");
+    setPhone("");
+    setAddress("");
+    setCity("");
+    setStateValue("");
+    setZip("");
+    setPropertyLocation("");
+    setService("Invoice");
+    setInvoiceNumber(meta.number);
+    setInvoiceDate(meta.date);
+    setDescription("");
+    setPrice("0");
+    setOther("0");
+  }, []);
 
   const subtotal = Number(price || 0);
   const otherNumber = Number(other || 0);
@@ -89,9 +109,9 @@ export default function CreateInvoiceEN() {
         console.error("Error creating quote for invoice:", quoteRes.status, text);
         try {
           const errJson = JSON.parse(text);
-          alert(errJson.message || "Could not create the quote. Please check the data.");
+          setToast({ type: "error", message: errJson.message || "Could not create the quote. Please check the data." });
         } catch {
-          alert(`Could not create the quote (${quoteRes.status}). Make sure the backend is running and you are logged in.`);
+          setToast({ type: "error", message: `Could not create the quote (${quoteRes.status}). Make sure the backend is running and you are logged in.` });
         }
         setSubmitting(false);
         return;
@@ -137,9 +157,9 @@ export default function CreateInvoiceEN() {
         console.error("Error creating invoice:", res.status, text);
         try {
           const errJson = JSON.parse(text);
-          alert(errJson.message || "There was a problem creating the invoice.");
+          setToast({ type: "error", message: errJson.message || "There was a problem creating the invoice." });
         } catch {
-          alert(`Error creating invoice (${res.status}). Check the console.`);
+          setToast({ type: "error", message: `Error creating invoice (${res.status}). Check the console.` });
         }
         setSubmitting(false);
         return;
@@ -155,17 +175,24 @@ export default function CreateInvoiceEN() {
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      alert("Invoice created and sent to the email provided. PDF downloaded.");
-      router.push("/admin/en/create-invoice");
+      resetForm();
+      setToast({ type: "success", message: "Invoice created and sent to the email provided. PDF downloaded." });
     } catch (err) {
       console.error("Error submitting invoice:", err);
-      alert("Unexpected error while creating the invoice.");
+      setToast({ type: "error", message: "Unexpected error while creating the invoice." });
       setSubmitting(false);
     }
   }
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+      {toast && (
+        <ToastMessage
+          type={toast.type}
+          message={toast.message}
+          onDismiss={() => setToast(null)}
+        />
+      )}
       <header>
         <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-br-pearl">
           Create invoice

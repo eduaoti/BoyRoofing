@@ -38,6 +38,7 @@ export class QuotesService {
   findAll() {
     return this.prisma.quote.findMany({
       orderBy: { createdAt: 'desc' },
+      include: { invoice: { select: { id: true } } },
     });
   }
 

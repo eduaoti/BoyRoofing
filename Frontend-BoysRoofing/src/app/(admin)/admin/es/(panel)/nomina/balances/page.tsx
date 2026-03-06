@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
+import { ToastMessage, type ToastType } from "@/components/ToastMessage";
 
 type Worker = {
   id: number;
@@ -22,6 +23,7 @@ export default function NominaBalancesES() {
   const [adjustId, setAdjustId] = useState<number | null>(null);
   const [adjustValue, setAdjustValue] = useState("");
   const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
   function load() {
     setLoading(true);
@@ -48,7 +50,7 @@ export default function NominaBalancesES() {
   function submitAdjust(workerId: number) {
     const v = Number(adjustValue);
     if (isNaN(v)) {
-      alert("Ingresa un número válido");
+      setToast({ type: "error", message: "Ingresa un número válido" });
       return;
     }
     setSaving(true);
@@ -62,7 +64,7 @@ export default function NominaBalancesES() {
         setAdjustValue("");
         load();
       })
-      .catch((e) => alert(e.message))
+      .catch((e) => setToast({ type: "error", message: e?.message || "Error al guardar" }))
       .finally(() => setSaving(false));
   }
 
@@ -77,6 +79,9 @@ export default function NominaBalancesES() {
 
   return (
     <div className="space-y-4 md:space-y-6 p-4 md:p-6 text-white">
+      {toast && (
+        <ToastMessage type={toast.type} message={toast.message} onDismiss={() => setToast(null)} />
+      )}
       <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-br-pearl">Balances / Deudas</h1>

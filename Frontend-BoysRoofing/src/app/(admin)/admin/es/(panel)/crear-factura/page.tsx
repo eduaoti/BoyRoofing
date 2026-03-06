@@ -1,9 +1,10 @@
 // src/app/admin/es/(panel)/crear-factura/page.tsx
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
+import { ToastMessage, type ToastType } from "@/components/ToastMessage";
 
 function getDefaultInvoiceMeta() {
   const today = new Date();
@@ -14,6 +15,7 @@ function getDefaultInvoiceMeta() {
 export default function CrearFacturaES() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
   const [email, setEmail] = useState("");
   const [billTo, setBillTo] = useState("");
@@ -30,6 +32,24 @@ export default function CrearFacturaES() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState<string>("0");
   const [other, setOther] = useState<string>("0");
+
+  const resetForm = useCallback(() => {
+    const meta = getDefaultInvoiceMeta();
+    setEmail("");
+    setBillTo("");
+    setPhone("");
+    setAddress("");
+    setCity("");
+    setStateValue("");
+    setZip("");
+    setPropertyLocation("");
+    setService("Factura");
+    setInvoiceNumber(meta.number);
+    setInvoiceDate(meta.date);
+    setDescription("");
+    setPrice("0");
+    setOther("0");
+  }, []);
 
   const subtotal = Number(price || 0);
   const otherNumber = Number(other || 0);
@@ -89,9 +109,9 @@ export default function CrearFacturaES() {
         console.error("Error creando cotización para factura:", quoteRes.status, text);
         try {
           const errJson = JSON.parse(text);
-          alert(errJson.message || "No se pudo crear la cotización. Revisa los datos.");
+          setToast({ type: "error", message: errJson.message || "No se pudo crear la cotización. Revisa los datos." });
         } catch {
-          alert(`No se pudo crear la cotización (${quoteRes.status}). Revisa que el backend esté en marcha y que hayas iniciado sesión.`);
+          setToast({ type: "error", message: `No se pudo crear la cotización (${quoteRes.status}). Revisa que el backend esté en marcha y que hayas iniciado sesión.` });
         }
         setSubmitting(false);
         return;
@@ -137,9 +157,9 @@ export default function CrearFacturaES() {
         console.error("Error al crear la factura:", res.status, text);
         try {
           const errJson = JSON.parse(text);
-          alert(errJson.message || "Hubo un problema al crear la factura.");
+          setToast({ type: "error", message: errJson.message || "Hubo un problema al crear la factura." });
         } catch {
-          alert(`Error al crear la factura (${res.status}). Revisa la consola.`);
+          setToast({ type: "error", message: `Error al crear la factura (${res.status}). Revisa la consola.` });
         }
         setSubmitting(false);
         return;
@@ -155,17 +175,24 @@ export default function CrearFacturaES() {
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      alert("Factura creada y enviada al correo indicado. PDF descargado.");
-      router.push("/admin/es/crear-factura");
+      resetForm();
+      setToast({ type: "success", message: "Factura creada y enviada al correo indicado. PDF descargado." });
     } catch (err) {
       console.error("Error enviando factura:", err);
-      alert("Error inesperado al crear la factura.");
+      setToast({ type: "error", message: "Error inesperado al crear la factura." });
       setSubmitting(false);
     }
   }
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+      {toast && (
+        <ToastMessage
+          type={toast.type}
+          message={toast.message}
+          onDismiss={() => setToast(null)}
+        />
+      )}
       <header>
         <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-br-pearl">
           Crear factura

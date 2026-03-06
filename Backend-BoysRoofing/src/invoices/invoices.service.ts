@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { MailService } from '../mail/mail.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
@@ -69,6 +69,24 @@ export class InvoicesService {
 
     // 7) Devolver invoice y PDF para descarga en el front
     return { invoice, pdfBuffer };
+  }
+
+  /**
+   * Borra el invoice de una quote (por quoteId). La quote queda de nuevo en PENDING.
+   */
+  async deleteByQuoteId(quoteId: number) {
+    const invoice = await this.prisma.invoice.findUnique({
+      where: { quoteId },
+    });
+    if (!invoice) {
+      throw new NotFoundException('Invoice not found for this quote');
+    }
+    await this.prisma.invoice.delete({ where: { quoteId } });
+    await this.prisma.quote.update({
+      where: { id: quoteId },
+      data: { status: QuoteStatus.PENDING },
+    });
+    return { ok: true };
   }
 
   /**

@@ -1,6 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
+  Param,
+  ParseIntPipe,
   Post,
   UseGuards,
   Res,
@@ -24,5 +27,11 @@ export class InvoicesController {
     });
 
     return res.send(pdfBuffer);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('quote/:quoteId')
+  async deleteByQuoteId(@Param('quoteId', ParseIntPipe) quoteId: number) {
+    return this.invoicesService.deleteByQuoteId(quoteId);
   }
 }
