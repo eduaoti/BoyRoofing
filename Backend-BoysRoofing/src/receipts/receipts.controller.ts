@@ -3,6 +3,7 @@ import { JwtAuthGuard } from '../auth/jwt/jwt.guard';
 import { MailService } from '../mail/mail.service';
 import { ReceiptsService } from './receipts.service';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
+import { UpdateReceiptDto } from './dto/update-receipt.dto';
 
 @Controller('receipts')
 @UseGuards(JwtAuthGuard)
@@ -33,8 +34,8 @@ export class ReceiptsController {
   }
 
   @Patch(':id')
-  updateClientEmail(@Param('id') id: string, @Body() body: { clientEmail?: string | null }) {
-    return this.receiptsService.updateClientEmail(+id, body.clientEmail ?? null);
+  update(@Param('id') id: string, @Body() body: UpdateReceiptDto) {
+    return this.receiptsService.update(+id, body);
   }
 
   @Delete(':id')
