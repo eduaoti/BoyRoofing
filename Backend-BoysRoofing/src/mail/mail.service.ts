@@ -185,7 +185,7 @@ export class MailService {
                 ${receipt.notes ? `<p style="margin: 0; font-size: 13px; color: #555;"><strong>${notesLabel}:</strong> ${receipt.notes}</p>` : ''}
               </div>
               <p style="margin: 0; font-size: 12px; color: #6b6b6b;">${signatureLabel} _________________________</p>
-              <p style="margin: 20px 0 0; font-size: 12px; color: #6b6b6b;">Message sent automatically by Boy's Roofing.</p>
+              <p style="margin: 20px 0 0; font-size: 12px; color: #6b6b6b;">${isEn ? 'Visit' : 'Visita'} https://www.boysroofing.company/en</p>
             </div>
           </div>
         `,
