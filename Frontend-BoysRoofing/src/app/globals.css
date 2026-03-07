@@ -417,3 +417,10 @@ section {
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* Al imprimir, ocultar todo excepto el recibo */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
