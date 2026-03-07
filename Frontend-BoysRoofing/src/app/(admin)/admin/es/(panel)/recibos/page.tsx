@@ -19,6 +19,7 @@ const CONCEPT_SUGGESTIONS = [
   "Pago total - fin de obra",
   "Otro",
 ];
+const OTHER_CONCEPT = "Otro";
 
 export default function RecibosESPage() {
   const [receipts, setReceipts] = useState<PaymentReceipt[]>([]);
@@ -28,6 +29,7 @@ export default function RecibosESPage() {
   const [clientEmail, setClientEmail] = useState("");
   const [amount, setAmount] = useState("");
   const [concept, setConcept] = useState(CONCEPT_SUGGESTIONS[0]);
+  const [customConcept, setCustomConcept] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
@@ -43,7 +45,8 @@ export default function RecibosESPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const num = parseFloat(amount.replace(/,/g, "."));
-    if (!clientName.trim() || Number.isNaN(num) || num <= 0) return;
+    const conceptText = concept === OTHER_CONCEPT ? customConcept.trim() : concept.trim();
+    if (!clientName.trim() || Number.isNaN(num) || num <= 0 || !conceptText) return;
     setSaving(true);
     try {
       createReceipt({
@@ -51,7 +54,7 @@ export default function RecibosESPage() {
         clientName: clientName.trim(),
         clientEmail: clientEmail.trim() || undefined,
         amount: num,
-        concept: concept.trim(),
+        concept: conceptText,
         notes: notes.trim() || undefined,
       });
       load();
@@ -59,6 +62,7 @@ export default function RecibosESPage() {
       setClientEmail("");
       setAmount("");
       setConcept(CONCEPT_SUGGESTIONS[0]);
+      setCustomConcept("");
       setDate(new Date().toISOString().slice(0, 10));
       setNotes("");
       setShowForm(false);
@@ -152,6 +156,19 @@ export default function RecibosESPage() {
                 ))}
               </select>
             </div>
+            {concept === OTHER_CONCEPT && (
+              <div>
+                <label className="block text-sm font-medium text-br-pearl/80 mb-1">Escribe el concepto</label>
+                <input
+                  type="text"
+                  value={customConcept}
+                  onChange={(e) => setCustomConcept(e.target.value)}
+                  className="w-full rounded-xl bg-br-carbon/80 border border-white/10 px-4 py-2.5 text-white placeholder-br-pearl/40 focus:border-br-red-main focus:ring-1 focus:ring-br-red-main"
+                  placeholder="ej. Materiales extra para porche"
+                  required
+                />
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-br-pearl/80 mb-1">Notas (opcional)</label>
               <textarea

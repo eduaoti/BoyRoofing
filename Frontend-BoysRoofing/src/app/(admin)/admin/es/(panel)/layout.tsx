@@ -41,6 +41,22 @@ export default function AdminESPanelLayout({
     );
   };
 
+  const mobileNavLink = (href: string, label: string, Icon: React.ComponentType<{ className?: string }>, exact?: boolean) => {
+    const isActive = exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
+    return (
+      <Link
+        href={href}
+        onClick={closeMenu}
+        className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 ${
+          isActive ? "admin-nav-active pl-4" : "hover:bg-br-carbon/60 hover:text-br-red-main text-br-pearl"
+        }`}
+      >
+        <Icon className="h-5 w-5 shrink-0" />
+        {label}
+      </Link>
+    );
+  };
+
   return (
     <div className="min-h-screen flex bg-br-carbon text-white no-print">
       {/* SIDEBAR */}
@@ -99,11 +115,11 @@ export default function AdminESPanelLayout({
               aria-hidden="true"
             />
             <nav
-              className="md:hidden fixed top-0 right-0 z-50 h-full w-[min(100%,280px)] flex flex-col bg-br-smoke border-l border-br-smoke-light shadow-2xl"
+              className="md:hidden fixed top-0 right-0 z-50 h-full w-[min(100%,280px)] flex flex-col bg-br-smoke/95 border-l border-white/5 shadow-2xl backdrop-blur-sm"
               aria-label="Menú principal"
             >
-              <div className="flex items-center justify-between px-4 py-4 border-b border-br-smoke-light">
-                <h2 className="text-lg font-bold text-br-red-main">Menú</h2>
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+                <h2 className="text-xl font-bold tracking-tight text-br-red-main">Boy&apos;s Roofing</h2>
                 <button
                   type="button"
                   onClick={closeMenu}
@@ -113,36 +129,21 @@ export default function AdminESPanelLayout({
                   <XMarkIcon className="h-6 w-6" />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-                <Link href="/admin/es/dashboard" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
-                  <HomeIcon className="h-5 w-5 shrink-0" /> Dashboard
-                </Link>
-                <Link href="/admin/es/quotes" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
-                  <DocumentTextIcon className="h-5 w-5 shrink-0" /> Cotizaciones
-                </Link>
-                <Link href="/admin/es/crear-factura" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
-                  <DocumentPlusIcon className="h-5 w-5 shrink-0" /> Crear factura
-                </Link>
-                <Link href="/admin/es/medir" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
-                  <MapPinIcon className="h-5 w-5 shrink-0" /> Medir
-                </Link>
-                <Link href="/admin/es/nomina/trabajadores" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
-                  <UserGroupIcon className="h-5 w-5 shrink-0" /> Trabajadores
-                </Link>
-                <Link href="/admin/es/nomina" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
-                  <BanknotesIcon className="h-5 w-5 shrink-0" /> Nómina
-                </Link>
-                <Link href="/admin/es/nomina/balances" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
-                  <CurrencyDollarIcon className="h-5 w-5 shrink-0" /> Balances / Deudas
-                </Link>
-                <Link href="/admin/es/recibos" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
-                  <DocumentCheckIcon className="h-5 w-5 shrink-0" /> Recibos de pago
-                </Link>
+              <p className="text-xs text-br-pearl/80 px-6 pb-3">Panel de administración · ES</p>
+              <div className="flex-1 overflow-y-auto py-2 px-4 space-y-0.5 text-sm">
+                {mobileNavLink("/admin/es/dashboard", "Dashboard", HomeIcon)}
+                {mobileNavLink("/admin/es/quotes", "Cotizaciones", DocumentTextIcon)}
+                {mobileNavLink("/admin/es/crear-factura", "Crear factura", DocumentPlusIcon)}
+                {mobileNavLink("/admin/es/medir", "Medir", MapPinIcon)}
+                {mobileNavLink("/admin/es/nomina/trabajadores", "Trabajadores", UserGroupIcon)}
+                {mobileNavLink("/admin/es/nomina", "Nómina", BanknotesIcon, true)}
+                {mobileNavLink("/admin/es/nomina/balances", "Balances / Deudas", CurrencyDollarIcon)}
+                {mobileNavLink("/admin/es/recibos", "Recibos de pago", DocumentCheckIcon)}
               </div>
-              <div className="p-3 border-t border-br-smoke-light">
+              <div className="p-4 border-t border-white/5">
                 <button
                   onClick={logout}
-                  className="flex w-full items-center justify-center gap-2 bg-br-red-main hover:bg-br-red-light text-white py-2.5 px-4 rounded-lg text-sm font-semibold transition"
+                  className="flex w-full items-center justify-center gap-2 admin-btn-primary text-white py-2.5 px-4 rounded-xl text-sm font-semibold"
                 >
                   <ArrowRightOnRectangleIcon className="h-5 w-5" />
                   Cerrar sesión
