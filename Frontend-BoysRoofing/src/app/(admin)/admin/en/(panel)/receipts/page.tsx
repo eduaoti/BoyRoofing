@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   getAllReceipts,
   createReceipt,
@@ -22,8 +23,11 @@ const CONCEPT_SUGGESTIONS = [
 const OTHER_CONCEPT = "Other";
 
 export default function ReceiptsENPage() {
+  const router = useRouter();
   const [receipts, setReceipts] = useState<PaymentReceipt[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [nextNumber, setNextNumber] = useState("REC-0001");
   const [viewing, setViewing] = useState<PaymentReceipt | null>(null);
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
@@ -34,22 +38,41 @@ export default function ReceiptsENPage() {
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
-  function load() {
-    setReceipts(getAllReceipts());
+  async function load() {
+    setLoading(true);
+    try {
+      const list = await getAllReceipts();
+      setReceipts(list);
+    } catch (e: unknown) {
+      if ((e as Error & { status?: number })?.status === 401) {
+        localStorage.removeItem("br_admin_token");
+        router.push("/admin/en/login");
+        return;
+      }
+      setReceipts([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
     load();
   }, []);
 
-  function handleSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    if (showForm) {
+      getNextReceiptNumber().then(setNextNumber).catch(() => setNextNumber("REC-0001"));
+    }
+  }, [showForm]);
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const num = parseFloat(amount.replace(/,/g, "."));
     const conceptText = concept === OTHER_CONCEPT ? customConcept.trim() : concept.trim();
     if (!clientName.trim() || Number.isNaN(num) || num <= 0 || !conceptText) return;
     setSaving(true);
     try {
-      createReceipt({
+      await createReceipt({
         date,
         clientName: clientName.trim(),
         clientEmail: clientEmail.trim() || undefined,
@@ -57,7 +80,7 @@ export default function ReceiptsENPage() {
         concept: conceptText,
         notes: notes.trim() || undefined,
       });
-      load();
+      await load();
       setClientName("");
       setClientEmail("");
       setAmount("");
@@ -66,19 +89,25 @@ export default function ReceiptsENPage() {
       setDate(new Date().toISOString().slice(0, 10));
       setNotes("");
       setShowForm(false);
+    } catch (err: unknown) {
+      if ((err as Error & { status?: number })?.status === 401) {
+        localStorage.removeItem("br_admin_token");
+        router.push("/admin/en/login");
+        return;
+      }
     } finally {
       setSaving(false);
     }
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
     if (!confirm("Delete this receipt? This cannot be undone.")) return;
-    deleteReceipt(id);
-    load();
-    if (viewing?.id === id) setViewing(null);
+    const ok = await deleteReceipt(id);
+    if (ok) {
+      await load();
+      if (viewing?.id === id) setViewing(null);
+    }
   }
-
-  const nextNumber = typeof window !== "undefined" ? getNextReceiptNumber() : "REC-0001";
 
   return (
     <div className="space-y-6 animate-fade-up">
@@ -195,7 +224,9 @@ export default function ReceiptsENPage() {
         <div className="p-4 border-b border-white/10">
           <h2 className="text-lg font-semibold text-white">Recent receipts</h2>
         </div>
-        {receipts.length === 0 ? (
+        {loading ? (
+          <div className="p-8 text-center text-br-pearl/70">Loading receipts…</div>
+        ) : receipts.length === 0 ? (
           <div className="p-8 text-center text-br-pearl/70">
             <DocumentCheckIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
             <p>No receipts yet. Create one to give to your client (e.g. for materials or advance payment).</p>
