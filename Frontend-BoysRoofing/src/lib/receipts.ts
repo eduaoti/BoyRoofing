@@ -1,6 +1,6 @@
-// Payment receipts — stored in localStorage (shared EN/ES)
+// Payment receipts — persisted in backend (synced across devices)
 
-const STORAGE_KEY = "br_receipts";
+import { apiFetch } from "./api";
 
 export type PaymentReceipt = {
   id: string;
@@ -14,74 +14,92 @@ export type PaymentReceipt = {
   createdAt: string;
 };
 
-function loadReceipts(): PaymentReceipt[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const data = JSON.parse(raw);
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveReceipts(receipts: PaymentReceipt[]) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(receipts));
-}
-
-export function getAllReceipts(): PaymentReceipt[] {
-  return loadReceipts().sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1));
-}
-
-export function getNextReceiptNumber(): string {
-  const receipts = loadReceipts();
-  const numbers = receipts
-    .map((r) => {
-      const match = r.receiptNumber.replace(/\s/g, "").match(/REC-?(\d+)/i);
-      return match ? parseInt(match[1], 10) : 0;
-    })
-    .filter((n) => n > 0);
-  const next = numbers.length > 0 ? Math.max(...numbers) + 1 : 1;
-  return `REC-${String(next).padStart(4, "0")}`;
-}
-
-export function createReceipt(input: Omit<PaymentReceipt, "id" | "receiptNumber" | "createdAt">): PaymentReceipt {
-  const receipts = loadReceipts();
-  const receiptNumber = getNextReceiptNumber();
-  const receipt: PaymentReceipt = {
-    id: crypto.randomUUID?.() ?? `rec-${Date.now()}`,
-    receiptNumber,
-    date: input.date,
-    clientName: input.clientName.trim(),
-    clientEmail: input.clientEmail?.trim() || undefined,
-    amount: Number(input.amount) || 0,
-    concept: input.concept.trim(),
-    notes: input.notes?.trim() || undefined,
-    createdAt: new Date().toISOString(),
+function mapReceipt(r: {
+  id: number;
+  receiptNumber: string;
+  date: string | Date;
+  clientName: string;
+  clientEmail?: string | null;
+  amount: number;
+  concept: string;
+  notes?: string | null;
+  createdAt: string | Date;
+}): PaymentReceipt {
+  return {
+    id: String(r.id),
+    receiptNumber: r.receiptNumber,
+    date: typeof r.date === "string" ? r.date.slice(0, 10) : r.date.toISOString().slice(0, 10),
+    clientName: r.clientName,
+    clientEmail: r.clientEmail ?? undefined,
+    amount: r.amount,
+    concept: r.concept,
+    notes: r.notes ?? undefined,
+    createdAt: typeof r.createdAt === "string" ? r.createdAt : r.createdAt.toISOString(),
   };
-  receipts.push(receipt);
-  saveReceipts(receipts);
-  return receipt;
 }
 
-export function getReceiptById(id: string): PaymentReceipt | undefined {
-  return loadReceipts().find((r) => r.id === id);
+export async function getAllReceipts(): Promise<PaymentReceipt[]> {
+  const res = await apiFetch("/receipts");
+  if (res.status === 401) {
+    const err = new Error("Unauthorized") as Error & { status: number };
+    err.status = 401;
+    throw err;
+  }
+  if (!res.ok) throw new Error("Failed to fetch receipts");
+  const data = await res.json();
+  return (Array.isArray(data) ? data : []).map(mapReceipt);
 }
 
-export function updateReceipt(id: string, patch: Partial<Pick<PaymentReceipt, "clientEmail">>): PaymentReceipt | undefined {
-  const receipts = loadReceipts();
-  const idx = receipts.findIndex((r) => r.id === id);
-  if (idx === -1) return undefined;
-  if (patch.clientEmail !== undefined) receipts[idx].clientEmail = patch.clientEmail.trim() || undefined;
-  saveReceipts(receipts);
-  return receipts[idx];
+export async function getNextReceiptNumber(): Promise<string> {
+  const res = await apiFetch("/receipts/next-number");
+  if (!res.ok) return "REC-0001";
+  const data = await res.json();
+  return typeof data === "string" ? data : "REC-0001";
 }
 
-export function deleteReceipt(id: string): boolean {
-  const receipts = loadReceipts().filter((r) => r.id !== id);
-  if (receipts.length === loadReceipts().length) return false;
-  saveReceipts(receipts);
-  return true;
+export async function createReceipt(input: Omit<PaymentReceipt, "id" | "receiptNumber" | "createdAt">): Promise<PaymentReceipt> {
+  const res = await apiFetch("/receipts", {
+    method: "POST",
+    body: JSON.stringify({
+      date: input.date,
+      clientName: input.clientName.trim(),
+      clientEmail: input.clientEmail?.trim() || undefined,
+      amount: Number(input.amount),
+      concept: input.concept.trim(),
+      notes: input.notes?.trim() || undefined,
+    }),
+  });
+  if (res.status === 401) {
+    const err = new Error("Unauthorized") as Error & { status: number };
+    err.status = 401;
+    throw err;
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || "Failed to create receipt");
+  }
+  const data = await res.json();
+  return mapReceipt(data);
+}
+
+export async function getReceiptById(id: string): Promise<PaymentReceipt | undefined> {
+  const res = await apiFetch(`/receipts/${id}`);
+  if (!res.ok) return undefined;
+  const data = await res.json();
+  return mapReceipt(data);
+}
+
+export async function updateReceipt(id: string, patch: Partial<Pick<PaymentReceipt, "clientEmail">>): Promise<PaymentReceipt | undefined> {
+  const res = await apiFetch(`/receipts/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ clientEmail: patch.clientEmail ?? null }),
+  });
+  if (!res.ok) return undefined;
+  const data = await res.json();
+  return mapReceipt(data);
+}
+
+export async function deleteReceipt(id: string): Promise<boolean> {
+  const res = await apiFetch(`/receipts/${id}`, { method: "DELETE" });
+  return res.ok;
 }

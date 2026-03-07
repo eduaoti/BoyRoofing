@@ -170,3 +170,17 @@ model WorkDay {
   type            WorkDayType  @default(OFF)
   createdAt       DateTime    @default(now())
 }
+
+// --------------- RECIBOS DE PAGO ---------------
+
+model PaymentReceipt {
+  id             Int      @id @default(autoincrement())
+  receiptNumber  String
+  date           DateTime
+  clientName     String
+  clientEmail    String?
+  amount         Float
+  concept        String
+  notes          String?
+  createdAt      DateTime @default(now())
+}
