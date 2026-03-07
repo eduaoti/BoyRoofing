@@ -424,3 +424,23 @@ section {
     display: none !important;
   }
 }
+
+/* Campo fecha en recibos: contención en iPhone (Safari) */
+.receipt-date-wrap {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+.receipt-date-wrap input[type="date"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  font-size: 1rem; /* evita zoom al enfocar en iOS */
+}
+@supports (-webkit-touch-callout: none) {
+  .receipt-date-wrap input[type="date"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}

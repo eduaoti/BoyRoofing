@@ -53,10 +53,27 @@ export class ReceiptsService {
     });
   }
 
-  async updateClientEmail(id: number, clientEmail: string | null) {
+  async update(
+    id: number,
+    dto: {
+      date?: string;
+      clientName?: string;
+      clientEmail?: string;
+      amount?: number;
+      concept?: string;
+      notes?: string;
+    },
+  ) {
+    const data: Record<string, unknown> = {};
+    if (dto.date !== undefined) data.date = new Date(dto.date);
+    if (dto.clientName !== undefined) data.clientName = dto.clientName.trim();
+    if (dto.clientEmail !== undefined) data.clientEmail = dto.clientEmail?.trim() || null;
+    if (dto.amount !== undefined) data.amount = Number(dto.amount);
+    if (dto.concept !== undefined) data.concept = dto.concept.trim();
+    if (dto.notes !== undefined) data.notes = dto.notes?.trim() || null;
     return this.prisma.paymentReceipt.update({
       where: { id },
-      data: { clientEmail: clientEmail?.trim() || null },
+      data,
     });
   }
 

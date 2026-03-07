@@ -89,10 +89,21 @@ export async function getReceiptById(id: string): Promise<PaymentReceipt | undef
   return mapReceipt(data);
 }
 
-export async function updateReceipt(id: string, patch: Partial<Pick<PaymentReceipt, "clientEmail">>): Promise<PaymentReceipt | undefined> {
+export type ReceiptUpdatePayload = Partial<
+  Pick<PaymentReceipt, "date" | "clientName" | "clientEmail" | "amount" | "concept" | "notes">
+>;
+
+export async function updateReceipt(id: string, patch: ReceiptUpdatePayload): Promise<PaymentReceipt | undefined> {
+  const body: Record<string, unknown> = {};
+  if (patch.date !== undefined) body.date = patch.date;
+  if (patch.clientName !== undefined) body.clientName = patch.clientName;
+  if (patch.clientEmail !== undefined) body.clientEmail = patch.clientEmail ?? null;
+  if (patch.amount !== undefined) body.amount = patch.amount;
+  if (patch.concept !== undefined) body.concept = patch.concept;
+  if (patch.notes !== undefined) body.notes = patch.notes ?? null;
   const res = await apiFetch(`/receipts/${id}`, {
     method: "PATCH",
-    body: JSON.stringify({ clientEmail: patch.clientEmail ?? null }),
+    body: JSON.stringify(Object.keys(body).length ? body : { clientEmail: null }),
   });
   if (!res.ok) return undefined;
   const data = await res.json();
