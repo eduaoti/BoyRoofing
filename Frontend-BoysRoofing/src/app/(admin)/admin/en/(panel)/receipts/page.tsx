@@ -124,7 +124,7 @@ export default function ReceiptsENPage() {
       </div>
 
       {showForm && (
-        <div className="admin-card-glow p-6 animate-fade-up">
+        <div className="admin-card-glow p-6 animate-fade-up overflow-x-hidden">
           <h2 className="text-lg font-semibold text-br-red-main mb-4">Create receipt · Next: {nextNumber}</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -149,24 +149,24 @@ export default function ReceiptsENPage() {
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
+              <div className="min-w-0">
                 <label className="block text-sm font-medium text-br-pearl/80 mb-1">Amount (USD)</label>
                 <input
                   type="text"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full rounded-xl bg-br-carbon/80 border border-white/10 px-4 py-2.5 text-white placeholder-br-pearl/40 focus:border-br-red-main focus:ring-1 focus:ring-br-red-main"
+                  className="w-full min-w-0 rounded-xl bg-br-carbon/80 border border-white/10 px-4 py-2.5 text-white placeholder-br-pearl/40 focus:border-br-red-main focus:ring-1 focus:ring-br-red-main"
                   placeholder="5000"
                   required
                 />
               </div>
-              <div>
+              <div className="min-w-0">
                 <label className="block text-sm font-medium text-br-pearl/80 mb-1">Date</label>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full rounded-xl bg-br-carbon/80 border border-white/10 px-4 py-2.5 text-white focus:border-br-red-main focus:ring-1 focus:ring-br-red-main"
+                  className="w-full min-w-0 max-w-full rounded-xl bg-br-carbon/80 border border-white/10 px-4 py-2.5 text-white focus:border-br-red-main focus:ring-1 focus:ring-br-red-main [&::-webkit-date-and-time-value]:text-left"
                   required
                 />
               </div>
