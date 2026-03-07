@@ -10,6 +10,7 @@ import { InvoicesModule } from './invoices/invoices.module';
 import { ReviewsModule } from './Reviews/reviews.module';
 import { WorkersModule } from './workers/workers.module';
 import { PayrollModule } from './payroll/payroll.module';
+import { ReceiptsModule } from './receipts/receipts.module';
 import { PrismaService } from './prisma.service';
 
 @Module({
@@ -21,6 +22,7 @@ import { PrismaService } from './prisma.service';
     ReviewsModule,
     WorkersModule,
     PayrollModule,
+    ReceiptsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

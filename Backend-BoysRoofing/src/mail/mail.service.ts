@@ -115,4 +115,85 @@ export class MailService {
       this.logger.error('❌ Error enviando invoice PDF', error);
     }
   }
+
+  // ------------------------------------------------------
+  // 3️⃣ EMAIL: Enviar recibo de pago al cliente
+  // ------------------------------------------------------
+  async sendReceiptEmail(params: {
+    to: string;
+    receipt: {
+      receiptNumber: string;
+      date: string;
+      clientName: string;
+      amount: number;
+      concept: string;
+      notes?: string;
+    };
+    locale: 'en' | 'es';
+    logoUrl?: string;
+  }) {
+    const { to, receipt, locale, logoUrl } = params;
+    if (!to?.trim()) {
+      this.logger.error('❌ No se proporcionó email para el recibo');
+      return;
+    }
+    const amountStr = new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(receipt.amount);
+    const dateStr = new Intl.DateTimeFormat(locale === 'es' ? 'es-MX' : 'en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(new Date(receipt.date + 'T12:00:00'));
+
+    const isEn = locale === 'en';
+    const subject = isEn
+      ? `Payment receipt ${receipt.receiptNumber} – Boy's Roofing`
+      : `Recibo de pago ${receipt.receiptNumber} – Boy's Roofing`;
+    const receivedFrom = isEn ? 'Received from' : 'Recibí de';
+    const theSumOf = isEn ? 'the sum of' : 'la cantidad de';
+    const forConcept = isEn ? 'for' : 'por concepto de';
+    const notesLabel = isEn ? 'Notes' : 'Notas';
+    const signatureLabel = isEn ? 'Signature' : 'Firma';
+    const greeting = isEn
+      ? `Hi ${receipt.clientName}, please find your payment receipt below.`
+      : `Hola ${receipt.clientName}, adjunto encontrará su recibo de pago.`;
+
+    const logoHtml = logoUrl
+      ? `<img src="${logoUrl}" alt="Boy's Roofing" style="height: 56px; width: auto; display: block; margin: 0 auto 12px;" />`
+      : '';
+
+    try {
+      await this.resend.emails.send({
+        from: this.from,
+        to: to.trim(),
+        subject,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; color: #333;">
+            <div style="background: #161A1D; padding: 24px 28px; border-radius: 12px 12px 0 0; text-align: center;">
+              ${logoHtml}
+              <h1 style="margin: 0; color: #fff; font-size: 22px; font-weight: 700;">Boy's Roofing</h1>
+              <p style="margin: 6px 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">${isEn ? 'Payment receipt' : 'Recibo de pago'}</p>
+            </div>
+            <div style="padding: 28px; background: #f5f5f5; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+              <p style="margin: 0 0 16px; font-size: 16px;">${greeting}</p>
+              <div style="background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 20px; border: 1px solid #e0e0e0;">
+                <p style="margin: 0 0 8px; font-size: 13px; color: #666;"><strong>${isEn ? 'Receipt #' : 'Recibo #'}</strong> ${receipt.receiptNumber}</p>
+                <p style="margin: 0 0 8px; font-size: 13px; color: #666;"><strong>${isEn ? 'Date' : 'Fecha'}</strong> ${dateStr}</p>
+                <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.5;">${receivedFrom} <strong>${receipt.clientName}</strong> ${theSumOf} <strong style="color: #BA181B;">${amountStr}</strong> ${forConcept} <strong>${receipt.concept}</strong>.</p>
+                ${receipt.notes ? `<p style="margin: 0; font-size: 13px; color: #555;"><strong>${notesLabel}:</strong> ${receipt.notes}</p>` : ''}
+              </div>
+              <p style="margin: 0; font-size: 12px; color: #6b6b6b;">${signatureLabel} _________________________</p>
+              <p style="margin: 20px 0 0; font-size: 12px; color: #6b6b6b;">Message sent automatically by Boy's Roofing.</p>
+            </div>
+          </div>
+        `,
+      });
+      this.logger.log('📄 Recibo enviado por correo correctamente');
+    } catch (error) {
+      this.logger.error('❌ Error enviando recibo por correo', error);
+      throw error;
+    }
+  }
 }

@@ -4,7 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { MapPinIcon, HomeIcon, DocumentTextIcon, DocumentPlusIcon, ArrowRightOnRectangleIcon, UserGroupIcon, BanknotesIcon, Bars3Icon, XMarkIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import { MapPinIcon, HomeIcon, DocumentTextIcon, DocumentPlusIcon, ArrowRightOnRectangleIcon, UserGroupIcon, BanknotesIcon, Bars3Icon, XMarkIcon, CurrencyDollarIcon, DocumentCheckIcon } from "@heroicons/react/24/outline";
 
 export default function AdminENPanelLayout({
   children,
@@ -43,7 +43,7 @@ export default function AdminENPanelLayout({
   };
 
   return (
-    <div className="min-h-screen flex bg-br-carbon text-white">
+    <div className="min-h-screen flex bg-br-carbon text-white no-print">
       {/* SIDEBAR */}
       <aside className="hidden md:flex w-64 flex-col justify-between bg-br-smoke/95 border-r border-white/5 px-6 py-6 shadow-2xl backdrop-blur-sm">
         <div>
@@ -62,6 +62,7 @@ export default function AdminENPanelLayout({
             {navLink("/admin/en/payroll/workers", "Workers", UserGroupIcon)}
             {navLink("/admin/en/payroll", "Payroll", BanknotesIcon, true)}
             {navLink("/admin/en/payroll/balances", "Balances", CurrencyDollarIcon)}
+            {navLink("/admin/en/receipts", "Payment receipts", DocumentCheckIcon)}
           </nav>
         </div>
 
@@ -134,6 +135,9 @@ export default function AdminENPanelLayout({
                 </Link>
                 <Link href="/admin/en/payroll/balances" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
                   <CurrencyDollarIcon className="h-5 w-5 shrink-0" /> Balances
+                </Link>
+                <Link href="/admin/en/receipts" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
+                  <DocumentCheckIcon className="h-5 w-5 shrink-0" /> Payment receipts
                 </Link>
               </div>
               <div className="p-3 border-t border-br-smoke-light">

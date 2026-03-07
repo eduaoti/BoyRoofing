@@ -4,7 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { MapPinIcon, HomeIcon, DocumentTextIcon, DocumentPlusIcon, ArrowRightOnRectangleIcon, UserGroupIcon, BanknotesIcon, Bars3Icon, XMarkIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import { MapPinIcon, HomeIcon, DocumentTextIcon, DocumentPlusIcon, ArrowRightOnRectangleIcon, UserGroupIcon, BanknotesIcon, Bars3Icon, XMarkIcon, CurrencyDollarIcon, DocumentCheckIcon } from "@heroicons/react/24/outline";
 
 export default function AdminESPanelLayout({
   children,
@@ -42,7 +42,7 @@ export default function AdminESPanelLayout({
   };
 
   return (
-    <div className="min-h-screen flex bg-br-carbon text-white">
+    <div className="min-h-screen flex bg-br-carbon text-white no-print">
       {/* SIDEBAR */}
       <aside className="hidden md:flex w-64 flex-col justify-between bg-br-smoke/95 border-r border-white/5 px-6 py-6 shadow-2xl backdrop-blur-sm">
         <div>
@@ -61,6 +61,7 @@ export default function AdminESPanelLayout({
             {navLink("/admin/es/nomina/trabajadores", "Trabajadores", UserGroupIcon)}
             {navLink("/admin/es/nomina", "Nómina", BanknotesIcon, true)}
             {navLink("/admin/es/nomina/balances", "Balances / Deudas", CurrencyDollarIcon)}
+            {navLink("/admin/es/recibos", "Recibos de pago", DocumentCheckIcon)}
           </nav>
         </div>
 
@@ -133,6 +134,9 @@ export default function AdminESPanelLayout({
                 </Link>
                 <Link href="/admin/es/nomina/balances" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
                   <CurrencyDollarIcon className="h-5 w-5 shrink-0" /> Balances / Deudas
+                </Link>
+                <Link href="/admin/es/recibos" onClick={closeMenu} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-br-pearl hover:bg-br-carbon/60 hover:text-br-red-main transition">
+                  <DocumentCheckIcon className="h-5 w-5 shrink-0" /> Recibos de pago
                 </Link>
               </div>
               <div className="p-3 border-t border-br-smoke-light">
