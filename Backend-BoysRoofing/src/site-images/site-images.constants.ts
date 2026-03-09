@@ -40,11 +40,14 @@ export const DEFAULT_SITE_IMAGE_URLS: Record<SiteImageKey, string> = {
 };
 
 /** Keys para galería (gallery_1 ... gallery_36) */
-export const GALLERY_KEYS = Array.from({ length: 36 }, (_, i) => `gallery_${i + 1}`) as const;
-export type GalleryKey = (typeof GALLERY_KEYS)[number];
+export const GALLERY_KEYS: readonly string[] = Array.from(
+  { length: 36 },
+  (_, i) => `gallery_${i + 1}`,
+);
+export type GalleryKey = string;
 
-export const DEFAULT_GALLERY_URLS: Record<GalleryKey, string> = Object.fromEntries(
+export const DEFAULT_GALLERY_URLS: Record<string, string> = Object.fromEntries(
   GALLERY_KEYS.map((k, i) => [k, `/gallery/imagen${i + 1}.jpg`]),
-) as Record<GalleryKey, string>;
+);
 
-export const ALL_IMAGE_KEYS = [...SITE_IMAGE_KEYS, ...GALLERY_KEYS] as const;
+export const ALL_IMAGE_KEYS: readonly string[] = [...SITE_IMAGE_KEYS, ...GALLERY_KEYS];
