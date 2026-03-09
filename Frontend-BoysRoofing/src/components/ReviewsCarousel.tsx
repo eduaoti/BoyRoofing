@@ -240,10 +240,10 @@ export default function ReviewsCarousel({
   if (loading) {
     return (
       <section className="w-full max-w-5xl mx-auto py-12 px-4">
-        <h2 className="text-3xl font-bold text-center mb-4 text-br-white">
+        <h2 className="page-h2 text-center mb-4 text-br-white">
           {t.title}
         </h2>
-        <p className="text-center text-br-stone">{t.loading}</p>
+        <p className="page-body text-center text-br-stone">{t.loading}</p>
       </section>
     );
   }
@@ -251,10 +251,10 @@ export default function ReviewsCarousel({
   if (!data || data.length === 0) {
     return (
       <section className="w-full max-w-5xl mx-auto py-12 px-4">
-        <h2 className="text-3xl font-bold text-center mb-4 text-br-white">
+        <h2 className="page-h2 text-center mb-4 text-br-white">
           {t.title}
         </h2>
-        <p className="text-center text-br-stone">{t.empty}</p>
+        <p className="page-body text-center text-br-stone">{t.empty}</p>
       </section>
     );
   }
@@ -264,7 +264,7 @@ export default function ReviewsCarousel({
 
   return (
     <section className="w-full max-w-5xl mx-auto py-16 px-4">
-      <h2 className="text-3xl font-bold text-center mb-6 text-br-white">
+      <h2 className="page-h2 text-center mb-6 text-br-white">
         {t.title}
       </h2>
 

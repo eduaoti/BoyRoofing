@@ -38,7 +38,14 @@
     "values": "Values",
     "footerCtaTitle": "Do you need help with your roof?",
     "footerCtaText": "Get a professional inspection and a personalized quote today.",
-    "footerButton": "Talk to a roofing expert"
+    "footerButton": "Talk to a roofing expert",
+    "seeAllServices": "See all services",
+    "learnMoreAbout": "Learn more about us"
+  },
+  "gallery": {
+    "title": "Project Gallery",
+    "description": "A selection of recent work by Boys Roofing. Repairs, renovations, before & after, and full roofing projects.",
+    "close": "Close"
   },
   "services": {
     "sectionTitle": "Our services",
