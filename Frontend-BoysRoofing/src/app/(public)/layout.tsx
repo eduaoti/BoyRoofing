@@ -3,6 +3,7 @@ import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { SiteImagesProvider } from "@/contexts/SiteImagesContext";
 import { Roboto, Montserrat } from "next/font/google";
 
 const montserrat = Montserrat({
@@ -32,7 +33,9 @@ export default function PublicLayout({
           <Breadcrumbs />
         </div>
 
+        <SiteImagesProvider>
         <main>{children}</main>
+      </SiteImagesProvider>
 
         <Footer />
       </body>

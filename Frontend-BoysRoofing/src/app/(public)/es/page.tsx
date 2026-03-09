@@ -4,12 +4,13 @@ import ReviewsCarousel from "@/components/ReviewsCarousel";
 export default function PageES() {
   return (
     <main className="bg-[#0F0F0F] text-white">
-      {/* Contenido completo del Home */}
       <HomePage />
 
-      {/* Reseñas al final de la página */}
-      <section className="pt-10 pb-20">
-        <ReviewsCarousel lang="es" />
+      {/* Reseñas: sección única al cierre del home */}
+      <section id="reviews" className="border-t border-white/5 bg-[#0c0c0d] py-16 md:py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <ReviewsCarousel lang="es" />
+        </div>
       </section>
     </main>
   );

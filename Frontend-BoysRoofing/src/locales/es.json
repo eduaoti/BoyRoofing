@@ -37,8 +37,15 @@
     "vision": "Visión",
     "values": "Valores",
     "footerCtaTitle": "¿Necesitas ayuda con tu techo?",
-    "footerCtaText": "Obtén una inspección profesional...",
-    "footerButton": "Habla con un experto en techos"
+    "footerCtaText": "Obtén una inspección profesional y una cotización a tu medida.",
+    "footerButton": "Habla con un experto en techos",
+    "seeAllServices": "Ver todos los servicios",
+    "learnMoreAbout": "Conoce más sobre nosotros"
+  },
+  "gallery": {
+    "title": "Galería de Proyectos",
+    "description": "Una selección de trabajos recientes de Boys Roofing. Reparaciones, renovaciones, antes y después, y proyectos completos de techado.",
+    "close": "Cerrar"
   },
   "services": {
     "sectionTitle": "Nuestros servicios",

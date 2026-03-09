@@ -184,3 +184,12 @@ model PaymentReceipt {
   notes          String?
   createdAt      DateTime @default(now())
 }
+
+// --------------- IMÁGENES DEL SITIO (Cloudinary) ---------------
+
+model SiteImage {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique  // ej: hero, home_about, gallery_1
+  url       String   // URL de Cloudinary (secure_url)
+  updatedAt DateTime @updatedAt
+}

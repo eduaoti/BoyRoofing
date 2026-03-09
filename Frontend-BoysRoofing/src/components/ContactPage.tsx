@@ -2,9 +2,11 @@
 "use client";
 
 import useTranslation from "@/hooks/useTranslation";
+import useReveal from "@/hooks/useReveal";
 
 export default function ContactPage() {
   const { t } = useTranslation();
+  const refCard = useReveal();
 
   const phone = t("contact.phone");
   const telHref = `tel:${phone}`;
@@ -14,35 +16,31 @@ export default function ContactPage() {
 
   return (
     <div className="bg-[#0F0F0F] text-white overflow-hidden">
-      {/* ✅ HERO (lo dejamos igual) */}
-      <section className="relative w-full h-[38vh] md:h-[48vh] flex items-center justify-center overflow-hidden bg-[#111315]">
-        {/* Degradado */}
-        <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(120,15,22,0.55),rgba(120,15,22,0.18)_45%,rgba(0,0,0,0.65)_85%)]" />
-
-        {/* Barrita roja superior */}
-        <div className="absolute top-0 left-0 w-full h-[6px] bg-gradient-to-r from-red-700/70 via-red-500/60 to-transparent animate-slideLight" />
-
-        <div className="text-center px-6 relative z-10">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            {t("contact.sectionTitle")}
+      {/* Hero */}
+      <section className="relative w-full min-h-[38vh] md:min-h-[44vh] flex items-center justify-center overflow-hidden page-hero">
+        <div className="absolute inset-0 page-hero-overlay" />
+        <div className="absolute inset-0 page-hero-glow" />
+        <div className="absolute top-0 left-0 w-full page-hero-accent animate-slideLight" />
+        <div className="text-center px-6 relative z-10 max-w-2xl mx-auto">
+<h1 className="page-h1 text-white page-hero-title">
+          {t("contact.sectionTitle")}
           </h1>
-          <p className="mt-3 text-base md:text-lg text-gray-300 font-light max-w-2xl mx-auto">
+          <p className="mt-4 page-tagline max-w-2xl mx-auto">
             {t("contact.sectionText")}
           </p>
         </div>
       </section>
 
-      {/* ✅ SOLO LA TARJETA, SIN REPETIR TITULOS NI TEXTOS */}
-      <section className="py-16 bg-[#0F0F0F] flex justify-center">
-        <div className="w-[90%] max-w-xl px-2">
-          <div className="bg-[#151515] border border-white/10 rounded-2xl px-8 py-10 shadow-xl text-center">
+      {/* Tarjeta de contacto */}
+      <section className="home-section-dark py-20 md:py-24 flex justify-center">
+        <div ref={refCard} className="reveal w-full max-w-xl px-6">
+          <div className="home-card rounded-2xl px-8 py-10 text-center border border-white/10">
             {/* Iconos */}
             <div className="flex justify-center gap-10 mb-10">
-              {/* Teléfono */}
               <a
                 href={telHref}
                 title={t("contact.callButton")}
-                className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#1f1f1f] border border-[#333]"
+                className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:border-br-red-light/50 hover:bg-br-red-main/10 transition-all"
               >
                 <svg
                   className="w-7 h-7 text-white opacity-90"
@@ -59,11 +57,10 @@ export default function ContactPage() {
                 </svg>
               </a>
 
-              {/* Mensaje */}
               <a
                 href={smsHref}
                 title={t("contact.smsButton")}
-                className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#1f1f1f] border border-[#333]"
+                className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:border-br-red-light/50 hover:bg-br-red-main/10 transition-all"
               >
                 <svg
                   className="w-7 h-7 text-white opacity-90"
@@ -81,28 +78,22 @@ export default function ContactPage() {
               </a>
             </div>
 
-            {/* Botón llamar */}
             <a
               href={telHref}
-              className="block w-full bg-[#E5383B] text-white font-semibold py-3 rounded-lg uppercase tracking-wide text-sm hover:bg-[#f04446] transition-colors"
+              className="block w-full bg-br-red-main text-white font-semibold py-3.5 rounded-xl uppercase tracking-wide text-sm hover:bg-br-red-light transition-all"
             >
               {t("contact.callButton")}
             </a>
-
-            {/* Botón mensaje */}
             <a
               href={smsHref}
-              className="mt-3 block w-full border border-[#E5383B] text-[#E5383B] font-semibold py-3 rounded-lg uppercase tracking-wide text-sm hover:bg-[#E5383B] hover:text-white transition-colors"
+              className="mt-3 block w-full border-2 border-br-red-main text-br-red-light font-semibold py-3.5 rounded-xl uppercase tracking-wide text-sm hover:bg-br-red-main hover:text-white transition-all"
             >
               {t("contact.smsButton")}
             </a>
 
-            {/* Teléfono y badge */}
             <div className="mt-6 text-center text-sm">
               <p className="font-medium text-gray-100">{phone}</p>
-              <p className="text-[12px] text-gray-400 mt-1">
-                {t("contact.badge")}
-              </p>
+              <p className="text-xs text-gray-400 mt-1">{t("contact.badge")}</p>
             </div>
           </div>
         </div>

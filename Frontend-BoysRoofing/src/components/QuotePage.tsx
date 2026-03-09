@@ -1,6 +1,7 @@
 "use client";
 
 import useTranslation from "@/hooks/useTranslation";
+import useReveal from "@/hooks/useReveal";
 import { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { ToastMessage, type ToastType } from "@/components/ToastMessage";
@@ -66,6 +67,8 @@ export default function QuotePage() {
     }
   };
 
+  const refForm = useReveal();
+
   const inputBase =
     "w-full rounded-lg bg-br-smoke/80 px-4 py-3 text-br-white border border-br-smoke-light/70 " +
     "focus:outline-none focus:ring-2 focus:ring-br-red-main focus:border-br-red-main " +
@@ -74,28 +77,32 @@ export default function QuotePage() {
   const labelBase = "block text-xs font-medium tracking-wide text-br-stone mb-1.5";
 
   return (
-    <div className="bg-[#0F0F0F] min-h-screen text-br-white py-20">
+    <div className="bg-[#0F0F0F] min-h-screen text-br-white">
       {toast && (
         <ToastMessage type={toast.type} message={toast.message} onDismiss={() => setToast(null)} />
       )}
-      <div className="mx-auto max-w-4xl px-4">
-        {/* Encabezado */}
-        <div className="mb-10">
-          <span className="inline-flex items-center rounded-full bg-br-red-main/10 px-3 py-1 text-xs font-semibold text-br-red-main uppercase tracking-wide">
+      {/* Hero */}
+      <section className="relative w-full min-h-[32vh] md:min-h-[38vh] flex items-center justify-center overflow-hidden page-hero">
+        <div className="absolute inset-0 page-hero-overlay" />
+        <div className="absolute inset-0 page-hero-glow" />
+        <div className="absolute top-0 left-0 w-full page-hero-accent animate-slideLight" />
+        <div className="text-center px-6 relative z-10 max-w-2xl mx-auto">
+          <span className="inline-block rounded-full bg-br-red-main/20 px-3 py-1 text-xs font-semibold text-br-red-light uppercase tracking-wide border border-br-red-main/30">
             {t("navbar.quote")}
           </span>
-
-          <h1 className="mt-4 text-4xl md:text-5xl font-bold text-br-red-main">
+          <h1 className="page-h1 mt-4 text-white page-hero-title">
             {t("quote.title")}
           </h1>
-
-          <p className="mt-4 text-sm md:text-base text-br-stone max-w-2xl">
+          <p className="mt-3 page-tagline">
             {t("quote.subtitle")}
           </p>
         </div>
+      </section>
 
-        {/* Card del formulario */}
-        <div className="rounded-2xl bg-[#111315] border border-[#2a2a2a] shadow-2xl shadow-black/40 p-6 md:p-8">
+      {/* Formulario */}
+      <section className="home-section-dark py-16 md:py-24">
+        <div ref={refForm} className="reveal mx-auto max-w-4xl px-6">
+          <div className="home-card rounded-2xl border border-white/10 p-6 md:p-8">
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Datos de contacto */}
             <div className="space-y-4">
@@ -262,18 +269,18 @@ export default function QuotePage() {
               </div>
             </div>
 
-            {/* Botón */}
             <div className="pt-4">
               <button
                 type="submit"
-                className="btn-pulse w-full md:w-auto px-8 py-3 rounded-lg bg-br-red-main font-semibold text-sm md:text-base hover:bg-br-red-light shadow-md hover:shadow-red-700/40 transition-all"
+                className="btn-pulse w-full md:w-auto px-8 py-3.5 rounded-xl bg-br-red-main font-semibold text-sm md:text-base hover:bg-br-red-light shadow-lg hover:shadow-red-900/30 transition-all"
               >
                 {t("quote.submit")}
               </button>
             </div>
           </form>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

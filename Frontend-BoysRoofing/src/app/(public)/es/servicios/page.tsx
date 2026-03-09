@@ -2,6 +2,7 @@
 
 import useTranslation from "@/hooks/useTranslation";
 import useReveal from "@/hooks/useReveal";
+import { useSiteImages } from "@/contexts/SiteImagesContext";
 import BeforeAfter from "@/components/BeforeAfter";
 import WorkCarousel from "@/components/WorkCarousel";
 
@@ -14,105 +15,75 @@ import {
 
 export default function ServicesPage() {
   const { t } = useTranslation();
-
+  const { getImage } = useSiteImages();
+  const sectionReveal = useReveal();
   const reveal1 = useReveal();
   const reveal2 = useReveal();
 
   return (
     <>
-      {/* ⭐ HERO SERVICIOS ACTUAL */}
-      <div className="relative w-full h-[38vh] md:h-[48vh] flex items-center justify-center overflow-hidden bg-[#111315]">
-
-        <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(120,15,22,0.55),rgba(120,15,22,0.18)_45%,rgba(0,0,0,0.65)_85%)]"></div>
-
-        <div className="absolute top-0 left-0 w-full h-[6px] bg-gradient-to-r from-red-700/70 via-red-500/60 to-transparent animate-slideLight"></div>
-
-        <div className="text-center px-6 relative z-10">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]">
+      {/* Hero */}
+      <div className="relative w-full min-h-[40vh] md:min-h-[50vh] flex items-center justify-center overflow-hidden services-hero">
+        <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(120,15,22,0.5),rgba(120,15,22,0.12)_45%,rgba(0,0,0,0.6)_85%)]" />
+        <div className="absolute inset-0 services-hero-glow" />
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-700/80 via-red-500/70 to-transparent animate-slideLight" />
+        <div className="text-center px-6 relative z-10 max-w-2xl mx-auto">
+          <h1 className="page-h1 text-white services-hero-title hero-text-reveal">
             {t("services.sectionTitle")}
           </h1>
-
-          <p className="mt-3 text-base md:text-lg text-gray-300 font-light">
+          <p className="mt-4 page-tagline hero-tagline-reveal">
             {t("services.tagline")}
           </p>
         </div>
       </div>
 
-      {/* ⭐⭐ SECCIÓN PROFESIONAL EXTRA */}
-      <section className="bg-[#0F0F0F] text-white py-16 border-b border-[#2a2a2a]">
-        <div className="mx-auto max-w-6xl px-6 space-y-16">
+      {/* Beneficios + Proceso + Sellos (reveal al scroll, estilo Zoho) */}
+      <section ref={sectionReveal} className="services-section-reveal services-section-wrap text-white py-20 md:py-24 border-b border-white/5">
+        <div className="mx-auto max-w-6xl px-6 space-y-20">
 
-          {/* 1. BENEFICIOS */}
-          <div ref={reveal1} className="reveal benefits-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
-            <div className="benefit-card p-6 rounded-xl bg-[#1f1f1f] border border-[#3a3a3a] hover:border-br-red-light/70">
-              <ShieldCheckAnimated />
-              <p className="mt-3 font-semibold text-center">
-                {t("services.benefits.satisfaction")}
-              </p>
-            </div>
-
-            <div className="benefit-card p-6 rounded-xl bg-[#1f1f1f] border border-[#3a3a3a] hover:border-br-red-light/70">
-              <ClockAnimated />
-              <p className="mt-3 font-semibold text-center">
-                {t("services.benefits.speed")}
-              </p>
-            </div>
-
-            <div className="benefit-card p-6 rounded-xl bg-[#1f1f1f] border border-[#3a3a3a] hover:border-br-red-light/70">
-              <CheckBadgeAnimated />
-              <p className="mt-3 font-semibold text-center">
-                {t("services.benefits.certified")}
-              </p>
-            </div>
-
-            <div className="benefit-card p-6 rounded-xl bg-[#1f1f1f] border border-[#3a3a3a] hover:border-br-red-light/70">
-              <SparklesAnimated />
-              <p className="mt-3 font-semibold text-center">
-                {t("services.benefits.cleaning")}
-              </p>
-            </div>
-
+          <div className="benefits-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            {[
+              { Icon: ShieldCheckAnimated, label: t("services.benefits.satisfaction") },
+              { Icon: ClockAnimated, label: t("services.benefits.speed") },
+              { Icon: CheckBadgeAnimated, label: t("services.benefits.certified") },
+              { Icon: SparklesAnimated, label: t("services.benefits.cleaning") },
+            ].map(({ Icon, label }) => (
+              <div key={label} className="benefit-card benefit-card-modern p-6 md:p-8 flex flex-col items-center">
+                <Icon />
+                <p className="mt-4 font-semibold text-center text-[0.95rem] md:text-base text-white/95">{label}</p>
+              </div>
+            ))}
           </div>
 
-          {/* 2. PASOS DEL PROCESO */}
-          <div className="space-y-10">
-            <h2 className="text-center text-2xl font-bold text-br-red-light">
+          <div className="space-y-12">
+            <div className="services-process-title-wrap">
+<h2 className="page-h2 text-center services-process-title">
               {t("services.process.title")}
             </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 t("services.process.step1"),
                 t("services.process.step2"),
                 t("services.process.step3"),
                 t("services.process.step4"),
               ].map((step, i) => (
-                <div
-                  key={i}
-                  className="flex flex-col items-center p-6 rounded-xl bg-[#1f1f1f] border border-[#3a3a3a] hover:border-br-red-light/70 transition"
-                >
-                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-br-red-main/80 text-white font-bold text-xl">
-                    {i + 1}
-                  </div>
-                  <p className="mt-4 text-center font-medium">{step}</p>
+                <div key={i} className="process-step-card flex flex-col items-center p-6 md:p-8 text-center">
+                  <div className="process-step-num flex items-center justify-center">{i + 1}</div>
+                  <p className="mt-4 font-medium text-white/90 text-sm md:text-base">{step}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* 3. SELLOS DE GARANTÍA */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="flex flex-wrap justify-center gap-3 md:gap-4">
             {[
               t("services.badges.years"),
               t("services.badges.certified"),
               t("services.badges.warranty"),
               t("services.badges.insured"),
-            ].map((badge, i) => (
-              <div
-                key={i}
-                className="py-3 px-4 bg-[#1f1f1f] border border-[#3a3a3a] rounded-lg text-center font-semibold text-sm hover:border-br-red-light/70 transition"
-              >
+            ].map((badge) => (
+              <div key={badge} className="services-badge-pill text-white/95">
                 ✔ {badge}
               </div>
             ))}
@@ -121,47 +92,47 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* 🔧 CONTENIDO DE SERVICIOS */}
-      <div className="bg-[radial-gradient(circle_at_top_left,rgba(120, 15, 22, 0.07),rgba(10, 10, 10, 0.1)_70%)] text-white py-20">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="mt-12 space-y-12">
+      {/* Tarjetas de contenido de servicios */}
+      <div className="bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(120,15,22,0.06)_0%,transparent_50%)] text-white py-16 md:py-24">
+        <div className="mx-auto max-w-6xl px-4 md:px-6">
+          <div className="space-y-14 md:space-y-16">
 
-            {/* Servicio 1 */}
             <section
               ref={reveal1}
-              className="reveal rounded-xl border border-[#242424]/80 bg-[#1E1F21]/70 p-8 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all"
+              className="reveal service-content-card p-8 md:p-10"
             >
-              <h2 className="text-2xl font-semibold text-[#E5383B]">
+              <h2 className="page-h2 text-br-red-light">
                 {t("services.roofing.title")}
               </h2>
-              <p className="mt-4">{t("services.roofing.p1")}</p>
-              <p className="mt-3">{t("services.roofing.p2")}</p>
-
-              <BeforeAfter
-                before="/gallery/proceso5.jpg"
-                after="/gallery/DesPues.jpg"
-                titleBefore={t("services.before")}
-                titleAfter={t("services.after")}
-              />
+              <p className="mt-4 text-white/85 leading-relaxed">{t("services.roofing.p1")}</p>
+              <p className="mt-3 text-white/85 leading-relaxed">{t("services.roofing.p2")}</p>
+              <div className="mt-8">
+                <BeforeAfter
+                  before={getImage("service_roofing_before", "/gallery/proceso5.jpg")}
+                  after={getImage("service_roofing_after", "/gallery/DesPues.jpg")}
+                  titleBefore={t("services.before")}
+                  titleAfter={t("services.after")}
+                />
+              </div>
             </section>
 
-            {/* Servicio 2 */}
             <section
               ref={reveal2}
-              className="reveal rounded-xl border border-[#242424]/80 bg-[#1E1F21]/70 p-8 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all"
+              className="reveal service-content-card p-8 md:p-10"
             >
-              <h2 className="text-2xl font-semibold text-[#E5383B]">
+              <h2 className="page-h2 text-br-red-light">
                 {t("services.cleaning.title")}
               </h2>
-              <p className="mt-4">{t("services.cleaning.p1")}</p>
-              <p className="mt-3">{t("services.cleaning.p2")}</p>
-
-              <BeforeAfter
-                before="/gallery/limpieza.jpg"
-                after="/gallery/despues1.jpg"
-                titleBefore={t("services.before")}
-                titleAfter={t("services.after")}
-              />
+              <p className="mt-4 text-white/85 leading-relaxed">{t("services.cleaning.p1")}</p>
+              <p className="mt-3 text-white/85 leading-relaxed">{t("services.cleaning.p2")}</p>
+              <div className="mt-8">
+<BeforeAfter
+                before={getImage("service_cleaning_before", "/gallery/limpieza.jpg")}
+                after={getImage("service_cleaning_after", "/gallery/despues1.jpg")}
+                  titleBefore={t("services.before")}
+                  titleAfter={t("services.after")}
+                />
+              </div>
             </section>
 
             <WorkCarousel />
