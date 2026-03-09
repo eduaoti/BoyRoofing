@@ -5,13 +5,12 @@ import useReveal from "@/hooks/useReveal";
 import BeforeAfter from "@/components/BeforeAfter";
 import WorkCarousel from "@/components/WorkCarousel";
 
-/* ⭐ ICONOS PROFESIONALES */
 import {
-  ShieldCheckIcon,
-  ClockIcon,
-  CheckBadgeIcon,
-  SparklesIcon,
-} from "@heroicons/react/24/outline";
+  ShieldCheckAnimated,
+  ClockAnimated,
+  CheckBadgeAnimated,
+  SparklesAnimated,
+} from "@/components/BenefitIconsAnimated";
 
 export default function ServicesPage() {
   const { t } = useTranslation();
@@ -44,31 +43,31 @@ export default function ServicesPage() {
         <div className="mx-auto max-w-6xl px-6 space-y-16">
 
           {/* 1. BENEFICIOS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div ref={reveal1} className="reveal benefits-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-            <div className="p-6 rounded-xl bg-[#1f1f1f] border border-[#3a3a3a] hover:border-br-red-light/70 hover:shadow-lg hover:shadow-br-red-light/20 transition">
-              <ShieldCheckIcon className="w-10 h-10 mx-auto text-br-red-light" />
+            <div className="benefit-card p-6 rounded-xl bg-[#1f1f1f] border border-[#3a3a3a] hover:border-br-red-light/70">
+              <ShieldCheckAnimated />
               <p className="mt-3 font-semibold text-center">
                 {t("services.benefits.satisfaction")}
               </p>
             </div>
 
-            <div className="p-6 rounded-xl bg-[#1f1f1f] border border-[#3a3a3a] hover:border-br-red-light/70 hover:shadow-lg hover:shadow-br-red-light/20 transition">
-              <ClockIcon className="w-10 h-10 mx-auto text-br-red-light" />
+            <div className="benefit-card p-6 rounded-xl bg-[#1f1f1f] border border-[#3a3a3a] hover:border-br-red-light/70">
+              <ClockAnimated />
               <p className="mt-3 font-semibold text-center">
                 {t("services.benefits.speed")}
               </p>
             </div>
 
-            <div className="p-6 rounded-xl bg-[#1f1f1f] border border-[#3a3a3a] hover:border-br-red-light/70 hover:shadow-lg hover:shadow-br-red-light/20 transition">
-              <CheckBadgeIcon className="w-10 h-10 mx-auto text-br-red-light" />
+            <div className="benefit-card p-6 rounded-xl bg-[#1f1f1f] border border-[#3a3a3a] hover:border-br-red-light/70">
+              <CheckBadgeAnimated />
               <p className="mt-3 font-semibold text-center">
                 {t("services.benefits.certified")}
               </p>
             </div>
 
-            <div className="p-6 rounded-xl bg-[#1f1f1f] border border-[#3a3a3a] hover:border-br-red-light/70 hover:shadow-lg hover:shadow-br-red-light/20 transition">
-              <SparklesIcon className="w-10 h-10 mx-auto text-br-red-light" />
+            <div className="benefit-card p-6 rounded-xl bg-[#1f1f1f] border border-[#3a3a3a] hover:border-br-red-light/70">
+              <SparklesAnimated />
               <p className="mt-3 font-semibold text-center">
                 {t("services.benefits.cleaning")}
               </p>

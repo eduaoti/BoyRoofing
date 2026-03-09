@@ -216,6 +216,123 @@ body {
 .animate-slideLight {
   animation: slideLight 6s ease-in-out infinite;
 }
+
+/* 🎴 Tarjetas de beneficios (Servicios): entrada escalonada + hover */
+@keyframes benefitCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes benefitIconGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(229, 56, 59, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 14px rgba(229, 56, 59, 0.6));
+  }
+}
+
+.benefits-grid.reveal .benefit-card {
+  opacity: 0;
+  animation: benefitCardIn 0.6s ease forwards;
+}
+
+.benefits-grid.reveal-visible .benefit-card:nth-child(1) { animation-delay: 0.05s; }
+.benefits-grid.reveal-visible .benefit-card:nth-child(2) { animation-delay: 0.15s; }
+.benefits-grid.reveal-visible .benefit-card:nth-child(3) { animation-delay: 0.25s; }
+.benefits-grid.reveal-visible .benefit-card:nth-child(4) { animation-delay: 0.35s; }
+
+.benefit-card {
+  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.3s ease;
+}
+
+.benefit-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(229, 56, 59, 0.18);
+}
+
+.benefit-card:hover .benefit-icon {
+  filter: drop-shadow(0 0 10px rgba(229, 56, 59, 0.5));
+}
+
+.benefit-icon {
+  transition: transform 0.35s ease, filter 0.35s ease;
+}
+
+/* Reloj: manecillas giran al hover */
+.benefit-clock-minute,
+.benefit-clock-hour {
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: 12px 12px;
+}
+
+.benefit-card:hover .benefit-clock-minute {
+  transform: rotate(360deg);
+}
+
+.benefit-card:hover .benefit-clock-hour {
+  transform: rotate(45deg);
+}
+
+/* Escudo: check hace un pequeño “pop” */
+.benefit-check {
+  transform-origin: center;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.benefit-card:hover .benefit-check {
+  transform: scale(1.15);
+}
+
+/* Badge: círculo y check con ligero rebote */
+.benefit-badge-check {
+  transform-origin: center;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.benefit-card:hover .benefit-badge-circle {
+  animation: benefitBadgePulse 0.6s ease;
+}
+
+.benefit-card:hover .benefit-badge-check {
+  transform: scale(1.12);
+}
+
+@keyframes benefitBadgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* Sparkles: destellos en secuencia */
+.benefit-sparkle {
+  transform-origin: center;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.benefit-card:hover .benefit-sparkle-1 {
+  animation: benefitSparklePop 0.5s ease forwards;
+}
+
+.benefit-card:hover .benefit-sparkle-2 {
+  animation: benefitSparklePop 0.5s ease 0.1s forwards;
+}
+
+.benefit-card:hover .benefit-sparkle-3 {
+  animation: benefitSparklePop 0.5s ease 0.2s forwards;
+}
+
+@keyframes benefitSparklePop {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.25); opacity: 0.9; }
+  100% { transform: scale(1.1); opacity: 1; }
+}
+
 /* Swiper: flechas y bullets (tonos suaves, sin saturar) */
 .swiper-button-prev,
 .swiper-button-next {
