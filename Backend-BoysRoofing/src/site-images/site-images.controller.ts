@@ -36,7 +36,10 @@ export class SiteImagesController {
   @Post('upload')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
-  async upload(@UploadedFile() file: Express.Multer.File) {
+  async upload(
+    @UploadedFile()
+    file: { buffer: Buffer; mimetype: string } | undefined,
+  ) {
     if (!file?.buffer) {
       throw new BadRequestException('No file uploaded');
     }

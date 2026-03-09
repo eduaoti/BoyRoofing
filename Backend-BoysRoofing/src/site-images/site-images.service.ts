@@ -49,7 +49,7 @@ export class SiteImagesService {
 
   /** Sube un archivo a Cloudinary y devuelve la URL. */
   async uploadToCloudinary(
-    file: Express.Multer.File,
+    file: { buffer: Buffer; mimetype: string },
   ): Promise<{ url: string; publicId: string }> {
     if (!cloudName || !apiKey || !apiSecret) {
       throw new BadRequestException(
@@ -63,9 +63,13 @@ export class SiteImagesService {
     const dataUri = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
 
     return new Promise((resolve, reject) => {
-      v2.uploader.upload(dataUri, { folder: 'boysroofing' }, (err: Error, result: any) => {
+      v2.uploader.upload(dataUri, { folder: 'boysroofing' }, (err: unknown, result?: { secure_url?: string; public_id?: string }) => {
         if (err) {
-          reject(new BadRequestException(`Cloudinary upload failed: ${err.message}`));
+          reject(new BadRequestException(`Cloudinary upload failed: ${(err as Error).message}`));
+          return;
+        }
+        if (!result?.secure_url || !result?.public_id) {
+          reject(new BadRequestException('Cloudinary upload failed: no result'));
           return;
         }
         resolve({ url: result.secure_url, publicId: result.public_id });
