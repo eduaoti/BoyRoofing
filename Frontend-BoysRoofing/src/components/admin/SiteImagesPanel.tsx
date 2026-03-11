@@ -3,17 +3,16 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getSiteImageMap, setSiteImageUrl, uploadSiteImage, type SiteImageMap } from "@/lib/siteImages";
-import { SITE_IMAGE_SLOTS, GALLERY_SLOTS, getImageUrlForPreview } from "@/lib/siteImagesConstants";
+import { SITE_IMAGE_SLOTS, getImageUrlForPreview } from "@/lib/siteImagesConstants";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 
-const ALL_SLOTS = [...SITE_IMAGE_SLOTS, ...GALLERY_SLOTS];
+const ALL_SLOTS = [...SITE_IMAGE_SLOTS];
 const GROUP_LABELS: Record<string, { en: string; es: string }> = {
   home: { en: "Home", es: "Inicio" },
   about: { en: "About us", es: "Nosotros" },
   services: { en: "Services", es: "Servicios" },
   carousel: { en: "Work carousel", es: "Carrusel de trabajo" },
   brand: { en: "Brand", es: "Marca" },
-  gallery: { en: "Gallery", es: "Galería" },
 };
 
 export default function SiteImagesPanel({ lang }: { lang: "en" | "es" }) {
@@ -98,7 +97,7 @@ export default function SiteImagesPanel({ lang }: { lang: "en" | "es" }) {
         </div>
       )}
 
-      {/* Vista previa: hero + about + services */}
+      {/* Vista previa: hero + about + services (solo Cloudinary) */}
       {map && (
         <section className="rounded-2xl border border-white/10 bg-br-smoke/50 p-6">
           <h2 className="page-h3 text-br-red-light mb-4">{previewTitle}</h2>
@@ -106,31 +105,33 @@ export default function SiteImagesPanel({ lang }: { lang: "en" | "es" }) {
             <div className="rounded-xl overflow-hidden border border-white/10 bg-black/40">
               <p className="text-xs text-br-pearl px-2 py-1">Hero</p>
               <div
-                className="h-24 bg-cover bg-center"
-                style={{ backgroundImage: `url(${getImageUrlForPreview(map.hero || "/gallery/hero.png")})` }}
-              />
+                className="h-24 bg-cover bg-center flex items-center justify-center"
+                style={map.hero ? { backgroundImage: `url(${getImageUrlForPreview(map.hero)})` } : undefined}
+              >
+                {!map.hero && <span className="text-br-pearl text-xs">Sin imagen</span>}
+              </div>
             </div>
             <div className="rounded-xl overflow-hidden border border-white/10 bg-black/40">
               <p className="text-xs text-br-pearl px-2 py-1">About · Team</p>
-              <img
-                src={getImageUrlForPreview(map.about_team || "/gallery/trabajo.jpg")}
-                alt="Preview"
-                className="w-full h-24 object-cover"
-              />
+              {map.about_team ? (
+                <img src={getImageUrlForPreview(map.about_team)} alt="Preview" className="w-full h-24 object-cover" />
+              ) : (
+                <div className="h-24 flex items-center justify-center text-br-pearl text-xs">Sin imagen</div>
+              )}
             </div>
             <div className="rounded-xl overflow-hidden border border-white/10 bg-black/40">
               <p className="text-xs text-br-pearl px-2 py-1">Roofing Before/After</p>
               <div className="flex h-24">
-                <img
-                  src={getImageUrlForPreview(map.service_roofing_before || "/gallery/proceso5.jpg")}
-                  alt="Before"
-                  className="w-1/2 object-cover"
-                />
-                <img
-                  src={getImageUrlForPreview(map.service_roofing_after || "/gallery/DesPues.jpg")}
-                  alt="After"
-                  className="w-1/2 object-cover"
-                />
+                {map.service_roofing_before ? (
+                  <img src={getImageUrlForPreview(map.service_roofing_before)} alt="Before" className="w-1/2 object-cover" />
+                ) : (
+                  <div className="w-1/2 flex items-center justify-center text-br-pearl text-xs">—</div>
+                )}
+                {map.service_roofing_after ? (
+                  <img src={getImageUrlForPreview(map.service_roofing_after)} alt="After" className="w-1/2 object-cover" />
+                ) : (
+                  <div className="w-1/2 flex items-center justify-center text-br-pearl text-xs">—</div>
+                )}
               </div>
             </div>
           </div>
@@ -149,7 +150,8 @@ export default function SiteImagesPanel({ lang }: { lang: "en" | "es" }) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {slots.map((slot) => {
                     const url = map[slot.key] || "";
-                    const displayUrl = getImageUrlForPreview(url || `/gallery/${slot.key}.jpg`);
+                    const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%23333'%3E%3Crect width='100' height='100'/%3E%3Ctext x='50' y='50' dominant-baseline='middle' text-anchor='middle' fill='%23666' font-size='12'%3ENo image%3C/text%3E%3C/svg%3E";
+const displayUrl = url ? getImageUrlForPreview(url) : (slot.key === "logo" ? getImageUrlForPreview("/gallery/LOGO.png") : PLACEHOLDER_SVG);
                     const isUpdating = updating === slot.key;
                     return (
                       <div

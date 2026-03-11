@@ -9,16 +9,16 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 const CAROUSEL_KEYS = ["carousel_1", "carousel_2", "carousel_3", "carousel_4", "carousel_5"] as const;
-const CAROUSEL_DEFAULTS = ["/gallery/proceso5.jpg", "/gallery/DesPues.jpg", "/gallery/limpieza.jpg", "/gallery/despues1.jpg", "/gallery/proceso4.jpg"];
 
 export default function WorkCarousel() {
   const { t } = useTranslation();
   const { getImage } = useSiteImages();
-  const images = CAROUSEL_KEYS.map((key, i) => getImage(key, CAROUSEL_DEFAULTS[i]));
+  const images = CAROUSEL_KEYS.map((key) => getImage(key, "")).filter(Boolean);
+
+  if (images.length === 0) return null;
 
   return (
     <div className="mt-28 px-4">
-      {/* 🔥 Section Header */}
       <h2 className="page-h2 text-center text-white mb-10">
         {t("services.ourWork")}
       </h2>

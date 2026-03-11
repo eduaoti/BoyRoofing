@@ -3,10 +3,7 @@ import { PrismaService } from '../prisma.service';
 import {
   SITE_IMAGE_KEYS,
   DEFAULT_SITE_IMAGE_URLS,
-  GALLERY_KEYS,
-  DEFAULT_GALLERY_URLS,
   type SiteImageKey,
-  type GalleryKey,
 } from './site-images.constants';
 
 const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
@@ -26,17 +23,12 @@ export class SiteImagesService {
       const row = rows.find((r) => r.key === key);
       map[key] = row ? row.url : DEFAULT_SITE_IMAGE_URLS[key];
     }
-    for (const key of GALLERY_KEYS) {
-      const row = rows.find((r) => r.key === key);
-      map[key] = row ? row.url : DEFAULT_GALLERY_URLS[key as GalleryKey];
-    }
     return map;
   }
 
   /** Actualiza la URL de una key (upsert) */
   async setImageUrl(key: string, url: string): Promise<{ key: string; url: string }> {
-    const allKeys = [...SITE_IMAGE_KEYS, ...GALLERY_KEYS];
-    if (!allKeys.includes(key as SiteImageKey | GalleryKey)) {
+    if (!SITE_IMAGE_KEYS.includes(key as SiteImageKey)) {
       throw new BadRequestException(`Invalid image key: ${key}`);
     }
     await this.prisma.siteImage.upsert({

@@ -41,7 +41,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* About: texto desde la izquierda, imagen desde la derecha */}
+      {/* About: texto + imagen (actualizable desde el panel) */}
       <section className="home-section-dark border-b border-white/5">
         <div className="max-w-6xl mx-auto px-6 py-20 md:py-24 grid md:grid-cols-2 gap-12 md:gap-16 items-center">
           <div ref={refAboutLeft} className="home-reveal-left space-y-4">
@@ -63,13 +63,22 @@ export default function HomePage() {
             </Link>
           </div>
           <div ref={refAboutRight} className="home-reveal-right">
-            <Image
-              src={getImage("home_about", "/gallery/proceso1.jpg")}
-              alt="Roofing Texas"
-              width={650}
-              height={450}
-              className="rounded-2xl shadow-2xl border border-white/10 object-cover w-full"
-            />
+            {(() => {
+              const homeAboutUrl = getImage("home_about", "");
+              return homeAboutUrl ? (
+                <Image
+                  src={homeAboutUrl}
+                  alt="Roofing Texas"
+                  width={650}
+                  height={450}
+                  className="rounded-2xl shadow-2xl border border-white/10 object-cover w-full"
+                />
+              ) : (
+                <div className="rounded-2xl shadow-2xl border border-white/10 bg-white/5 aspect-[65/45] w-full flex items-center justify-center text-br-pearl text-sm">
+                  {t("home.aboutImagePlaceholder")}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </section>

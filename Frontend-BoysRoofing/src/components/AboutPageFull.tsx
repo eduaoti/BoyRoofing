@@ -50,13 +50,17 @@ export default function AboutPageFull() {
             ))}
           </div>
           <div>
-            <Image
-              src={getImage("about_team", "/gallery/trabajo.jpg")}
-              alt="Roofing Team"
-              width={650}
-              height={450}
-              className="rounded-2xl shadow-2xl border border-white/10 object-cover w-full"
-            />
+            {getImage("about_team", "") ? (
+              <Image
+                src={getImage("about_team", "")}
+                alt="Roofing Team"
+                width={650}
+                height={450}
+                className="rounded-2xl shadow-2xl border border-white/10 object-cover w-full"
+              />
+            ) : (
+              <div className="rounded-2xl shadow-2xl border border-white/10 bg-white/5 aspect-[65/45] w-full flex items-center justify-center text-br-pearl text-sm">—</div>
+            )}
           </div>
         </div>
       </section>
@@ -72,13 +76,17 @@ export default function AboutPageFull() {
             <p className="text-gray-300 leading-relaxed">{t("aboutPage.founderP2")}</p>
           </div>
           <div>
-            <Image
-              src={getImage("about_founder", "/gallery/founder.jpg")}
-              alt="Founder of Boys Roofing"
-              width={500}
-              height={450}
-              className="rounded-2xl shadow-2xl border border-white/10 object-cover w-full"
-            />
+            {getImage("about_founder", "") ? (
+              <Image
+                src={getImage("about_founder", "")}
+                alt="Founder of Boys Roofing"
+                width={500}
+                height={450}
+                className="rounded-2xl shadow-2xl border border-white/10 object-cover w-full"
+              />
+            ) : (
+              <div className="rounded-2xl shadow-2xl border border-white/10 bg-white/5 aspect-[5/4.5] w-full flex items-center justify-center text-br-pearl text-sm">—</div>
+            )}
           </div>
         </div>
       </section>

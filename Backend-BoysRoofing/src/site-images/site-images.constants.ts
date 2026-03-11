@@ -21,33 +21,23 @@ export const SITE_IMAGE_KEYS = [
 
 export type SiteImageKey = (typeof SITE_IMAGE_KEYS)[number];
 
-/** URLs por defecto (paths del frontend public) */
+/** Solo Cloudinary: vacío por defecto. Logo tiene fallback local para navbar/recibo. */
+const LOGO_FALLBACK = '/gallery/LOGO.png';
 export const DEFAULT_SITE_IMAGE_URLS: Record<SiteImageKey, string> = {
-  hero: '/gallery/hero.png',
-  home_about: '/gallery/proceso1.jpg',
-  about_team: '/gallery/trabajo.jpg',
-  about_founder: '/gallery/founder.jpg',
-  service_roofing_before: '/gallery/proceso5.jpg',
-  service_roofing_after: '/gallery/DesPues.jpg',
-  service_cleaning_before: '/gallery/limpieza.jpg',
-  service_cleaning_after: '/gallery/despues1.jpg',
-  carousel_1: '/gallery/proceso5.jpg',
-  carousel_2: '/gallery/DesPues.jpg',
-  carousel_3: '/gallery/limpieza.jpg',
-  carousel_4: '/gallery/despues1.jpg',
-  carousel_5: '/gallery/proceso4.jpg',
-  logo: '/gallery/LOGO.png',
+  hero: '',
+  home_about: '',
+  about_team: '',
+  about_founder: '',
+  service_roofing_before: '',
+  service_roofing_after: '',
+  service_cleaning_before: '',
+  service_cleaning_after: '',
+  carousel_1: '',
+  carousel_2: '',
+  carousel_3: '',
+  carousel_4: '',
+  carousel_5: '',
+  logo: LOGO_FALLBACK,
 };
 
-/** Keys para galería (gallery_1 ... gallery_36) */
-export const GALLERY_KEYS: readonly string[] = Array.from(
-  { length: 36 },
-  (_, i) => `gallery_${i + 1}`,
-);
-export type GalleryKey = string;
-
-export const DEFAULT_GALLERY_URLS: Record<string, string> = Object.fromEntries(
-  GALLERY_KEYS.map((k, i) => [k, `/gallery/imagen${i + 1}.jpg`]),
-);
-
-export const ALL_IMAGE_KEYS: readonly string[] = [...SITE_IMAGE_KEYS, ...GALLERY_KEYS];
+export const ALL_IMAGE_KEYS: readonly string[] = [...SITE_IMAGE_KEYS];

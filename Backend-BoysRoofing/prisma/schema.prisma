@@ -189,7 +189,7 @@ model PaymentReceipt {
 
 model SiteImage {
   id        Int      @id @default(autoincrement())
-  key       String   @unique  // ej: hero, home_about, gallery_1
+  key       String   @unique  // ej: hero, home_about, logo
   url       String   // URL de Cloudinary (secure_url)
   updatedAt DateTime @updatedAt
 }
