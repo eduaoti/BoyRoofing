@@ -16,15 +16,13 @@ export default function Hero() {
   const pathname = usePathname();
   const { getImage } = useSiteImages();
   const lang = pathname.startsWith("/en") ? "en" : "es";
-  const heroBg = getImage("hero", "/gallery/hero.png");
+  const heroBg = getImage("hero", "");
 
   return (
     <section
       className="relative overflow-hidden py-28 md:py-36 min-h-[85vh] flex items-center"
       style={{
-        backgroundImage: `url(${heroBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center 20%",
+        ...(heroBg ? { backgroundImage: `url(${heroBg})`, backgroundSize: "cover", backgroundPosition: "center 20%" } : {}),
       }}
     >
       {/* Overlay + gradiente sutil rojo */}

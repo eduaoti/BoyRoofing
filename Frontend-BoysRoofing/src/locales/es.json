@@ -40,7 +40,8 @@
     "footerCtaText": "Obtén una inspección profesional y una cotización a tu medida.",
     "footerButton": "Habla con un experto en techos",
     "seeAllServices": "Ver todos los servicios",
-    "learnMoreAbout": "Conoce más sobre nosotros"
+    "learnMoreAbout": "Conoce más sobre nosotros",
+    "aboutImagePlaceholder": "Sube la imagen desde el panel de administración"
   },
   "gallery": {
     "title": "Galería de Proyectos",

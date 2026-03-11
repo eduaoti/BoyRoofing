@@ -108,8 +108,8 @@ export default function ServicesPage() {
               <p className="mt-3 text-white/85 leading-relaxed">{t("services.roofing.p2")}</p>
               <div className="mt-8">
                 <BeforeAfter
-                  before={getImage("service_roofing_before", "/gallery/proceso5.jpg")}
-                  after={getImage("service_roofing_after", "/gallery/DesPues.jpg")}
+                  before={getImage("service_roofing_before", "")}
+                  after={getImage("service_roofing_after", "")}
                   titleBefore={t("services.before")}
                   titleAfter={t("services.after")}
                 />
@@ -127,8 +127,8 @@ export default function ServicesPage() {
               <p className="mt-3 text-white/85 leading-relaxed">{t("services.cleaning.p2")}</p>
               <div className="mt-8">
 <BeforeAfter
-                before={getImage("service_cleaning_before", "/gallery/limpieza.jpg")}
-                after={getImage("service_cleaning_after", "/gallery/despues1.jpg")}
+                before={getImage("service_cleaning_before", "")}
+                after={getImage("service_cleaning_after", "")}
                   titleBefore={t("services.before")}
                   titleAfter={t("services.after")}
                 />

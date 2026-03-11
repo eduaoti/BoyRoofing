@@ -16,14 +16,7 @@ export const SITE_IMAGE_SLOTS: { key: string; labelEn: string; labelEs: string; 
   { key: "logo", labelEn: "Logo", labelEs: "Logo", group: "brand" },
 ];
 
-export const GALLERY_SLOTS = Array.from({ length: 36 }, (_, i) => ({
-  key: `gallery_${i + 1}`,
-  labelEn: `Gallery ${i + 1}`,
-  labelEs: `Galería ${i + 1}`,
-  group: "gallery",
-}));
-
-export const ALL_SLOTS = [...SITE_IMAGE_SLOTS, ...GALLERY_SLOTS];
+export const ALL_SLOTS = [...SITE_IMAGE_SLOTS];
 
 /** Resuelve URL para preview (path relativo -> absoluto) */
 export function getImageUrlForPreview(url: string, origin?: string): string {

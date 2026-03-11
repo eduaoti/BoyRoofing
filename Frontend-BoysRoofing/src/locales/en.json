@@ -40,7 +40,8 @@
     "footerCtaText": "Get a professional inspection and a personalized quote today.",
     "footerButton": "Talk to a roofing expert",
     "seeAllServices": "See all services",
-    "learnMoreAbout": "Learn more about us"
+    "learnMoreAbout": "Learn more about us",
+    "aboutImagePlaceholder": "Upload the image from the admin panel"
   },
   "gallery": {
     "title": "Project Gallery",
