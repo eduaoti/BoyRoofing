@@ -3,6 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { getMapProjects, type MapProject } from "@/lib/projects";
 
+function escapeHtml(text: string): string {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 // Golden Triangle Texas: Beaumont, Port Arthur, Orange
 const GOLDEN_TRIANGLE_COORDS: [number, number][] = [
   [-94.1266, 30.0802], // Beaumont
@@ -25,52 +31,84 @@ export default function GoldenTriangleMap() {
   }, []);
 
   useEffect(() => {
-    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-    if (!token || !containerRef.current) {
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN?.trim();
+    if (!token) {
       setLoaded(true);
-      setError(!token ? "Configura NEXT_PUBLIC_MAPBOX_TOKEN para ver el mapa." : null);
+      setError("Configura NEXT_PUBLIC_MAPBOX_TOKEN (token público pk.). Si ya lo añadiste en Railway, haz un nuevo deploy del frontend.");
+      return;
+    }
+    if (token.startsWith("sk.")) {
+      setLoaded(true);
+      setError("Usa el token público de Mapbox (empieza con pk.), no el secreto (sk.).");
       return;
     }
 
     let map: mapboxgl.Map | null = null;
+    const container = containerRef.current;
+    if (!container) {
+      setLoaded(true);
+      setError("No se pudo crear el contenedor del mapa.");
+      return;
+    }
 
     const init = async () => {
-      const mapboxgl = (await import("mapbox-gl")).default;
+      try {
+        const mapboxgl = (await import("mapbox-gl")).default;
 
-      mapboxgl.accessToken = token;
-      map = new mapboxgl.Map({
-        container: containerRef.current!,
-        style: "mapbox://styles/mapbox/dark-v11",
-        center: MAP_CENTER,
-        zoom: DEFAULT_ZOOM,
-      });
+        mapboxgl.accessToken = token;
+        map = new mapboxgl.Map({
+          container,
+          style: "mapbox://styles/mapbox/dark-v11",
+          center: MAP_CENTER,
+          zoom: DEFAULT_ZOOM,
+        });
 
-      map.addControl(new mapboxgl.NavigationControl(), "top-right");
+        map.on("error", (e) => {
+          const msg = String(e?.error?.message ?? "");
+          if (msg.includes("token") || msg.includes("access") || msg.includes("401") || msg.includes("403")) {
+            setError(
+              "Mapbox rechazó el token. En account.mapbox.com → Access tokens: usa el token público (pk.); en \"URL restrictions\" añade tu dominio o déjalo en blanco; luego redeploy del frontend."
+            );
+          }
+        });
 
-      map.on("load", () => {
-        map!.addSource("golden-triangle", {
-          type: "geojson",
-          data: {
-            type: "Feature",
-            properties: {},
-            geometry: {
-              type: "Polygon",
-              coordinates: [[...GOLDEN_TRIANGLE_COORDS, GOLDEN_TRIANGLE_COORDS[0]]],
+        map.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+        map.on("load", () => {
+          if (!map) return;
+          map.addSource("golden-triangle", {
+            type: "geojson",
+            data: {
+              type: "Feature",
+              properties: {},
+              geometry: {
+                type: "Polygon",
+                coordinates: [[...GOLDEN_TRIANGLE_COORDS, GOLDEN_TRIANGLE_COORDS[0]]],
+              },
             },
-          },
+          });
+          map.addLayer({
+            id: "triangle-fill",
+            type: "fill",
+            source: "golden-triangle",
+            paint: {
+              "fill-color": "rgba(180, 24, 27, 0.15)",
+              "fill-outline-color": "rgba(180, 24, 27, 0.8)",
+            },
+          });
+          mapRef.current = map;
+          map.resize(); // asegura que el mapa ocupe todo el contenedor
+          setLoaded(true);
         });
-        map!.addLayer({
-          id: "triangle-fill",
-          type: "fill",
-          source: "golden-triangle",
-          paint: {
-            "fill-color": "rgba(180, 24, 27, 0.15)",
-            "fill-outline-color": "rgba(180, 24, 27, 0.8)",
-          },
-        });
-        mapRef.current = map;
+      } catch (err) {
+        const msg = (err as Error)?.message ?? "";
+        if (msg.includes("token") || msg.includes("access") || msg.includes("401")) {
+          setError("Token de Mapbox inválido. En account.mapbox.com revisa el token público (pk.) y sus restricciones de URL.");
+        } else {
+          setError("No se pudo cargar el mapa. " + (msg ? msg.slice(0, 100) : ""));
+        }
         setLoaded(true);
-      });
+      }
     };
 
     init();
@@ -116,12 +154,28 @@ export default function GoldenTriangleMap() {
       };
       el.appendChild(img);
 
+      const reviews = p.reviews ?? [];
+      const reviewsHtml =
+        reviews.length === 0
+          ? ""
+          : `<div class="mt-2 pt-2 border-t border-gray-200 space-y-2 max-h-40 overflow-y-auto">${reviews
+              .map(
+                (r) =>
+                  `<div class="text-left">
+                    <p class="font-medium text-gray-800 text-xs">${escapeHtml(r.clientName || "Cliente")} · ${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</p>
+                    <p class="text-gray-700 text-sm mt-0.5">${escapeHtml(r.message)}</p>
+                  </div>`
+              )
+              .join("")}</div>`;
+      const popupHtml = `<div class="map-popup-content text-left min-w-[200px] max-w-[280px] p-3 bg-white rounded-lg shadow-lg">
+        <p class="font-semibold text-gray-900">${escapeHtml(p.name || "Proyecto")}</p>
+        ${reviewsHtml}
+      </div>`;
+
       const marker = new mapboxgl.Marker({ element: el })
         .setLngLat([p.longitude, p.latitude])
         .setPopup(
-          new mapboxgl.Popup({ offset: 25 }).setHTML(
-            `<div class="p-2 text-sm text-white"><strong>${p.name || "Proyecto"}</strong></div>`
-          )
+          new mapboxgl.Popup({ offset: 25, className: "mapbox-popup-custom" }).setHTML(popupHtml)
         )
         .addTo(mapRef.current!);
       markersRef.current.push(marker);
@@ -138,13 +192,24 @@ export default function GoldenTriangleMap() {
           Atendemos el Golden Triangle de Texas: Beaumont, Port Arthur, Orange y alrededores.
         </p>
 
-        <div className="rounded-2xl overflow-hidden border border-white/10 bg-black/40 aspect-[16/10] min-h-[320px]">
+        <div className="rounded-2xl overflow-hidden border border-white/10 bg-black/40 aspect-[16/10] min-h-[320px] relative">
           {error ? (
-            <div className="w-full h-full flex items-center justify-center text-br-pearl p-6 text-center">
+            <div className="absolute inset-0 flex items-center justify-center text-br-pearl p-6 text-center text-sm">
               {error}
             </div>
           ) : (
-            <div ref={containerRef} className="w-full h-full" />
+            <>
+              <div
+                ref={containerRef}
+                className="absolute inset-0 w-full h-full min-h-[280px]"
+                style={{ minHeight: 280 }}
+              />
+              {!loaded && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 text-br-pearl text-sm">
+                  Cargando mapa…
+                </div>
+              )}
+            </>
           )}
         </div>
 
