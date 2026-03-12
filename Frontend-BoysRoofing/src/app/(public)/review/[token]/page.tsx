@@ -12,7 +12,6 @@ import Link from "next/link";
 
 export default function ReviewPage() {
   const params = useParams();
-  const router = useRouter();
   const token = String(params?.token || "");
   const [project, setProject] = useState<{
     id: number;

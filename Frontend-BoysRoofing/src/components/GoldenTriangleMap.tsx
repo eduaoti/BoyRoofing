@@ -36,7 +36,6 @@ export default function GoldenTriangleMap() {
 
     const init = async () => {
       const mapboxgl = (await import("mapbox-gl")).default;
-      await import("mapbox-gl/dist/mapbox-gl.css");
 
       mapboxgl.accessToken = token;
       map = new mapboxgl.Map({
