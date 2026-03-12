@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, EffectFade } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/effect-fade";
 import { apiFetch } from "@/lib/api";
 import { getApprovedReviews } from "@/lib/projects";
 import useTranslation from "@/hooks/useTranslation";
@@ -9,6 +14,7 @@ import { StarIcon as StarOutlineIcon } from "@heroicons/react/24/outline";
 
 interface Review {
   id: number;
+  key?: string;
   name: string;
   rating: number;
   comment: string;
@@ -38,52 +44,15 @@ export default function ReviewsCarousel({
   const [modalError, setModalError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  // Mock ES
   const defaultReviewsES: Review[] = [
-    {
-      id: 1,
-      name: "Carlos Martínez",
-      rating: 5,
-      comment:
-        "Excelente servicio, llegaron rápido y repararon mi techo en el mismo día. 100% recomendados.",
-    },
-    {
-      id: 2,
-      name: "María López",
-      rating: 5,
-      comment:
-        "Muy profesionales y con buena atención. Me explicaron todo el proceso. Gran trabajo.",
-    },
-    {
-      id: 3,
-      name: "Luis Hernández",
-      rating: 4,
-      comment: "Buen servicio y precio justo. Mi techo quedó como nuevo.",
-    },
+    { id: 1, key: "def-0", name: "Carlos Martínez", rating: 5, comment: "Excelente servicio, llegaron rápido y repararon mi techo en el mismo día. 100% recomendados." },
+    { id: 2, key: "def-1", name: "María López", rating: 5, comment: "Muy profesionales y con buena atención. Me explicaron todo el proceso. Gran trabajo." },
+    { id: 3, key: "def-2", name: "Luis Hernández", rating: 4, comment: "Buen servicio y precio justo. Mi techo quedó como nuevo." },
   ];
-
-  // Mock EN
   const defaultReviewsEN: Review[] = [
-    {
-      id: 1,
-      name: "Carlos Martinez",
-      rating: 5,
-      comment:
-        "Excellent service, they arrived quickly and repaired my roof the same day. 100% recommended.",
-    },
-    {
-      id: 2,
-      name: "Maria Lopez",
-      rating: 5,
-      comment:
-        "Very professional and great attention. They explained the whole process. Great job.",
-    },
-    {
-      id: 3,
-      name: "Luis Hernandez",
-      rating: 4,
-      comment: "Good service and fair price. My roof looks like new.",
-    },
+    { id: 1, key: "def-0", name: "Carlos Martinez", rating: 5, comment: "Excellent service, they arrived quickly and repaired my roof the same day. 100% recommended." },
+    { id: 2, key: "def-1", name: "Maria Lopez", rating: 5, comment: "Very professional and great attention. They explained the whole process. Great job." },
+    { id: 3, key: "def-2", name: "Luis Hernandez", rating: 4, comment: "Good service and fair price. My roof looks like new." },
   ];
 
   const [data, setData] = useState<Review[]>([]);
@@ -93,42 +62,40 @@ export default function ReviewsCarousel({
   async function loadReviews() {
     try {
       if (reviews.length > 0) {
-        setData(reviews);
+        setData(reviews.map((r, i) => ({ ...r, key: r.key ?? `prop-${i}` })));
         setLoading(false);
         return;
       }
-      const projectReviews = await getApprovedReviews();
-      if (projectReviews.length > 0) {
-        setData(
-          projectReviews.map((r) => ({
+      const [projectReviews, quoteRes] = await Promise.all([
+        getApprovedReviews(),
+        apiFetch("/reviews"),
+      ]);
+      const fromProject: Review[] = projectReviews.map((r) => ({
+        id: r.id,
+        key: `p-${r.id}`,
+        name: r.clientName || "Cliente",
+        rating: r.rating,
+        comment: r.message,
+        photoUrl: r.photoUrl,
+      }));
+      let fromQuote: Review[] = [];
+      if (quoteRes.ok) {
+        const json = await quoteRes.json();
+        if (Array.isArray(json)) {
+          fromQuote = json.map((r: { id: number; name: string; rating: number; message: string }) => ({
             id: r.id,
-            name: r.clientName || "Cliente",
-            rating: r.rating,
-            comment: r.message,
-            photoUrl: r.photoUrl,
-          }))
-        );
-        setLoading(false);
-        return;
-      }
-      const res = await apiFetch("/reviews");
-      if (!res.ok) {
-        setData(activeLang === "en" ? defaultReviewsEN : defaultReviewsES);
-        return;
-      }
-      const json = await res.json();
-      const mapped: Review[] = Array.isArray(json)
-        ? json.map((r: { id: number; name: string; rating: number; message: string }) => ({
-            id: r.id,
+            key: `q-${r.id}`,
             name: r.name,
             rating: r.rating,
             comment: r.message,
-          }))
-        : [];
-      if (mapped.length === 0) {
+          }));
+        }
+      }
+      const merged = [...fromProject, ...fromQuote];
+      if (merged.length === 0) {
         setData(activeLang === "en" ? defaultReviewsEN : defaultReviewsES);
       } else {
-        setData(mapped);
+        setData(merged);
       }
     } catch {
       setData(activeLang === "en" ? defaultReviewsEN : defaultReviewsES);
@@ -375,50 +342,51 @@ export default function ReviewsCarousel({
         </div>
       )}
 
-      {/* Grid con todas las reseñas aprobadas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
+      <Swiper
+        modules={[Pagination, Autoplay, EffectFade]}
+        effect="fade"
+        fadeEffect={{ crossFade: true }}
+        pagination={data.length > 1 ? { clickable: true } : false}
+        autoplay={
+          data.length > 1
+            ? { delay: 4000, disableOnInteraction: false }
+            : false
+        }
+        loop={data.length >= 3}
+        slidesPerView={1}
+        className="!pb-10 w-full min-w-0"
+      >
         {data.map((review) => (
-          <article
-            key={review.id}
-            className="group relative bg-gradient-to-b from-[#1a1d21] to-[#111315] border border-white/10 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-br-red-main/5 transition-all duration-300 hover:-translate-y-1 hover:border-br-red-main/30"
-          >
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-br-red-deep via-br-red-main to-br-red-light" />
-            <div className="p-5 sm:p-6">
-              <span className="text-4xl font-serif text-br-red-main/30 leading-none select-none" aria-hidden>"</span>
+          <SwiperSlide key={review.key ?? `r-${review.id}`} className="!flex !justify-center !overflow-hidden">
+            <article className="bg-[#111315] border border-[#2a2a2a] rounded-xl sm:rounded-2xl px-4 sm:px-6 md:px-8 py-5 sm:py-6 shadow-xl max-w-xl w-full mx-1 sm:mx-2 transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl min-w-0">
               {review.photoUrl && (
-                <div className="rounded-xl overflow-hidden mb-4 border border-white/10">
+                <div className="flex justify-center mb-4">
                   <img
                     src={review.photoUrl}
                     alt=""
-                    className="w-full h-40 object-cover"
+                    className="rounded-xl object-cover w-full max-h-48"
                   />
                 </div>
               )}
-              <div className="flex items-center gap-0.5 mb-3">
+              <div className="flex justify-center mb-3">
                 {[1, 2, 3, 4, 5].map((i) =>
                   i <= review.rating ? (
-                    <StarIcon key={i} className="w-5 h-5 text-amber-400 drop-shadow-sm" />
+                    <StarIcon key={i} className="w-5 h-5 text-amber-400" />
                   ) : (
-                    <StarOutlineIcon key={i} className="w-5 h-5 text-amber-400/40" />
+                    <StarOutlineIcon key={i} className="w-5 h-5 text-gray-600" />
                   )
                 )}
-                <span className="ml-2 text-xs text-br-stone font-medium">{review.rating}/5</span>
               </div>
-              <p className="text-br-pearl text-sm sm:text-base leading-relaxed mb-4 line-clamp-5">
+              <p className="text-sm text-br-stone italic mb-4 text-center">
                 &ldquo;{review.comment}&rdquo;
               </p>
-              <div className="flex items-center gap-3 pt-3 border-t border-white/10">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-br-red-main/20 flex items-center justify-center text-br-red-light font-bold text-sm">
-                  {(review.name || "?").charAt(0).toUpperCase()}
-                </div>
-                <p className="font-semibold text-br-white text-sm truncate">
-                  {review.name}
-                </p>
-              </div>
-            </div>
-          </article>
+              <p className="text-sm font-semibold text-br-white text-center">
+                — {review.name}
+              </p>
+            </article>
+          </SwiperSlide>
         ))}
-      </div>
+      </Swiper>
     </section>
   );
 }
