@@ -104,9 +104,6 @@ export default function ProjectsPanel({ lang }: { lang: "es" | "en" }) {
         delete: "Delete",
         deleteProject: "Delete project",
         loading: "Loading...",
-        searchAddress: "Search address",
-        searchPlaceholder: "E.g. 123 Main St, Beaumont, TX",
-        orCoords: "Or enter lat/long below",
       };
 
   async function load() {
