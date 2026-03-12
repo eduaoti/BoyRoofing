@@ -8,7 +8,7 @@ export default function PageES() {
       <HomePage />
 
       {/* Mapa: Golden Triangle (Beaumont, Port Arthur, Orange) */}
-      <GoldenTriangleMap />
+      <GoldenTriangleMap lang="es" />
 
       {/* Reseñas */}
       <section id="reviews" className="border-t border-white/5 bg-[#0c0c0d] py-10 sm:py-16 md:py-20 overflow-x-hidden">
