@@ -4,7 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { MapPinIcon, HomeIcon, DocumentTextIcon, DocumentPlusIcon, ArrowRightOnRectangleIcon, UserGroupIcon, BanknotesIcon, Bars3Icon, XMarkIcon, CurrencyDollarIcon, DocumentCheckIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import { MapPinIcon, HomeIcon, DocumentTextIcon, DocumentPlusIcon, ArrowRightOnRectangleIcon, UserGroupIcon, BanknotesIcon, Bars3Icon, XMarkIcon, CurrencyDollarIcon, DocumentCheckIcon, PhotoIcon, BuildingOffice2Icon } from "@heroicons/react/24/outline";
 
 export default function AdminENPanelLayout({
   children,
@@ -80,6 +80,7 @@ export default function AdminENPanelLayout({
             {navLink("/admin/en/payroll/balances", "Balances", CurrencyDollarIcon)}
             {navLink("/admin/en/receipts", "Payment receipts", DocumentCheckIcon)}
             {navLink("/admin/en/site-images", "Site images", PhotoIcon)}
+            {navLink("/admin/en/projects", "Projects / Map", BuildingOffice2Icon)}
           </nav>
         </div>
 
@@ -142,6 +143,7 @@ export default function AdminENPanelLayout({
                 {mobileNavLink("/admin/en/payroll/balances", "Balances", CurrencyDollarIcon)}
                 {mobileNavLink("/admin/en/receipts", "Payment receipts", DocumentCheckIcon)}
                 {mobileNavLink("/admin/en/site-images", "Site images", PhotoIcon)}
+                {mobileNavLink("/admin/en/projects", "Projects / Map", BuildingOffice2Icon)}
               </div>
               <div className="p-4 border-t border-white/5">
                 <button

@@ -80,6 +80,32 @@ model Review {
   createdAt DateTime @default(now())
 }
 
+// --------------- MAPA + REVIEWS POR PROYECTO (Golden Triangle) ---------------
+
+model MapProject {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique   // token único para el link que se manda al cliente
+  name      String?            // ej: "Casa Smith - Beaumont"
+  latitude  Float
+  longitude Float
+  logoUrl   String             // URL del logo en el mapa (Cloudinary)
+  createdAt DateTime @default(now())
+
+  reviews   ProjectReview[]
+}
+
+model ProjectReview {
+  id         Int        @id @default(autoincrement())
+  projectId  Int
+  project    MapProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  clientName String?
+  photoUrl   String?    // foto subida por el cliente (Cloudinary)
+  message    String
+  rating     Int        @default(5)  // 1-5
+  approved   Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+}
+
 // --------------- NÓMINA ---------------
 
 model Worker {

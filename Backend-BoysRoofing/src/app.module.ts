@@ -12,6 +12,7 @@ import { WorkersModule } from './workers/workers.module';
 import { PayrollModule } from './payroll/payroll.module';
 import { ReceiptsModule } from './receipts/receipts.module';
 import { SiteImagesModule } from './site-images/site-images.module';
+import { ProjectsModule } from './projects/projects.module';
 import { PrismaService } from './prisma.service';
 
 @Module({
@@ -25,6 +26,7 @@ import { PrismaService } from './prisma.service';
     PayrollModule,
     ReceiptsModule,
     SiteImagesModule,
+    ProjectsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
