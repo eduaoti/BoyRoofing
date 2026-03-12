@@ -31,46 +31,67 @@ export default function GoldenTriangleMap() {
       setError(!token ? "Configura NEXT_PUBLIC_MAPBOX_TOKEN para ver el mapa." : null);
       return;
     }
+    if (token.trim().startsWith("sk.")) {
+      setLoaded(true);
+      setError("Usa el token público de Mapbox (empieza con pk.), no el secreto (sk.). Cámbialo en las variables de entorno.");
+      return;
+    }
 
     let map: mapboxgl.Map | null = null;
 
     const init = async () => {
-      const mapboxgl = (await import("mapbox-gl")).default;
+      try {
+        const mapboxgl = (await import("mapbox-gl")).default;
 
-      mapboxgl.accessToken = token;
-      map = new mapboxgl.Map({
-        container: containerRef.current!,
-        style: "mapbox://styles/mapbox/dark-v11",
-        center: MAP_CENTER,
-        zoom: DEFAULT_ZOOM,
-      });
+        mapboxgl.accessToken = token;
+        map = new mapboxgl.Map({
+          container: containerRef.current!,
+          style: "mapbox://styles/mapbox/dark-v11",
+          center: MAP_CENTER,
+          zoom: DEFAULT_ZOOM,
+        });
 
-      map.addControl(new mapboxgl.NavigationControl(), "top-right");
+        map.on("error", (e) => {
+          if (e?.error?.message?.includes("token") || e?.error?.message?.includes("access")) {
+            setError("Token de Mapbox inválido. Usa el token público (pk.) en NEXT_PUBLIC_MAPBOX_TOKEN.");
+          }
+        });
 
-      map.on("load", () => {
-        map!.addSource("golden-triangle", {
-          type: "geojson",
-          data: {
-            type: "Feature",
-            properties: {},
-            geometry: {
-              type: "Polygon",
-              coordinates: [[...GOLDEN_TRIANGLE_COORDS, GOLDEN_TRIANGLE_COORDS[0]]],
+        map.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+        map.on("load", () => {
+          map!.addSource("golden-triangle", {
+            type: "geojson",
+            data: {
+              type: "Feature",
+              properties: {},
+              geometry: {
+                type: "Polygon",
+                coordinates: [[...GOLDEN_TRIANGLE_COORDS, GOLDEN_TRIANGLE_COORDS[0]]],
+              },
             },
-          },
+          });
+          map!.addLayer({
+            id: "triangle-fill",
+            type: "fill",
+            source: "golden-triangle",
+            paint: {
+              "fill-color": "rgba(180, 24, 27, 0.15)",
+              "fill-outline-color": "rgba(180, 24, 27, 0.8)",
+            },
+          });
+          mapRef.current = map;
+          setLoaded(true);
         });
-        map!.addLayer({
-          id: "triangle-fill",
-          type: "fill",
-          source: "golden-triangle",
-          paint: {
-            "fill-color": "rgba(180, 24, 27, 0.15)",
-            "fill-outline-color": "rgba(180, 24, 27, 0.8)",
-          },
-        });
-        mapRef.current = map;
+      } catch (err) {
+        const msg = (err as Error)?.message || "";
+        if (msg.includes("token") || msg.includes("access")) {
+          setError("Token de Mapbox inválido. Usa el token público (pk.) en NEXT_PUBLIC_MAPBOX_TOKEN.");
+        } else {
+          setError("No se pudo cargar el mapa.");
+        }
         setLoaded(true);
-      });
+      }
     };
 
     init();
