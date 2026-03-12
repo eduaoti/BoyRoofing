@@ -8,6 +8,7 @@ import "swiper/css/pagination";
 import "swiper/css/effect-fade";
 import { apiFetch } from "@/lib/api";
 import { getApprovedReviews } from "@/lib/projects";
+import { translateReviewsToEnglish } from "@/lib/translate";
 import useTranslation from "@/hooks/useTranslation";
 import { StarIcon } from "@heroicons/react/24/solid";
 import { StarIcon as StarOutlineIcon } from "@heroicons/react/24/outline";
@@ -56,8 +57,33 @@ export default function ReviewsCarousel({
   ];
 
   const [data, setData] = useState<Review[]>([]);
+  const [displayData, setDisplayData] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const loadedRef = useRef(false);
+
+  // Cuando el sitio está en inglés, traducir reseñas (es → en)
+  useEffect(() => {
+    if (!data.length) {
+      setDisplayData([]);
+      return;
+    }
+    if (activeLang === "es") {
+      setDisplayData(data);
+      return;
+    }
+    setDisplayData(data);
+    let cancelled = false;
+    translateReviewsToEnglish(data)
+      .then((translated) => {
+        if (!cancelled) setDisplayData(translated);
+      })
+      .catch(() => {
+        if (!cancelled) setDisplayData(data);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [data, activeLang]);
 
   async function loadReviews() {
     try {
@@ -356,7 +382,7 @@ export default function ReviewsCarousel({
         slidesPerView={1}
         className="!pb-10 w-full min-w-0"
       >
-        {data.map((review) => (
+        {(displayData.length ? displayData : data).map((review) => (
           <SwiperSlide key={review.key ?? `r-${review.id}`} className="!flex !justify-center !overflow-hidden">
             <article className="bg-[#111315] border border-[#2a2a2a] rounded-xl sm:rounded-2xl px-4 sm:px-6 md:px-8 py-5 sm:py-6 shadow-xl max-w-xl w-full mx-1 sm:mx-2 transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl min-w-0">
               {review.photoUrl && (

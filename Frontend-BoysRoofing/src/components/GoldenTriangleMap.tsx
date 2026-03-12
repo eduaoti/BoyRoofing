@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { getMapProjects, type MapProject } from "@/lib/projects";
+import { translateText } from "@/lib/translate";
 
 function escapeHtml(text: string): string {
   const div = document.createElement("div");
@@ -18,17 +19,54 @@ const GOLDEN_TRIANGLE_COORDS: [number, number][] = [
 const MAP_CENTER: [number, number] = [-93.95, 30.0];
 const DEFAULT_ZOOM = 9;
 
-export default function GoldenTriangleMap() {
+export default function GoldenTriangleMap({ lang = "es" }: { lang?: "es" | "en" }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [projects, setProjects] = useState<MapProject[]>([]);
+  const [displayProjects, setDisplayProjects] = useState<MapProject[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     getMapProjects().then(setProjects).catch(() => setProjects([]));
   }, []);
+
+  // Traducir reseñas del mapa cuando el sitio está en inglés
+  useEffect(() => {
+    if (!projects.length) {
+      setDisplayProjects([]);
+      return;
+    }
+    if (lang === "es") {
+      setDisplayProjects(projects);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const translated = await Promise.all(
+        projects.map(async (p) => ({
+          ...p,
+          name: p.name ? await translateText(p.name, "es", "en") : null,
+          reviews: p.reviews?.length
+            ? await Promise.all(
+                (p.reviews ?? []).map(async (r) => ({
+                  ...r,
+                  message: await translateText(r.message, "es", "en"),
+                  clientName: r.clientName
+                    ? await translateText(r.clientName, "es", "en")
+                    : null,
+                }))
+              )
+            : [],
+        }))
+      );
+      if (!cancelled) setDisplayProjects(translated);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [projects, lang]);
 
   useEffect(() => {
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN?.trim();
@@ -128,15 +166,16 @@ export default function GoldenTriangleMap() {
     return () => window.removeEventListener("resize", onResize);
   }, [loaded]);
 
-  // Markers when map and projects are ready
+  // Markers when map and displayProjects are ready
   useEffect(() => {
-    if (!mapRef.current || !loaded || projects.length === 0) return;
+    const list = displayProjects.length ? displayProjects : projects;
+    if (!mapRef.current || !loaded || list.length === 0) return;
 
     const mapboxgl = require("mapbox-gl");
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
-    projects.forEach((p) => {
+    list.forEach((p) => {
       const el = document.createElement("div");
       el.className = "map-marker-logo";
       el.style.width = "40px";
@@ -188,7 +227,7 @@ export default function GoldenTriangleMap() {
         .addTo(mapRef.current!);
       markersRef.current.push(marker);
     });
-  }, [loaded, projects]);
+  }, [loaded, projects, displayProjects]);
 
   return (
     <section className="home-section-dark border-b border-white/5 py-10 sm:py-16 md:py-20">

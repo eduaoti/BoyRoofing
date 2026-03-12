@@ -7,7 +7,7 @@ export default function PageEN() {
     <main className="bg-[#0F0F0F] text-white min-w-0 overflow-x-hidden">
       <HomePage />
 
-      <GoldenTriangleMap />
+      <GoldenTriangleMap lang="en" />
 
       {/* Reviews */}
       <section id="reviews" className="border-t border-white/5 bg-[#0c0c0d] py-10 sm:py-16 md:py-20 overflow-x-hidden">
