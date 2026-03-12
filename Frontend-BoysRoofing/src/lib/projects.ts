@@ -1,11 +1,19 @@
 import { API_BASE_URL } from "./api";
 
+export type MapProjectReview = {
+  clientName: string | null;
+  message: string;
+  rating: number;
+  photoUrl: string | null;
+};
+
 export type MapProject = {
   id: number;
   name: string | null;
   latitude: number;
   longitude: number;
   logoUrl: string;
+  reviews?: MapProjectReview[];
 };
 
 export type ProjectReview = {

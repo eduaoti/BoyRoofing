@@ -22,7 +22,7 @@ export class ProjectsService {
     private readonly siteImages: SiteImagesService,
   ) {}
 
-  /** Lista proyectos para el mapa (público) */
+  /** Lista proyectos para el mapa (público), con reseñas aprobadas para el popup */
   async findAllForMap() {
     return this.prisma.mapProject.findMany({
       orderBy: { createdAt: 'desc' },
@@ -32,6 +32,17 @@ export class ProjectsService {
         latitude: true,
         longitude: true,
         logoUrl: true,
+        reviews: {
+          where: { approved: true },
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+          select: {
+            clientName: true,
+            message: true,
+            rating: true,
+            photoUrl: true,
+          },
+        },
       },
     });
   }

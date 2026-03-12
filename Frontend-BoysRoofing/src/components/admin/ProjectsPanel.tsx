@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { apiFetch } from "@/lib/api";
 import {
   ClipboardDocumentIcon,
   PlusIcon,
   TrashIcon,
   CheckIcon,
-  XMarkIcon,
   PhotoIcon,
+  MapPinIcon,
 } from "@heroicons/react/24/outline";
+
+const MAPBOX_TOKEN = typeof window !== "undefined" ? process.env.NEXT_PUBLIC_MAPBOX_TOKEN?.trim() : "";
+type GeocodeFeature = { place_name: string; center: [number, number] };
 
 type MapProject = {
   id: number;
@@ -48,6 +51,12 @@ export default function ProjectsPanel({ lang }: { lang: "es" | "en" }) {
   const [reviewsByProject, setReviewsByProject] = useState<Record<number, ProjectReview[]>>({});
   const [openReviewsId, setOpenReviewsId] = useState<number | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  // Selector de dirección (Mapbox Geocoding)
+  const [addressQuery, setAddressQuery] = useState("");
+  const [addressSuggestions, setAddressSuggestions] = useState<GeocodeFeature[]>([]);
+  const [addressLoading, setAddressLoading] = useState(false);
+  const addressDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const addressDropdownRef = useRef<HTMLDivElement>(null);
 
   const t = lang === "es"
     ? {
@@ -69,6 +78,9 @@ export default function ProjectsPanel({ lang }: { lang: "es" | "en" }) {
         delete: "Eliminar",
         deleteProject: "Eliminar proyecto",
         loading: "Cargando...",
+        searchAddress: "Buscar dirección",
+        searchPlaceholder: "Ej. 123 Main St, Beaumont, TX",
+        orCoords: "O escribe lat/long abajo",
       }
     : {
         title: "Map projects (Golden Triangle)",
@@ -78,6 +90,9 @@ export default function ProjectsPanel({ lang }: { lang: "es" | "en" }) {
         lat: "Latitude",
         lng: "Longitude",
         logo: "Logo (upload image)",
+        searchAddress: "Search address",
+        searchPlaceholder: "E.g. 123 Main St, Beaumont, TX",
+        orCoords: "Or enter lat/long below",
         cancel: "Cancel",
         create: "Create and generate link",
         link: "Link for client",
@@ -89,6 +104,9 @@ export default function ProjectsPanel({ lang }: { lang: "es" | "en" }) {
         delete: "Delete",
         deleteProject: "Delete project",
         loading: "Loading...",
+        searchAddress: "Search address",
+        searchPlaceholder: "E.g. 123 Main St, Beaumont, TX",
+        orCoords: "Or enter lat/long below",
       };
 
   async function load() {
@@ -131,6 +149,56 @@ export default function ProjectsPanel({ lang }: { lang: "es" | "en" }) {
   useEffect(() => {
     if (openReviewsId != null) loadReviews(openReviewsId);
   }, [openReviewsId]);
+
+  const fetchAddressSuggestions = useCallback(async (query: string) => {
+    if (!query.trim() || !MAPBOX_TOKEN) {
+      setAddressSuggestions([]);
+      return;
+    }
+    setAddressLoading(true);
+    try {
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query.trim())}.json?access_token=${MAPBOX_TOKEN}&limit=5&country=US&types=address,place`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        setAddressSuggestions([]);
+        return;
+      }
+      const data = await res.json();
+      const features: GeocodeFeature[] = Array.isArray(data.features)
+        ? data.features.map((f: { place_name?: string; center?: [number, number] }) => ({
+            place_name: f.place_name ?? "",
+            center: Array.isArray(f.center) && f.center.length >= 2 ? [f.center[0], f.center[1]] : [0, 0],
+          }))
+        : [];
+      setAddressSuggestions(features);
+    } catch {
+      setAddressSuggestions([]);
+    } finally {
+      setAddressLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!addressQuery.trim()) {
+      setAddressSuggestions([]);
+      return;
+    }
+    if (addressDebounceRef.current) clearTimeout(addressDebounceRef.current);
+    addressDebounceRef.current = setTimeout(() => {
+      fetchAddressSuggestions(addressQuery);
+    }, 300);
+    return () => {
+      if (addressDebounceRef.current) clearTimeout(addressDebounceRef.current);
+    };
+  }, [addressQuery, fetchAddressSuggestions]);
+
+  function pickAddress(feature: GeocodeFeature) {
+    const [lng, lat] = feature.center;
+    setFormLng(String(lng));
+    setFormLat(String(lat));
+    setAddressQuery(feature.place_name);
+    setAddressSuggestions([]);
+  }
 
   function getFullLink(path: string) {
     if (typeof window !== "undefined") return `${window.location.origin}${path}`;
@@ -200,6 +268,7 @@ export default function ProjectsPanel({ lang }: { lang: "es" | "en" }) {
       setFormLat("30.08");
       setFormLng("-94.13");
       setLogoUrl("");
+      setAddressQuery("");
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -280,6 +349,41 @@ export default function ProjectsPanel({ lang }: { lang: "es" | "en" }) {
               placeholder="Ej. Casa Smith - Beaumont"
             />
           </div>
+          <div className="relative">
+            <label className="block text-sm text-br-pearl mb-1">
+              <MapPinIcon className="h-4 w-4 inline mr-1" />
+              {t.searchAddress}
+            </label>
+            <input
+              type="text"
+              value={addressQuery}
+              onChange={(e) => setAddressQuery(e.target.value)}
+              onBlur={() => setTimeout(() => setAddressSuggestions([]), 200)}
+              className="w-full rounded-lg border border-white/10 bg-br-carbon/80 px-4 py-2 text-white placeholder:text-white/40"
+              placeholder={t.searchPlaceholder}
+            />
+            {addressLoading && (
+              <p className="absolute right-3 top-9 text-xs text-br-pearl">...</p>
+            )}
+            {addressSuggestions.length > 0 && (
+              <div
+                ref={addressDropdownRef}
+                className="absolute z-20 left-0 right-0 mt-1 rounded-lg border border-white/20 bg-br-carbon shadow-xl max-h-48 overflow-y-auto"
+              >
+                {addressSuggestions.map((f, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => pickAddress(f)}
+                    className="w-full text-left px-4 py-2.5 text-sm text-br-pearl hover:bg-white/10 border-b border-white/5 last:border-0"
+                  >
+                    {f.place_name}
+                  </button>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-white/50 mt-1">{t.orCoords}</p>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-br-pearl mb-1">{t.lat}</label>
@@ -328,7 +432,7 @@ export default function ProjectsPanel({ lang }: { lang: "es" | "en" }) {
             </button>
             <button
               type="button"
-              onClick={() => { setShowForm(false); setError(null); }}
+              onClick={() => { setShowForm(false); setError(null); setAddressQuery(""); }}
               className="rounded-lg border border-white/20 px-4 py-2 text-sm text-br-pearl"
             >
               {t.cancel}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, EffectFade } from "swiper/modules";
 import "swiper/css";
@@ -91,6 +91,7 @@ export default function ReviewsCarousel({
 
   const [data, setData] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const loadedRef = useRef(false);
 
   async function loadReviews() {
     try {
@@ -99,7 +100,6 @@ export default function ReviewsCarousel({
         setLoading(false);
         return;
       }
-      // Primero intentar reviews de proyectos (con foto)
       const projectReviews = await getApprovedReviews();
       if (projectReviews.length > 0) {
         setData(
@@ -141,8 +141,10 @@ export default function ReviewsCarousel({
   }
 
   useEffect(() => {
+    if (loadedRef.current) return;
+    loadedRef.current = true;
     loadReviews();
-  }, [reviews, activeLang]);
+  }, []);
 
   function openModal() {
     setModalOpen(true);
