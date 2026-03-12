@@ -30,7 +30,7 @@ export default function HomePage() {
 
       {/* Beneficios: scale + fade al scroll */}
       <section ref={refBenefits} className="home-section-reveal home-section-alt border-b border-white/5">
-        <div className="max-w-6xl mx-auto px-6 py-20 md:py-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-20 md:py-24">
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {benefits.map((txt, i) => (
               <div key={i} className="home-benefit-card home-card p-6 md:p-8 text-center">
@@ -43,7 +43,7 @@ export default function HomePage() {
 
       {/* About: texto + imagen (actualizable desde el panel) */}
       <section className="home-section-dark border-b border-white/5">
-        <div className="max-w-6xl mx-auto px-6 py-20 md:py-24 grid md:grid-cols-2 gap-12 md:gap-16 items-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-20 md:py-24 grid md:grid-cols-2 gap-8 md:gap-16 items-center">
           <div ref={refAboutLeft} className="home-reveal-left space-y-4">
             <h2 className="page-h2 text-br-red-light">
               {t("home.aboutTitle")}

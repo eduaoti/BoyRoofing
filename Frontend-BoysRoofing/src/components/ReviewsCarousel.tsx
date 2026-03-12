@@ -1,14 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination, EffectFade } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/effect-fade";
 import { apiFetch } from "@/lib/api";
 import { getApprovedReviews } from "@/lib/projects";
 import useTranslation from "@/hooks/useTranslation";
+import { StarIcon } from "@heroicons/react/24/solid";
+import { StarIcon as StarOutlineIcon } from "@heroicons/react/24/outline";
 
 interface Review {
   id: number;
@@ -259,7 +256,7 @@ export default function ReviewsCarousel({
 
   if (loading) {
     return (
-      <section className="w-full max-w-5xl mx-auto py-12 px-4">
+      <section className="w-full max-w-5xl mx-auto py-8 sm:py-12 px-3 sm:px-4 min-w-0">
         <h2 className="page-h2 text-center mb-4 text-br-white">
           {t.title}
         </h2>
@@ -270,7 +267,7 @@ export default function ReviewsCarousel({
 
   if (!data || data.length === 0) {
     return (
-      <section className="w-full max-w-5xl mx-auto py-12 px-4">
+      <section className="w-full max-w-5xl mx-auto py-8 sm:py-12 px-3 sm:px-4 min-w-0">
         <h2 className="page-h2 text-center mb-4 text-br-white">
           {t.title}
         </h2>
@@ -279,33 +276,30 @@ export default function ReviewsCarousel({
     );
   }
 
-  const onlyOne = data.length === 1;
-  const canLoop = data.length >= 3; // loop solo si hay 3+ reseñas
-
   return (
-    <section className="w-full max-w-5xl mx-auto py-16 px-4">
-      <h2 className="page-h2 text-center mb-6 text-br-white">
+    <section className="w-full max-w-6xl mx-auto py-8 sm:py-12 md:py-16 px-3 sm:px-4 min-w-0 overflow-x-hidden">
+      <h2 className="page-h2 text-center mb-4 sm:mb-6 text-br-white">
         {t.title}
       </h2>
 
       {/* Botón reseña */}
-      <div className="flex justify-center mb-4">
+      <div className="flex justify-center mb-3 sm:mb-4">
         <button
           type="button"
-          className="px-6 py-2 rounded-lg font-semibold text-sm transition bg-br-red-main text-white hover:bg-br-red-light shadow-md"
+          className="px-5 sm:px-6 py-2.5 rounded-xl font-semibold text-sm transition bg-br-red-main text-white hover:bg-br-red-light shadow-lg hover:shadow-br-red-main/20 hover:scale-[1.02]"
           onClick={openModal}
         >
           {t.button}
         </button>
       </div>
-      <p className="text-center text-xs text-br-stone mb-6">
+      <p className="text-center text-xs text-br-stone mb-6 sm:mb-8 px-1">
         {t.onlyIf}
       </p>
 
       {/* Modal dejar reseña */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" onClick={() => !modalLoading && setModalOpen(false)}>
-          <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl shadow-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 overflow-y-auto" onClick={() => !modalLoading && setModalOpen(false)}>
+          <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-6 my-auto max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-xl font-bold text-br-white mb-4">{t.modalTitle}</h3>
             {submitSuccess ? (
               <p className="text-br-stone">{t.modalSuccess}</p>
@@ -348,9 +342,9 @@ export default function ReviewsCarousel({
                         key={star}
                         type="button"
                         onClick={() => setRating(star)}
-                        className={`text-2xl ${star <= rating ? "text-yellow-400" : "text-gray-600"}`}
+                        className={`${star <= rating ? "text-amber-400" : "text-gray-600"}`}
                       >
-                        ★
+                        <StarIcon className="w-8 h-8" />
                       </button>
                     ))}
                   </div>
@@ -381,62 +375,50 @@ export default function ReviewsCarousel({
         </div>
       )}
 
-      <Swiper
-        modules={[Pagination, Autoplay, EffectFade]}
-        effect="fade"
-        fadeEffect={{ crossFade: true }}
-        pagination={data.length > 1 ? { clickable: true } : false}
-        autoplay={
-          data.length > 1
-            ? {
-                delay: 4000,
-                disableOnInteraction: false,
-              }
-            : false
-        }
-        loop={canLoop}
-        slidesPerView={1}
-        className="!pb-10"
-      >
+      {/* Grid con todas las reseñas aprobadas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
         {data.map((review) => (
-          <SwiperSlide key={review.id} className="!flex !justify-center">
-            <article className="bg-[#111315] border border-[#2a2a2a] rounded-2xl px-8 py-6 shadow-xl max-w-xl w-full mx-2 transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl">
+          <article
+            key={review.id}
+            className="group relative bg-gradient-to-b from-[#1a1d21] to-[#111315] border border-white/10 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-br-red-main/5 transition-all duration-300 hover:-translate-y-1 hover:border-br-red-main/30"
+          >
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-br-red-deep via-br-red-main to-br-red-light" />
+            <div className="p-5 sm:p-6">
+              <span className="text-4xl font-serif text-br-red-main/30 leading-none select-none" aria-hidden>"</span>
               {review.photoUrl && (
-                <div className="flex justify-center mb-4">
+                <div className="rounded-xl overflow-hidden mb-4 border border-white/10">
                   <img
                     src={review.photoUrl}
                     alt=""
-                    className="rounded-xl object-cover w-full max-h-48"
+                    className="w-full h-40 object-cover"
                   />
                 </div>
               )}
-              {/* Rating */}
-              <div className="flex justify-center mb-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <span
-                    key={i}
-                    className={`text-xl ${
-                      i < review.rating ? "text-yellow-400" : "text-gray-600"
-                    }`}
-                  >
-                    ★
-                  </span>
-                ))}
+              <div className="flex items-center gap-0.5 mb-3">
+                {[1, 2, 3, 4, 5].map((i) =>
+                  i <= review.rating ? (
+                    <StarIcon key={i} className="w-5 h-5 text-amber-400 drop-shadow-sm" />
+                  ) : (
+                    <StarOutlineIcon key={i} className="w-5 h-5 text-amber-400/40" />
+                  )
+                )}
+                <span className="ml-2 text-xs text-br-stone font-medium">{review.rating}/5</span>
               </div>
-
-              {/* Comment */}
-              <p className="text-sm text-br-stone italic mb-4 text-center">
-                “{review.comment}”
+              <p className="text-br-pearl text-sm sm:text-base leading-relaxed mb-4 line-clamp-5">
+                &ldquo;{review.comment}&rdquo;
               </p>
-
-              {/* Name */}
-              <p className="text-sm font-semibold text-br-white text-center">
-                — {review.name}
-              </p>
-            </article>
-          </SwiperSlide>
+              <div className="flex items-center gap-3 pt-3 border-t border-white/10">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-br-red-main/20 flex items-center justify-center text-br-red-light font-bold text-sm">
+                  {(review.name || "?").charAt(0).toUpperCase()}
+                </div>
+                <p className="font-semibold text-br-white text-sm truncate">
+                  {review.name}
+                </p>
+              </div>
+            </div>
+          </article>
         ))}
-      </Swiper>
+      </div>
     </section>
   );
 }

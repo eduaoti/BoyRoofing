@@ -24,12 +24,12 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`${montserrat.variable} ${roboto.variable}`}>
+    <html lang="en" className="overflow-x-hidden">
+      <body className={`${montserrat.variable} ${roboto.variable} min-w-0 overflow-x-hidden`}>
         <Navbar />
 
         {/* 📌 Breadcrumbs justo debajo del navbar */}
-        <div className="max-w-6xl mx-auto px-6 py-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
           <Breadcrumbs />
         </div>
 

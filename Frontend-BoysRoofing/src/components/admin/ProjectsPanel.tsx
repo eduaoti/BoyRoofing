@@ -203,7 +203,8 @@ export default function ProjectsPanel({ lang }: { lang: "es" | "en" }) {
   }
 
   function copyLink(project: MapProject) {
-    const full = getFullLink(project.reviewLink);
+    const base = getFullLink(project.reviewLink);
+    const full = `${base}${base.includes("?") ? "&" : "?"}lang=${lang}`;
     navigator.clipboard.writeText(full);
     setCopiedId(project.id);
     setTimeout(() => setCopiedId(null), 2000);
