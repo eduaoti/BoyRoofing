@@ -121,6 +121,13 @@ export default function GoldenTriangleMap() {
     };
   }, []);
 
+  // Redimensionar mapa en resize/orientation (móvil)
+  useEffect(() => {
+    const onResize = () => mapRef.current?.resize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [loaded]);
+
   // Markers when map and projects are ready
   useEffect(() => {
     if (!mapRef.current || !loaded || projects.length === 0) return;
@@ -158,17 +165,18 @@ export default function GoldenTriangleMap() {
       const reviewsHtml =
         reviews.length === 0
           ? ""
-          : `<div class="mt-2 pt-2 border-t border-gray-200 space-y-2 max-h-40 overflow-y-auto">${reviews
+          : `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #e5e7eb;max-height:180px;overflow-y:auto">${reviews
               .map(
-                (r) =>
-                  `<div class="text-left">
-                    <p class="font-medium text-gray-800 text-xs">${escapeHtml(r.clientName || "Cliente")} · ${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</p>
-                    <p class="text-gray-700 text-sm mt-0.5">${escapeHtml(r.message)}</p>
+                (r, idx) =>
+                  `<div style="padding-bottom:10px;margin-bottom:10px;${idx < reviews.length - 1 ? "border-bottom:1px solid #f3f4f6;" : ""}text-align:left">
+                    <p style="font-weight:600;color:#1f2937;font-size:12px;margin:0;display:flex;align-items:center;gap:6px"><span style="display:inline-flex;width:22px;height:22px;border-radius:50%;background:#fef3c7;color:#b45309;font-size:11px;align-items:center;justify-content:center">${escapeHtml((r.clientName || "C").charAt(0).toUpperCase())}</span>${escapeHtml(r.clientName || "Cliente")}</p>
+                    <p style="color:#d97706;font-size:11px;margin:4px 0 0 0">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</p>
+                    <p style="color:#4b5563;font-size:13px;margin:6px 0 0 0;line-height:1.4">${escapeHtml(r.message)}</p>
                   </div>`
               )
               .join("")}</div>`;
-      const popupHtml = `<div class="map-popup-content text-left min-w-[200px] max-w-[280px] p-3 bg-white rounded-lg shadow-lg">
-        <p class="font-semibold text-gray-900">${escapeHtml(p.name || "Proyecto")}</p>
+      const popupHtml = `<div style="min-width:220px;max-width:300px;padding:16px;background:#fff;border-radius:12px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 8px 10px -6px rgba(0,0,0,0.1);border:1px solid #f3f4f6;text-align:left">
+        <p style="font-weight:700;color:#111;font-size:14px;margin:0;padding-bottom:8px;border-bottom:2px solid rgba(186,24,27,0.25)">${escapeHtml(p.name || "Proyecto")}</p>
         ${reviewsHtml}
       </div>`;
 
@@ -183,16 +191,16 @@ export default function GoldenTriangleMap() {
   }, [loaded, projects]);
 
   return (
-    <section className="home-section-dark border-b border-white/5 py-16 md:py-20">
-      <div className="max-w-6xl mx-auto px-6">
+    <section className="home-section-dark border-b border-white/5 py-10 sm:py-16 md:py-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 w-full min-w-0">
         <h2 className="page-h2 text-br-red-light text-center mb-2">
           Nuestra zona de servicio
         </h2>
-        <p className="text-center text-br-pearl text-sm md:text-base max-w-2xl mx-auto mb-8">
+        <p className="text-center text-br-pearl text-sm md:text-base max-w-2xl mx-auto mb-6 sm:mb-8">
           Atendemos el Golden Triangle de Texas: Beaumont, Port Arthur, Orange y alrededores.
         </p>
 
-        <div className="rounded-2xl overflow-hidden border border-white/10 bg-black/40 aspect-[16/10] min-h-[320px] relative">
+        <div className="rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 bg-black/40 aspect-[16/10] min-h-[220px] sm:min-h-[280px] md:min-h-[320px] relative w-full">
           {error ? (
             <div className="absolute inset-0 flex items-center justify-center text-br-pearl p-6 text-center text-sm">
               {error}
@@ -201,8 +209,7 @@ export default function GoldenTriangleMap() {
             <>
               <div
                 ref={containerRef}
-                className="absolute inset-0 w-full h-full min-h-[280px]"
-                style={{ minHeight: 280 }}
+                className="absolute inset-0 w-full h-full min-h-[180px] sm:min-h-[260px]"
               />
               {!loaded && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 text-br-pearl text-sm">
