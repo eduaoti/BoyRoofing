@@ -1,6 +1,9 @@
 /* Importa Tailwind v4 */
 @import "tailwindcss";
 
+/* Mapbox GL (mapa Golden Triangle) */
+@import "mapbox-gl/dist/mapbox-gl.css";
+
 /* Estética Boys Roofing: colores no saturados, bordes redondeados. */
 /* Definimos la paleta de Boys Roofing como theme variables */
 @theme {
