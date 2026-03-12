@@ -4,7 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { MapPinIcon, HomeIcon, DocumentTextIcon, DocumentPlusIcon, ArrowRightOnRectangleIcon, UserGroupIcon, BanknotesIcon, Bars3Icon, XMarkIcon, CurrencyDollarIcon, DocumentCheckIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import { MapPinIcon, HomeIcon, DocumentTextIcon, DocumentPlusIcon, ArrowRightOnRectangleIcon, UserGroupIcon, BanknotesIcon, Bars3Icon, XMarkIcon, CurrencyDollarIcon, DocumentCheckIcon, PhotoIcon, BuildingOffice2Icon } from "@heroicons/react/24/outline";
 
 export default function AdminESPanelLayout({
   children,
@@ -79,6 +79,7 @@ export default function AdminESPanelLayout({
             {navLink("/admin/es/nomina/balances", "Balances / Deudas", CurrencyDollarIcon)}
             {navLink("/admin/es/recibos", "Recibos de pago", DocumentCheckIcon)}
             {navLink("/admin/es/imagenes-sitio", "Imágenes del sitio", PhotoIcon)}
+            {navLink("/admin/es/proyectos", "Proyectos / Mapa", BuildingOffice2Icon)}
           </nav>
         </div>
 
@@ -141,6 +142,7 @@ export default function AdminESPanelLayout({
                 {mobileNavLink("/admin/es/nomina/balances", "Balances / Deudas", CurrencyDollarIcon)}
                 {mobileNavLink("/admin/es/recibos", "Recibos de pago", DocumentCheckIcon)}
                 {mobileNavLink("/admin/es/imagenes-sitio", "Imágenes del sitio", PhotoIcon)}
+                {mobileNavLink("/admin/es/proyectos", "Proyectos / Mapa", BuildingOffice2Icon)}
               </div>
               <div className="p-4 border-t border-white/5">
                 <button

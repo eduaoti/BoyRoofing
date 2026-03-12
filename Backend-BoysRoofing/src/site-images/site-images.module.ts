@@ -8,5 +8,6 @@ import { AuthModule } from '../auth/auth.module';
   imports: [AuthModule],
   controllers: [SiteImagesController],
   providers: [SiteImagesService, PrismaService],
+  exports: [SiteImagesService],
 })
 export class SiteImagesModule {}

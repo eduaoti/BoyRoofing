@@ -7,6 +7,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
 import { apiFetch } from "@/lib/api";
+import { getApprovedReviews } from "@/lib/projects";
 import useTranslation from "@/hooks/useTranslation";
 
 interface Review {
@@ -14,6 +15,7 @@ interface Review {
   name: string;
   rating: number;
   comment: string;
+  photoUrl?: string | null;
 }
 
 interface ReviewsCarouselProps {
@@ -94,6 +96,22 @@ export default function ReviewsCarousel({
     try {
       if (reviews.length > 0) {
         setData(reviews);
+        setLoading(false);
+        return;
+      }
+      // Primero intentar reviews de proyectos (con foto)
+      const projectReviews = await getApprovedReviews();
+      if (projectReviews.length > 0) {
+        setData(
+          projectReviews.map((r) => ({
+            id: r.id,
+            name: r.clientName || "Cliente",
+            rating: r.rating,
+            comment: r.message,
+            photoUrl: r.photoUrl,
+          }))
+        );
+        setLoading(false);
         return;
       }
       const res = await apiFetch("/reviews");
@@ -381,6 +399,15 @@ export default function ReviewsCarousel({
         {data.map((review) => (
           <SwiperSlide key={review.id} className="!flex !justify-center">
             <article className="bg-[#111315] border border-[#2a2a2a] rounded-2xl px-8 py-6 shadow-xl max-w-xl w-full mx-2 transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl">
+              {review.photoUrl && (
+                <div className="flex justify-center mb-4">
+                  <img
+                    src={review.photoUrl}
+                    alt=""
+                    className="rounded-xl object-cover w-full max-h-48"
+                  />
+                </div>
+              )}
               {/* Rating */}
               <div className="flex justify-center mb-3">
                 {Array.from({ length: 5 }).map((_, i) => (
