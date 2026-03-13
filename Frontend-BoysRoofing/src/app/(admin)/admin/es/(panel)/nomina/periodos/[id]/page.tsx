@@ -226,11 +226,25 @@ export default function NominaPeriodoDetalleES() {
 
   useEffect(() => {
     if (period?.entries?.length && period.startDate && period.endDate) {
-      setEntryDayStates(initEntryDayStates(period.entries, period.startDate, period.endDate));
+      const initial = initEntryDayStates(period.entries, period.startDate, period.endDate);
+      setEntryDayStates((prev) => {
+        const merged: Record<string, Record<string, 0 | 1 | 2>> = {};
+        for (const [entryId, days] of Object.entries(initial)) {
+          const prevDays = prev[entryId] || {};
+          const combined: Record<string, 0 | 1 | 2> = {};
+          for (const [dateStr, value] of Object.entries(days)) {
+            combined[dateStr] = (prevDays[dateStr] ?? value) as 0 | 1 | 2;
+          }
+          merged[entryId] = combined;
+        }
+        return merged;
+      });
     }
   }, [period]);
 
-  function handleSaveDays(entry: Entry, fullDays: number, halfDays: number) {
+type WorkDayPayload = { date: string; type: "FULL" | "HALF" | "OFF" };
+
+  function handleSaveDays(entry: Entry, fullDays: number, halfDays: number, workDays: WorkDayPayload[]) {
     const halfDayRate = entry.dayRate / 2;
     setSavingId(entry.id);
     apiFetch(`/payroll/entries/${entry.id}`, {
@@ -243,6 +257,7 @@ export default function NominaPeriodoDetalleES() {
         bonuses: entry.bonuses,
         deductions: entry.deductions,
         notes: entry.notes,
+        workDays,
       }),
     })
       .then((r) => {
@@ -266,14 +281,18 @@ export default function NominaPeriodoDetalleES() {
     };
     setEntryDayStates(newState);
     const days = getDaysInPeriod(period!.startDate, period!.endDate);
-    let full = 0,
-      half = 0;
-    days.forEach((d) => {
+    let full = 0;
+    let half = 0;
+    const workDays: WorkDayPayload[] = days.map((d) => {
       const v = newState[key]?.[d.dateStr] ?? 0;
       if (v === 1) full++;
       if (v === 2) half++;
+      return {
+        date: d.dateStr,
+        type: v === 1 ? "FULL" : v === 2 ? "HALF" : "OFF",
+      };
     });
-    handleSaveDays(entry, full, half);
+    handleSaveDays(entry, full, half, workDays);
   }
 
   function updateEntry(entryId: number, payload: Record<string, unknown>) {
