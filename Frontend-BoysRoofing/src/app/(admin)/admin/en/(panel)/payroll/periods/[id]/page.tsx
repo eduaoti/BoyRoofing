@@ -151,7 +151,22 @@ export default function PayrollPeriodDetailEN() {
 
   useEffect(() => {
     if (period?.entries?.length && period.startDate && period.endDate) {
-      setEntryDayStates(initEntryDayStates(period.entries, period.startDate, period.endDate));
+      const initial = initEntryDayStates(period.entries, period.startDate, period.endDate);
+      // Preservar el estado existente de días para no "correr" las selecciones
+      // al volver a cargar el período (después de guardar), pero inicializar
+      // correctamente nuevas filas o días añadidos.
+      setEntryDayStates((prev) => {
+        const merged: Record<string, Record<string, 0 | 1 | 2>> = {};
+        for (const [entryId, days] of Object.entries(initial)) {
+          const prevDays = prev[entryId] || {};
+          const combined: Record<string, 0 | 1 | 2> = {};
+          for (const [dateStr, value] of Object.entries(days)) {
+            combined[dateStr] = (prevDays[dateStr] ?? value) as 0 | 1 | 2;
+          }
+          merged[entryId] = combined;
+        }
+        return merged;
+      });
     }
   }, [period]);
 
