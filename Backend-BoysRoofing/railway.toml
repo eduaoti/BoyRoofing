@@ -2,10 +2,9 @@
 # Root Directory del servicio debe ser: Backend-BoysRoofing
 
 [build]
-builder = "nixpacks"
-buildCommand = "npm run build"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "sh scripts/railway-start.sh"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
