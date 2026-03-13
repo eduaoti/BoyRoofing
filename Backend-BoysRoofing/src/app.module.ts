@@ -13,6 +13,8 @@ import { PayrollModule } from './payroll/payroll.module';
 import { ReceiptsModule } from './receipts/receipts.module';
 import { SiteImagesModule } from './site-images/site-images.module';
 import { ProjectsModule } from './projects/projects.module';
+import { RoofReportModule } from './roof-report/roof-report.module';
+import { RoofDetectionModule } from './roof-detection/roof-detection.module';
 import { PrismaService } from './prisma.service';
 
 @Module({
@@ -27,6 +29,8 @@ import { PrismaService } from './prisma.service';
     ReceiptsModule,
     SiteImagesModule,
     ProjectsModule,
+    RoofReportModule,
+    RoofDetectionModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

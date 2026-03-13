@@ -7,7 +7,7 @@ import {
   DocumentCheckIcon,
 } from "@heroicons/react/24/outline";
 
-const RoofMeasureMap = dynamic(() => import("./RoofMeasureMap"), { ssr: false });
+const RoofMeasureMap = dynamic(() => import("./RoofMeasureMapMapbox"), { ssr: false });
 
 export default function MeasurePage() {
   return (
