@@ -1,0 +1,9 @@
+# Nixpacks (Railway): asegurar que se ejecute nest build y se genere dist/
+[phases.setup]
+nixPkgs = ["nodejs_18"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = ["npm run build"]
