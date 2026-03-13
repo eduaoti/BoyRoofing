@@ -12,6 +12,7 @@ type Entry = {
   workerType: string;
   workerId: number | null;
   workerName: string | null;
+  workDays?: { date: string; type: "FULL" | "HALF" | "OFF" }[];
   worker?: { name: string } | null;
   fullDays: number;
   halfDays: number;
@@ -74,17 +75,27 @@ function initEntryDayStates(
     days.forEach((day) => {
       dayState[day.dateStr] = 0;
     });
-    let full = entry.fullDays;
-    let half = entry.halfDays;
-    days.forEach((day) => {
-      if (full > 0) {
-        dayState[day.dateStr] = 1;
-        full--;
-      } else if (half > 0) {
-        dayState[day.dateStr] = 2;
-        half--;
-      }
-    });
+    if (entry.workDays && entry.workDays.length > 0) {
+      // Si el backend ya tiene WorkDays guardados, los usamos como fuente de verdad.
+      entry.workDays.forEach((wd) => {
+        const dateStr = wd.date.slice(0, 10);
+        if (!(dateStr in dayState)) return;
+        dayState[dateStr] = wd.type === "FULL" ? 1 : wd.type === "HALF" ? 2 : 0;
+      });
+    } else {
+      // Compatibilidad hacia atrás: repartir según fullDays / halfDays desde el inicio del periodo.
+      let full = entry.fullDays;
+      let half = entry.halfDays;
+      days.forEach((day) => {
+        if (full > 0) {
+          dayState[day.dateStr] = 1;
+          full--;
+        } else if (half > 0) {
+          dayState[day.dateStr] = 2;
+          half--;
+        }
+      });
+    }
     state[String(entry.id)] = dayState;
   });
   return state;
@@ -184,6 +195,13 @@ export default function PayrollPeriodDetailEN() {
         bonuses: entry.bonuses,
         deductions: entry.deductions,
         notes: entry.notes,
+        workDays: days.map((d) => {
+          const v = newState[key]?.[d.dateStr] ?? 0;
+          return {
+            date: d.dateStr,
+            type: v === 1 ? "FULL" : v === 2 ? "HALF" : "OFF",
+          };
+        }),
       }),
     })
       .then((r) => {

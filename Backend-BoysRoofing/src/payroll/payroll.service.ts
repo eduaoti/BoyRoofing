@@ -4,7 +4,12 @@ import { CreatePeriodDto } from './dto/create-period.dto';
 import { AddOccasionalDto } from './dto/add-occasional.dto';
 import { UpdateEntryDto } from './dto/update-entry.dto';
 import { MarkPaidDto } from './dto/mark-paid.dto';
-import { WorkerType, PaymentStatus, PayrollPeriodStatus } from '@prisma/client';
+import {
+  WorkerType,
+  PaymentStatus,
+  PayrollPeriodStatus,
+  WorkDayType,
+} from '@prisma/client';
 
 function calcTotal(
   fullDays: number,
@@ -35,7 +40,7 @@ export class PayrollService {
       where: { id },
       include: {
         entries: {
-          include: { worker: true },
+          include: { worker: true, workDays: true },
           orderBy: [{ workerType: 'asc' }, { workerName: 'asc' }, { worker: { name: 'asc' } }],
         },
       },
@@ -109,9 +114,15 @@ export class PayrollService {
     const bonuses = dto.bonuses ?? entry.bonuses;
     const deductions = dto.deductions ?? entry.deductions;
     const total = calcTotal(fullDays, halfDays, dayRate, halfDayRate, bonuses, deductions);
-    const prevBalance = entry.prevBalance;
+    // Si el balance del trabajador se ajustó manualmente (pantalla "Balances"),
+    // usamos ese balance actual como base efectiva, restando el efecto del entry
+    // previo para conservar los ajustes manuales.
+    let effectivePrevBalance = entry.prevBalance;
+    if (entry.workerId && entry.worker) {
+      effectivePrevBalance = entry.worker.balance - entry.total + entry.amountPaid;
+    }
     const amountPaid = dto.amountPaid ?? entry.amountPaid;
-    const balanceAfter = prevBalance + total - amountPaid;
+    const balanceAfter = effectivePrevBalance + total - amountPaid;
 
     let paymentStatus = entry.paymentStatus;
     if (dto.paymentStatus) paymentStatus = dto.paymentStatus as PaymentStatus;
@@ -132,6 +143,7 @@ export class PayrollService {
         deductions,
         notes: dto.notes !== undefined ? dto.notes : entry.notes,
         total,
+        prevBalance: effectivePrevBalance,
         amountPaid,
         balanceAfter,
         paymentStatus,
@@ -145,6 +157,26 @@ export class PayrollService {
         data: { balance: balanceAfter },
       });
     }
+
+    // Actualizar WorkDays si se envían desde el frontend
+    if (dto.workDays && Array.isArray(dto.workDays)) {
+      await this.prisma.workDay.deleteMany({ where: { payrollEntryId: entryId } });
+      const normalized = dto.workDays.map((wd) => ({
+        payrollEntryId: entryId,
+        date: new Date(wd.date),
+        type:
+          wd.type === 'FULL'
+            ? WorkDayType.FULL
+            : wd.type === 'HALF'
+            ? WorkDayType.HALF
+            : WorkDayType.OFF,
+      }));
+      // Filtrar OFF para no llenar de filas innecesarias
+      const toCreate = normalized.filter((n) => n.type !== WorkDayType.OFF);
+      if (toCreate.length) {
+        await this.prisma.workDay.createMany({ data: toCreate });
+      }
+    }
     return updated;
   }
 
@@ -156,7 +188,11 @@ export class PayrollService {
     if (!entry) throw new Error('Entry not found');
 
     const amountPaid = dto.amountPaid;
-    const balanceAfter = entry.prevBalance + entry.total - amountPaid;
+    let effectivePrevBalance = entry.prevBalance;
+    if (entry.workerId && entry.worker) {
+      effectivePrevBalance = entry.worker.balance - entry.total + entry.amountPaid;
+    }
+    const balanceAfter = effectivePrevBalance + entry.total - amountPaid;
     const paymentStatus: PaymentStatus = Math.abs(balanceAfter) < 0.01 ? PaymentStatus.PAID : amountPaid > 0 ? PaymentStatus.PARTIAL : PaymentStatus.UNPAID;
 
     const updated = await this.prisma.payrollEntry.update({
@@ -184,6 +220,10 @@ export class PayrollService {
       include: { worker: true },
     });
     if (!entry) throw new Error('Entry not found');
+    // Si hay worker, pagar el saldo actual completo (incluyendo ajustes manuales).
+    if (entry.workerId && entry.worker) {
+      return this.markPaid(entryId, { amountPaid: entry.worker.balance });
+    }
     const amountToPay = entry.prevBalance + entry.total;
     return this.markPaid(entryId, { amountPaid: amountToPay });
   }
