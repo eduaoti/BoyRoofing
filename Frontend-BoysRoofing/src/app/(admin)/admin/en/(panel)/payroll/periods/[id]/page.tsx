@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
@@ -110,6 +110,70 @@ function calcTotal(
   ded: number
 ) {
   return full * dayR + half * halfR + bon - ded;
+}
+
+/** Mobile: use touch coordinates so the correct day is toggled (avoids offset bugs) */
+function DayRowTouchTarget({
+  entry,
+  savingId,
+  days,
+  dayState,
+  handleDayCircleClick,
+}: {
+  entry: Entry;
+  savingId: number | null;
+  days: { dateStr: string; initial: string }[];
+  dayState: Record<string, 0 | 1 | 2>;
+  handleDayCircleClick: (entry: Entry, dateStr: string) => void;
+}) {
+  const didScrollRef = useRef(false);
+  return (
+    <div
+      className="overflow-x-auto overflow-y-hidden touch-pan-x"
+      style={{ WebkitOverflowScrolling: "touch" }}
+      onTouchStart={() => { didScrollRef.current = false; }}
+      onTouchMove={() => { didScrollRef.current = true; }}
+      onTouchEnd={(e) => {
+        if (didScrollRef.current || e.changedTouches.length === 0) return;
+        const t = e.changedTouches[0];
+        const el = document.elementFromPoint(t.clientX, t.clientY);
+        const btn = el?.closest?.("button[data-date]");
+        if (btn) {
+          e.preventDefault();
+          const dateStr = btn.getAttribute("data-date");
+          if (dateStr) handleDayCircleClick(entry, dateStr);
+        }
+      }}
+    >
+      <div className="flex flex-nowrap gap-1.5 w-max min-w-full pb-0.5">
+        {days.map((day) => {
+          const state = dayState[day.dateStr] ?? 0;
+          return (
+            <button
+              key={day.dateStr}
+              type="button"
+              data-date={day.dateStr}
+              disabled={savingId === entry.id}
+              onClick={(e) => {
+                const dateStr = (e.currentTarget as HTMLButtonElement).getAttribute("data-date");
+                if (dateStr) handleDayCircleClick(entry, dateStr);
+              }}
+              title={`${day.dateStr}: ${state === 0 ? "empty" : state === 1 ? "full" : "half"}`}
+              className={`w-8 h-8 min-w-[2rem] rounded-full flex items-center justify-center text-xs font-semibold transition-colors shrink-0 select-none touch-manipulation ${
+                state === 0
+                  ? "border-2 border-white/40 bg-br-carbon/70 text-br-pearl hover:border-br-red-main/60"
+                  : state === 1
+                  ? "bg-br-red-main text-white border-2 border-br-red-main"
+                  : "bg-br-red-main/60 text-white border-2 border-br-red-main/80"
+              }`}
+            >
+              {day.initial}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 export default function PayrollPeriodDetailEN() {
@@ -653,35 +717,13 @@ function handleSaveDays(entry: Entry, fullDays: number, halfDays: number, workDa
               </div>
               <div className="min-w-0">
                 <label className="text-br-white/60 text-xs block mb-1.5">Days (L–D)</label>
-                <div className="overflow-x-auto overflow-y-hidden touch-pan-x" style={{ WebkitOverflowScrolling: "touch" }}>
-                  <div className="flex flex-nowrap gap-1.5 w-max min-w-full pb-0.5">
-                    {days.map((day) => {
-                      const state = dayState[day.dateStr] ?? 0;
-                      return (
-                        <button
-                          key={day.dateStr}
-                          type="button"
-                          data-date={day.dateStr}
-                          disabled={savingId === entry.id}
-                          onClick={(e) => {
-                            const dateStr = (e.currentTarget as HTMLButtonElement).getAttribute("data-date");
-                            if (dateStr) handleDayCircleClick(entry, dateStr);
-                          }}
-                          title={`${day.dateStr}: ${state === 0 ? "empty" : state === 1 ? "full" : "half"}`}
-                          className={`w-8 h-8 min-w-[2rem] rounded-full flex items-center justify-center text-xs font-semibold transition-colors shrink-0 select-none touch-manipulation ${
-                            state === 0
-                              ? "border-2 border-white/40 bg-br-carbon/70 text-br-pearl hover:border-br-red-main/60"
-                              : state === 1
-                              ? "bg-br-red-main text-white border-2 border-br-red-main"
-                              : "bg-br-red-main/60 text-white border-2 border-br-red-main/80"
-                          }`}
-                        >
-                          {day.initial}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                <DayRowTouchTarget
+                  entry={entry}
+                  savingId={savingId}
+                  days={days}
+                  dayState={dayState}
+                  handleDayCircleClick={handleDayCircleClick}
+                />
               </div>
               <div>
                   <label className="text-br-white/60 text-xs">$/day</label>

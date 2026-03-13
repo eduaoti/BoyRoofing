@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
@@ -12,6 +12,7 @@ type Entry = {
   workerType: string;
   workerId: number | null;
   workerName: string | null;
+  workDays?: { date: string; type: "FULL" | "HALF" | "OFF" }[];
   worker?: { name: string } | null;
   fullDays: number;
   halfDays: number;
@@ -74,17 +75,27 @@ function initEntryDayStates(
     days.forEach((day) => {
       dayState[day.dateStr] = 0;
     });
-    let full = entry.fullDays;
-    let half = entry.halfDays;
-    days.forEach((day) => {
-      if (full > 0) {
-        dayState[day.dateStr] = 1;
-        full--;
-      } else if (half > 0) {
-        dayState[day.dateStr] = 2;
-        half--;
-      }
-    });
+    if (entry.workDays && entry.workDays.length > 0) {
+      // Si el backend ya tiene WorkDays guardados, los usamos como fuente de verdad.
+      entry.workDays.forEach((wd) => {
+        const dateStr = wd.date.slice(0, 10);
+        if (!(dateStr in dayState)) return;
+        dayState[dateStr] = wd.type === "FULL" ? 1 : wd.type === "HALF" ? 2 : 0;
+      });
+    } else {
+      // Compatibilidad hacia atrás: repartir según fullDays / halfDays desde el inicio del periodo.
+      let full = entry.fullDays;
+      let half = entry.halfDays;
+      days.forEach((day) => {
+        if (full > 0) {
+          dayState[day.dateStr] = 1;
+          full--;
+        } else if (half > 0) {
+          dayState[day.dateStr] = 2;
+          half--;
+        }
+      });
+    }
     state[String(entry.id)] = dayState;
   });
   return state;
@@ -99,6 +110,70 @@ function calcTotal(
   ded: number
 ) {
   return full * dayR + half * halfR + bon - ded;
+}
+
+/** Móvil: usar coordenadas del toque para que se marque el día correcto (evita desfase) */
+function DayRowTouchTarget({
+  entry,
+  savingId,
+  days,
+  dayState,
+  handleDayCircleClick,
+}: {
+  entry: Entry;
+  savingId: number | null;
+  days: { dateStr: string; initial: string }[];
+  dayState: Record<string, 0 | 1 | 2>;
+  handleDayCircleClick: (entry: Entry, dateStr: string) => void;
+}) {
+  const didScrollRef = useRef(false);
+  return (
+    <div
+      className="overflow-x-auto overflow-y-hidden touch-pan-x"
+      style={{ WebkitOverflowScrolling: "touch" }}
+      onTouchStart={() => { didScrollRef.current = false; }}
+      onTouchMove={() => { didScrollRef.current = true; }}
+      onTouchEnd={(e) => {
+        if (didScrollRef.current || e.changedTouches.length === 0) return;
+        const t = e.changedTouches[0];
+        const el = document.elementFromPoint(t.clientX, t.clientY);
+        const btn = el?.closest?.("button[data-date]");
+        if (btn) {
+          e.preventDefault();
+          const dateStr = btn.getAttribute("data-date");
+          if (dateStr) handleDayCircleClick(entry, dateStr);
+        }
+      }}
+    >
+      <div className="flex flex-nowrap gap-1.5 w-max min-w-full pb-0.5">
+        {days.map((day) => {
+          const state = dayState[day.dateStr] ?? 0;
+          return (
+            <button
+              key={day.dateStr}
+              type="button"
+              data-date={day.dateStr}
+              disabled={savingId === entry.id}
+              onClick={(e) => {
+                const dateStr = (e.currentTarget as HTMLButtonElement).getAttribute("data-date");
+                if (dateStr) handleDayCircleClick(entry, dateStr);
+              }}
+              title={`${day.dateStr}: ${state === 0 ? "vacío" : state === 1 ? "completo" : "medio"}`}
+              className={`w-8 h-8 min-w-[2rem] rounded-full flex items-center justify-center text-xs font-semibold transition-colors shrink-0 select-none touch-manipulation ${
+                state === 0
+                  ? "border-2 border-white/40 bg-br-carbon/70 text-br-pearl hover:border-br-red-main/60"
+                  : state === 1
+                  ? "bg-br-red-main text-white border-2 border-br-red-main"
+                  : "bg-br-red-main/60 text-white border-2 border-br-red-main/80"
+              }`}
+            >
+              {day.initial}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 export default function NominaPeriodoDetalleES() {
@@ -666,35 +741,13 @@ export default function NominaPeriodoDetalleES() {
               </div>
               <div className="min-w-0">
                 <label className="text-br-white/60 text-xs block mb-1.5">Días (L–D)</label>
-                <div className="overflow-x-auto overflow-y-hidden touch-pan-x" style={{ WebkitOverflowScrolling: "touch" }}>
-                  <div className="flex flex-nowrap gap-1.5 w-max min-w-full pb-0.5">
-                    {days.map((day) => {
-                      const state = dayState[day.dateStr] ?? 0;
-                      return (
-                        <button
-                          key={day.dateStr}
-                          type="button"
-                          data-date={day.dateStr}
-                          disabled={savingId === entry.id}
-                          onClick={(e) => {
-                            const dateStr = (e.currentTarget as HTMLButtonElement).getAttribute("data-date");
-                            if (dateStr) handleDayCircleClick(entry, dateStr);
-                          }}
-                          title={`${day.dateStr}: ${state === 0 ? "vacío" : state === 1 ? "completo" : "medio"}`}
-                          className={`w-8 h-8 min-w-[2rem] rounded-full flex items-center justify-center text-xs font-semibold transition-colors shrink-0 select-none touch-manipulation ${
-                            state === 0
-                              ? "border-2 border-white/40 bg-br-carbon/70 text-br-pearl hover:border-br-red-main/60"
-                              : state === 1
-                              ? "bg-br-red-main text-white border-2 border-br-red-main"
-                              : "bg-br-red-main/60 text-white border-2 border-br-red-main/80"
-                          }`}
-                        >
-                          {day.initial}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                <DayRowTouchTarget
+                  entry={entry}
+                  savingId={savingId}
+                  days={days}
+                  dayState={dayState}
+                  handleDayCircleClick={handleDayCircleClick}
+                />
               </div>
               <div>
                   <label className="text-br-white/60 text-xs">$/día</label>
