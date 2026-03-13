@@ -661,8 +661,12 @@ function handleSaveDays(entry: Entry, fullDays: number, halfDays: number, workDa
                         <button
                           key={day.dateStr}
                           type="button"
+                          data-date={day.dateStr}
                           disabled={savingId === entry.id}
-                          onClick={() => handleDayCircleClick(entry, day.dateStr)}
+                          onClick={(e) => {
+                            const dateStr = (e.currentTarget as HTMLButtonElement).getAttribute("data-date");
+                            if (dateStr) handleDayCircleClick(entry, dateStr);
+                          }}
                           title={`${day.dateStr}: ${state === 0 ? "empty" : state === 1 ? "full" : "half"}`}
                           className={`w-8 h-8 min-w-[2rem] rounded-full flex items-center justify-center text-xs font-semibold transition-colors shrink-0 select-none touch-manipulation ${
                             state === 0
@@ -789,8 +793,12 @@ function handleSaveDays(entry: Entry, fullDays: number, halfDays: number, workDa
                           <button
                             key={day.dateStr}
                             type="button"
+                            data-date={day.dateStr}
                             disabled={savingId === entry.id}
-                            onClick={() => handleDayCircleClick(entry, day.dateStr)}
+                            onClick={(e) => {
+                              const dateStr = (e.currentTarget as HTMLButtonElement).getAttribute("data-date");
+                              if (dateStr) handleDayCircleClick(entry, dateStr);
+                            }}
                             title={`${day.dateStr}: ${state === 0 ? "empty" : state === 1 ? "full" : "half"}`}
                             className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all shrink-0 ${
                               state === 0
