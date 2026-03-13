@@ -1,8 +1,9 @@
 # Railway: backend NestJS + Prisma
-# Si en Railway el "Root Directory" del servicio es Backend-BoysRoofing, este archivo se usa.
+# Root Directory del servicio debe ser: Backend-BoysRoofing
 
 [build]
 builder = "nixpacks"
+buildCommand = "npm run build"
 
 [deploy]
 startCommand = "sh scripts/railway-start.sh"
