@@ -4,6 +4,8 @@ import sharp from 'sharp';
 const MAPBOX_SATELLITE_STYLE = 'mapbox/satellite-v9';
 const DEFAULT_ZOOM = 20;
 const IMG_SIZE = 640;
+/** Solo considerar bordes en el centro de la imagen (la casa), no todo el terreno */
+const ROI_CENTER_FRACTION = 0.42; // centro 42% (29% a 71%) para una sola vivienda
 
 /** Web Mercator: at zoom z, approximate degrees per pixel at given latitude */
 function scaleLng(zoom: number, latDeg: number): number {
@@ -130,16 +132,21 @@ export class RoofDetectionService {
     const gray = new Uint8Array(data);
     const edges = sobelMagnitude(gray, w, h);
 
-    // Threshold: keep strong edges. Roofs often have clear boundaries (shadow, color change)
-    const threshold = 60;
+    // Threshold: strong edges (techo vs cielo/sombras)
+    const threshold = 55;
+    // ROI central: solo la casa que el usuario centró, no todo el terreno
+    const roiMinX = Math.floor(w * (1 - ROI_CENTER_FRACTION) / 2);
+    const roiMaxX = Math.floor(w * (1 + ROI_CENTER_FRACTION) / 2);
+    const roiMinY = Math.floor(h * (1 - ROI_CENTER_FRACTION) / 2);
+    const roiMaxY = Math.floor(h * (1 + ROI_CENTER_FRACTION) / 2);
     const edgePoints: [number, number][] = [];
-    for (let y = 2; y < h - 2; y++) {
-      for (let x = 2; x < w - 2; x++) {
+    for (let y = Math.max(2, roiMinY); y < Math.min(h - 2, roiMaxY); y++) {
+      for (let x = Math.max(2, roiMinX); x < Math.min(w - 2, roiMaxX); x++) {
         if (edges[y * w + x] >= threshold) edgePoints.push([x, y]);
       }
     }
 
-    if (edgePoints.length < 20) return null;
+    if (edgePoints.length < 15) return null;
 
     const hull = convexHull(edgePoints);
     const simplified = douglasPeucker(hull, 3);
