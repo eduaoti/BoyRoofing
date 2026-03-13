@@ -4,8 +4,10 @@ import sharp from 'sharp';
 const MAPBOX_SATELLITE_STYLE = 'mapbox/satellite-v9';
 const DEFAULT_ZOOM = 20;
 const IMG_SIZE = 640;
-/** Solo considerar bordes en el centro de la imagen (la casa), no todo el terreno */
-const ROI_CENTER_FRACTION = 0.42; // centro 42% (29% a 71%) para una sola vivienda
+/** ROI central donde buscar la casa (donde el usuario puso el pin) */
+const ROI_CENTER_FRACTION = 0.5;
+/** Umbral de gris: píxeles más oscuros que esto se consideran "techo" (casa negra/gris) */
+const DARK_ROOF_THRESHOLD = 95;
 
 /** Web Mercator: at zoom z, approximate degrees per pixel at given latitude */
 function scaleLng(zoom: number, latDeg: number): number {
@@ -32,29 +34,48 @@ function pixelToLngLat(
   return [lng, lat];
 }
 
-/** Sobel edge magnitude (3x3) on grayscale buffer. Returns new buffer, same size */
-function sobelMagnitude(data: Uint8Array, w: number, h: number): Uint8Array {
-  const out = new Uint8Array(w * h);
-  const gx = [-1, 0, 1, -2, 0, 2, -1, 0, 1];
-  const gy = [-1, -2, -1, 0, 0, 0, 1, 2, 1];
-  for (let y = 1; y < h - 1; y++) {
-    for (let x = 1; x < w - 1; x++) {
-      let sx = 0,
-        sy = 0;
-      let ki = 0;
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          const v = data[(y + dy) * w + (x + dx)] ?? 0;
-          sx += v * gx[ki];
-          sy += v * gy[ki];
-          ki++;
-        }
-      }
-      const mag = Math.min(255, Math.sqrt(sx * sx + sy * sy));
-      out[y * w + x] = mag;
+/** Encuentra la componente conexa de píxeles oscuros que contiene (cx, cy). 4-vecinos. */
+function findDarkComponentContainingCenter(
+  gray: Uint8Array,
+  w: number,
+  h: number,
+  threshold: number,
+  roiMinX: number,
+  roiMaxX: number,
+  roiMinY: number,
+  roiMaxY: number,
+  cx: number,
+  cy: number,
+): [number, number][] {
+  const dark = new Uint8Array(w * h);
+  for (let y = roiMinY; y < roiMaxY; y++) {
+    for (let x = roiMinX; x < roiMaxX; x++) {
+      if ((gray[y * w + x] ?? 255) <= threshold) dark[y * w + x] = 1;
     }
   }
-  return out;
+  const visited = new Uint8Array(w * h);
+  const stack: [number, number][] = [];
+  const push = (x: number, y: number) => {
+    if (x < roiMinX || x >= roiMaxX || y < roiMinY || y >= roiMaxY) return;
+    const i = y * w + x;
+    if (!dark[i] || visited[i]) return;
+    visited[i] = 1;
+    stack.push([x, y]);
+  };
+  const centerIdx = cy * w + cx;
+  if (!dark[centerIdx]) return [];
+  push(cx, cy);
+  const points: [number, number][] = [];
+  const dx4 = [0, 1, 0, -1];
+  const dy4 = [1, 0, -1, 0];
+  while (stack.length > 0) {
+    const [x, y] = stack.pop()!;
+    points.push([x, y]);
+    for (let k = 0; k < 4; k++) {
+      push(x + dx4[k], y + dy4[k]);
+    }
+  }
+  return points;
 }
 
 /** 2D cross product for orientation */
@@ -123,32 +144,49 @@ export class RoofDetectionService {
 
     const { data, info } = await sharp(buf)
       .grayscale()
-      .blur(0.5)
       .raw()
       .toBuffer({ resolveWithObject: true });
 
     const w = info.width;
     const h = info.height;
     const gray = new Uint8Array(data);
-    const edges = sobelMagnitude(gray, w, h);
-
-    // Threshold: strong edges (techo vs cielo/sombras)
-    const threshold = 55;
-    // ROI central: solo la casa que el usuario centró, no todo el terreno
+    const cx = Math.floor(w / 2);
+    const cy = Math.floor(h / 2);
     const roiMinX = Math.floor(w * (1 - ROI_CENTER_FRACTION) / 2);
     const roiMaxX = Math.floor(w * (1 + ROI_CENTER_FRACTION) / 2);
     const roiMinY = Math.floor(h * (1 - ROI_CENTER_FRACTION) / 2);
     const roiMaxY = Math.floor(h * (1 + ROI_CENTER_FRACTION) / 2);
-    const edgePoints: [number, number][] = [];
-    for (let y = Math.max(2, roiMinY); y < Math.min(h - 2, roiMaxY); y++) {
-      for (let x = Math.max(2, roiMinX); x < Math.min(w - 2, roiMaxX); x++) {
-        if (edges[y * w + x] >= threshold) edgePoints.push([x, y]);
-      }
+
+    // Detectar la mancha oscura (techo/casa negra) que contiene el pin; no bordes ni terreno
+    let darkPoints = findDarkComponentContainingCenter(
+      gray,
+      w,
+      h,
+      DARK_ROOF_THRESHOLD,
+      roiMinX,
+      roiMaxX,
+      roiMinY,
+      roiMaxY,
+      cx,
+      cy,
+    );
+    if (darkPoints.length < 30) {
+      darkPoints = findDarkComponentContainingCenter(
+        gray,
+        w,
+        h,
+        110,
+        roiMinX,
+        roiMaxX,
+        roiMinY,
+        roiMaxY,
+        cx,
+        cy,
+      );
     }
+    if (darkPoints.length < 30) return null;
 
-    if (edgePoints.length < 15) return null;
-
-    const hull = convexHull(edgePoints);
+    const hull = convexHull(darkPoints);
     const simplified = douglasPeucker(hull, 3);
     if (simplified.length < 3) return null;
 
