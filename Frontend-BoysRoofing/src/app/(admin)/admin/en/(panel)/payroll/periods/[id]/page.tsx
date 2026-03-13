@@ -181,7 +181,9 @@ export default function PayrollPeriodDetailEN() {
     }
   }, [period]);
 
-  function handleSaveDays(entry: Entry, fullDays: number, halfDays: number) {
+type WorkDayPayload = { date: string; type: "FULL" | "HALF" | "OFF" };
+
+function handleSaveDays(entry: Entry, fullDays: number, halfDays: number, workDays: WorkDayPayload[]) {
     const halfDayRate = entry.dayRate / 2;
     const total = calcTotal(fullDays, halfDays, entry.dayRate, halfDayRate, entry.bonuses, entry.deductions);
     setSavingId(entry.id);
@@ -195,13 +197,7 @@ export default function PayrollPeriodDetailEN() {
         bonuses: entry.bonuses,
         deductions: entry.deductions,
         notes: entry.notes,
-        workDays: days.map((d) => {
-          const v = newState[key]?.[d.dateStr] ?? 0;
-          return {
-            date: d.dateStr,
-            type: v === 1 ? "FULL" : v === 2 ? "HALF" : "OFF",
-          };
-        }),
+      workDays,
       }),
     })
       .then((r) => {
@@ -225,14 +221,18 @@ export default function PayrollPeriodDetailEN() {
     };
     setEntryDayStates(newState);
     const days = getDaysInPeriod(period!.startDate, period!.endDate);
-    let full = 0,
-      half = 0;
-    days.forEach((d) => {
+    let full = 0;
+    let half = 0;
+    const workDays: WorkDayPayload[] = days.map((d) => {
       const v = newState[key]?.[d.dateStr] ?? 0;
       if (v === 1) full++;
       if (v === 2) half++;
+      return {
+        date: d.dateStr,
+        type: v === 1 ? "FULL" : v === 2 ? "HALF" : "OFF",
+      };
     });
-    handleSaveDays(entry, full, half);
+    handleSaveDays(entry, full, half, workDays);
   }
 
   function updateEntry(entryId: number, payload: Record<string, unknown>) {
