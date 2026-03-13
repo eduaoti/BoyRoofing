@@ -92,11 +92,19 @@ export class RoofReportService {
       doc.fontSize(10).fillColor(BRAND_DARK).text('Contents', leftX, doc.y);
       doc.y += 14;
       doc.fontSize(SMALL_FONT).fillColor(GRAY_TEXT);
-      let item = 1;
-      if (hasDiagram) doc.text(`${item++.}. Roof diagram`, leftX, doc.y).y += 16;
-      doc.text(`${item++.}. Length & area measurement`, leftX, doc.y).y += 16;
-      doc.text(`${item++.}. Report summary & squares by waste`, leftX, doc.y).y += 16;
-      doc.text(`${item}. Material calculations`, leftX, doc.y);
+      let tocItem = 1;
+      if (hasDiagram) {
+        doc.text(tocItem + '. Roof diagram', leftX, doc.y);
+        doc.y += 16;
+        tocItem++;
+      }
+      doc.text(tocItem + '. Length & area measurement', leftX, doc.y);
+      doc.y += 16;
+      tocItem++;
+      doc.text(tocItem + '. Report summary & squares by waste', leftX, doc.y);
+      doc.y += 16;
+      tocItem++;
+      doc.text(tocItem + '. Material calculations', leftX, doc.y);
 
       addFooter(pageNum++, totalPages);
       doc.addPage();
