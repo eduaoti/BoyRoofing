@@ -91,6 +91,8 @@ export default function RoofMeasureMapMapbox() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapboxMap | null>(null);
   const drawRef = useRef<MapboxDraw | null>(null);
+  const detectionPinMarkerRef = useRef<{ remove: () => void } | null>(null);
+  const detectionPinCancelledRef = useRef(false);
 
   const [mapReady, setMapReady] = useState(false);
   const [measure, setMeasure] = useState<Measure | null>(null);
@@ -105,6 +107,8 @@ export default function RoofMeasureMapMapbox() {
   const [pitchKey, setPitchKey] = useState<string>("0");
   const [wastePercent, setWastePercent] = useState<number>(10);
   const [ridgeLengthOverride, setRidgeLengthOverride] = useState<string>("");
+  /** Pin que el usuario coloca sobre la casa para que la detección use ese punto */
+  const [detectionPin, setDetectionPin] = useState<{ lng: number; lat: number } | null>(null);
 
   const mapboxToken = useMemo(() => (process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "").trim(), []);
 
@@ -285,7 +289,10 @@ export default function RoofMeasureMapMapbox() {
   async function detectRoofAuto() {
     const map = mapRef.current;
     if (!map || !mapReady) return;
-    const center = map.getCenter();
+    // Usar el pin si lo puso el usuario; si no, el centro del mapa
+    const center = detectionPin
+      ? { lng: detectionPin.lng, lat: detectionPin.lat }
+      : map.getCenter();
     const zoom = Math.min(22, Math.max(18, Math.round(map.getZoom() ?? 20)));
     setDetectingRoof(true);
     setErrorMsg("");
@@ -316,7 +323,7 @@ export default function RoofMeasureMapMapbox() {
       const data = await res.json();
       const polygon = data?.polygon;
       if (!polygon || !Array.isArray(polygon) || polygon.length < 3) {
-        setErrorMsg(data?.message ?? "No se detectó un contorno de techo. Centra el mapa sobre la casa e intenta de nuevo.");
+        setErrorMsg(data?.message ?? "No se detectó un contorno. Coloca el pin sobre la casa y pulsa Detectar techo de nuevo.");
         return;
       }
       const draw = drawRef.current;
@@ -563,6 +570,69 @@ export default function RoofMeasureMapMapbox() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // Pin de detección: marcador arrastrable sobre la casa
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    const removeMarker = () => {
+      if (detectionPinMarkerRef.current) {
+        detectionPinMarkerRef.current.remove();
+        detectionPinMarkerRef.current = null;
+      }
+    };
+
+    if (!detectionPin) {
+      detectionPinCancelledRef.current = true;
+      removeMarker();
+      return;
+    }
+
+    detectionPinCancelledRef.current = false;
+    removeMarker();
+
+    (async () => {
+      const mapboxgl = (await import("mapbox-gl")).default;
+      const el = document.createElement("div");
+      el.className = "detection-pin-marker";
+      el.style.width = "36px";
+      el.style.height = "36px";
+      el.style.background = "url('data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"%23BA181B\"%3E%3Cpath d=\"M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z\"/%3E%3C/svg%3E') center/contain no-repeat";
+      el.style.cursor = "grab";
+      const marker = new mapboxgl.Marker({ element: el, draggable: true }).setLngLat([
+        detectionPin.lng,
+        detectionPin.lat,
+      ]);
+      if (detectionPinCancelledRef.current) return;
+      marker.addTo(map);
+      marker.on("dragend", () => {
+        const ll = marker.getLngLat();
+        setDetectionPin({ lng: ll.lng, lat: ll.lat });
+      });
+      if (detectionPinCancelledRef.current) {
+        marker.remove();
+        return;
+      }
+      detectionPinMarkerRef.current = marker;
+    })();
+
+    return () => {
+      detectionPinCancelledRef.current = true;
+      removeMarker();
+    };
+  }, [mapReady, detectionPin?.lng, detectionPin?.lat]);
+
+  function placeDetectionPin() {
+    const map = mapRef.current;
+    if (!map) return;
+    const c = map.getCenter();
+    setDetectionPin({ lng: c.lng, lat: c.lat });
+  }
+
+  function removeDetectionPin() {
+    setDetectionPin(null);
+  }
+
   return (
     <div className="grid gap-4">
       <div className="flex flex-col gap-3">
@@ -586,11 +656,32 @@ export default function RoofMeasureMapMapbox() {
             </button>
             <button
               type="button"
+              disabled={!mapReady}
+              className="inline-flex items-center gap-2 rounded-full border border-amber-500/60 bg-amber-500/20 px-4 py-2 text-xs font-medium text-amber-200 hover:bg-amber-500/30 transition"
+              onClick={placeDetectionPin}
+              aria-label="Colocar pin sobre la casa"
+              title="Coloca un pin sobre la casa. La detección usará este punto. Puedes arrastrar el pin para ajustarlo."
+            >
+              <MapPinIcon className="h-4 w-4" />
+              Colocar pin en la casa
+            </button>
+            {detectionPin && (
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-full border border-br-smoke-light bg-br-smoke/40 px-4 py-2 text-xs font-medium text-br-pearl hover:bg-br-smoke-light/60 transition"
+                onClick={removeDetectionPin}
+                aria-label="Quitar pin"
+              >
+                Quitar pin
+              </button>
+            )}
+            <button
+              type="button"
               disabled={!mapReady || detectingRoof}
               className="inline-flex items-center gap-2 rounded-full border border-br-red-main/50 bg-br-red-main/10 px-4 py-2 text-xs font-medium text-br-red-light hover:bg-br-red-main/20 disabled:opacity-50 disabled:cursor-not-allowed transition"
               onClick={detectRoofAuto}
               aria-label="Detectar techo automáticamente"
-              title="Centra el mapa sobre la casa y pulsa para detectar el contorno del techo"
+              title={detectionPin ? "Detectar techo usando la posición del pin" : "Coloca el pin sobre la casa y pulsa Detectar techo, o usa el centro del mapa"}
             >
               <SparklesIcon className="h-4 w-4" />
               {detectingRoof ? "Detectando…" : "Detectar techo"}
