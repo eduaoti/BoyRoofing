@@ -664,30 +664,32 @@ export default function NominaPeriodoDetalleES() {
                   {entry.workerType === "REGULAR" ? "Plantilla" : "Ocasional"}
                 </span>
               </div>
-              <div>
+              <div className="min-w-0">
                 <label className="text-br-white/60 text-xs block mb-1.5">Días (L–D)</label>
-                <div className="flex flex-wrap gap-1.5">
-                  {days.map((day) => {
-                    const state = dayState[day.dateStr] ?? 0;
-                    return (
-                      <button
-                        key={day.dateStr}
-                        type="button"
-                        disabled={savingId === entry.id}
-                        onClick={() => handleDayCircleClick(entry, day.dateStr)}
-                        title={`${day.dateStr}: ${state === 0 ? "vacío" : state === 1 ? "completo" : "medio"}`}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all shrink-0 ${
-                          state === 0
-                            ? "border-2 border-white/40 bg-br-carbon/70 text-br-pearl hover:border-br-red-main/60"
-                            : state === 1
-                            ? "bg-br-red-main text-white border-2 border-br-red-main"
-                            : "bg-br-red-main/60 text-white border-2 border-br-red-main/80"
-                        }`}
-                      >
-                        {day.initial}
-                      </button>
-                    );
-                  })}
+                <div className="overflow-x-auto overflow-y-hidden touch-pan-x" style={{ WebkitOverflowScrolling: "touch" }}>
+                  <div className="flex flex-nowrap gap-1.5 w-max min-w-full pb-0.5">
+                    {days.map((day) => {
+                      const state = dayState[day.dateStr] ?? 0;
+                      return (
+                        <button
+                          key={day.dateStr}
+                          type="button"
+                          disabled={savingId === entry.id}
+                          onClick={() => handleDayCircleClick(entry, day.dateStr)}
+                          title={`${day.dateStr}: ${state === 0 ? "vacío" : state === 1 ? "completo" : "medio"}`}
+                          className={`w-8 h-8 min-w-[2rem] rounded-full flex items-center justify-center text-xs font-semibold transition-colors shrink-0 select-none touch-manipulation ${
+                            state === 0
+                              ? "border-2 border-white/40 bg-br-carbon/70 text-br-pearl hover:border-br-red-main/60"
+                              : state === 1
+                              ? "bg-br-red-main text-white border-2 border-br-red-main"
+                              : "bg-br-red-main/60 text-white border-2 border-br-red-main/80"
+                          }`}
+                        >
+                          {day.initial}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
               <div>
