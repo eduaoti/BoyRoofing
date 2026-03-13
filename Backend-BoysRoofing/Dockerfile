@@ -15,7 +15,7 @@ RUN npx prisma generate
 COPY . .
 RUN npm run build
 
-# Comprobar que dist se generó (si falla, el build de Railway falla y vemos el error)
-RUN test -f dist/main.js || (echo "ERROR: dist/main.js no existe" && exit 1)
+# Nest genera dist/src/main.js (no dist/main.js)
+RUN test -f dist/src/main.js || (echo "ERROR: dist/src/main.js no existe" && exit 1)
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]
