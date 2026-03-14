@@ -37,6 +37,8 @@ export class ReceiptsService {
     amount: number;
     concept: string;
     notes?: string;
+    totalPrice?: number;
+    jobReference?: string;
   }) {
     const receiptNumber = await this.getNextReceiptNumber();
     const date = new Date(dto.date);
@@ -49,6 +51,8 @@ export class ReceiptsService {
         amount: Number(dto.amount),
         concept: dto.concept.trim(),
         notes: dto.notes?.trim() || null,
+        totalPrice: dto.totalPrice != null ? Number(dto.totalPrice) : null,
+        jobReference: dto.jobReference?.trim() || null,
       },
     });
   }
@@ -62,6 +66,8 @@ export class ReceiptsService {
       amount?: number;
       concept?: string;
       notes?: string;
+      totalPrice?: number;
+      jobReference?: string;
     },
   ) {
     const data: Record<string, unknown> = {};
@@ -71,6 +77,8 @@ export class ReceiptsService {
     if (dto.amount !== undefined) data.amount = Number(dto.amount);
     if (dto.concept !== undefined) data.concept = dto.concept.trim();
     if (dto.notes !== undefined) data.notes = dto.notes?.trim() || null;
+    if (dto.totalPrice !== undefined) data.totalPrice = dto.totalPrice == null ? null : Number(dto.totalPrice);
+    if (dto.jobReference !== undefined) data.jobReference = dto.jobReference?.trim() || null;
     return this.prisma.paymentReceipt.update({
       where: { id },
       data,

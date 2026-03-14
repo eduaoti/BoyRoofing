@@ -5,4 +5,6 @@ export class CreateReceiptDto {
   amount: number;
   concept: string;
   notes?: string;
+  totalPrice?: number;
+  jobReference?: string;
 }

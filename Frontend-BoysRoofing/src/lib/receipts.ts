@@ -11,6 +11,8 @@ export type PaymentReceipt = {
   amount: number;
   concept: string;
   notes?: string;
+  totalPrice?: number;
+  jobReference?: string;
   createdAt: string;
 };
 
@@ -23,6 +25,8 @@ function mapReceipt(r: {
   amount: number;
   concept: string;
   notes?: string | null;
+  totalPrice?: number | null;
+  jobReference?: string | null;
   createdAt: string | Date;
 }): PaymentReceipt {
   return {
@@ -34,8 +38,23 @@ function mapReceipt(r: {
     amount: r.amount,
     concept: r.concept,
     notes: r.notes ?? undefined,
+    totalPrice: r.totalPrice ?? undefined,
+    jobReference: r.jobReference ?? undefined,
     createdAt: typeof r.createdAt === "string" ? r.createdAt : r.createdAt.toISOString(),
   };
+}
+
+/** Calcula total pagado y saldo para un grupo de recibos (mismo jobReference). */
+export function getJobBalance(receipts: PaymentReceipt[], jobReference: string): {
+  totalPrice: number;
+  totalPaid: number;
+  balanceDue: number;
+} {
+  const group = receipts.filter((r) => r.jobReference === jobReference);
+  const totalPaid = group.reduce((sum, r) => sum + r.amount, 0);
+  const totalPrice = group.find((r) => r.totalPrice != null)?.totalPrice ?? 0;
+  const balanceDue = Math.max(0, totalPrice - totalPaid);
+  return { totalPrice, totalPaid, balanceDue };
 }
 
 export async function getAllReceipts(): Promise<PaymentReceipt[]> {
@@ -67,6 +86,8 @@ export async function createReceipt(input: Omit<PaymentReceipt, "id" | "receiptN
       amount: Number(input.amount),
       concept: input.concept.trim(),
       notes: input.notes?.trim() || undefined,
+      totalPrice: input.totalPrice != null ? Number(input.totalPrice) : undefined,
+      jobReference: input.jobReference?.trim() || undefined,
     }),
   });
   if (res.status === 401) {
@@ -90,7 +111,7 @@ export async function getReceiptById(id: string): Promise<PaymentReceipt | undef
 }
 
 export type ReceiptUpdatePayload = Partial<
-  Pick<PaymentReceipt, "date" | "clientName" | "clientEmail" | "amount" | "concept" | "notes">
+  Pick<PaymentReceipt, "date" | "clientName" | "clientEmail" | "amount" | "concept" | "notes" | "totalPrice" | "jobReference">
 >;
 
 export async function updateReceipt(id: string, patch: ReceiptUpdatePayload): Promise<PaymentReceipt | undefined> {
@@ -101,6 +122,8 @@ export async function updateReceipt(id: string, patch: ReceiptUpdatePayload): Pr
   if (patch.amount !== undefined) body.amount = patch.amount;
   if (patch.concept !== undefined) body.concept = patch.concept;
   if (patch.notes !== undefined) body.notes = patch.notes ?? null;
+  if (patch.totalPrice !== undefined) body.totalPrice = patch.totalPrice ?? null;
+  if (patch.jobReference !== undefined) body.jobReference = patch.jobReference ?? null;
   const res = await apiFetch(`/receipts/${id}`, {
     method: "PATCH",
     body: JSON.stringify(Object.keys(body).length ? body : { clientEmail: null }),

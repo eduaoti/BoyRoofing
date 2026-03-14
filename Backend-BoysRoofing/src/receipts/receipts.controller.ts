@@ -58,6 +58,9 @@ export class ReceiptsController {
       };
       locale: 'en' | 'es';
       logoUrl?: string;
+      receiptType?: 'payment' | 'balance_due' | 'thank_you';
+      balanceInfo?: { totalPrice: number; totalPaid: number; balanceDue: number };
+      websiteLink?: string;
     },
   ) {
     await this.mailService.sendReceiptEmail({
@@ -65,6 +68,9 @@ export class ReceiptsController {
       receipt: body.receipt,
       locale: body.locale,
       logoUrl: body.logoUrl,
+      receiptType: body.receiptType,
+      balanceInfo: body.balanceInfo,
+      websiteLink: body.websiteLink,
     });
     return { ok: true, message: 'Receipt email sent' };
   }

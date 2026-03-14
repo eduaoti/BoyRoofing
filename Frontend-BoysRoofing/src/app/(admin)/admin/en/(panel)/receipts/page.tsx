@@ -8,6 +8,7 @@ import {
   updateReceipt,
   deleteReceipt,
   getNextReceiptNumber,
+  getJobBalance,
   type PaymentReceipt,
 } from "@/lib/receipts";
 import { ReceiptPrintView } from "@/components/ReceiptPrintView";
@@ -38,6 +39,8 @@ export default function ReceiptsENPage() {
   const [customConcept, setCustomConcept] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [notes, setNotes] = useState("");
+  const [totalPrice, setTotalPrice] = useState("");
+  const [jobReference, setJobReference] = useState("");
   const [saving, setSaving] = useState(false);
 
   async function load() {
@@ -77,6 +80,8 @@ export default function ReceiptsENPage() {
     setCustomConcept(isSuggestion ? "" : r.concept);
     setDate(r.date.slice(0, 10));
     setNotes(r.notes ?? "");
+    setTotalPrice(r.totalPrice != null ? String(r.totalPrice) : "");
+    setJobReference(r.jobReference ?? "");
     setShowForm(true);
   }
 
@@ -90,33 +95,32 @@ export default function ReceiptsENPage() {
     setCustomConcept("");
     setDate(new Date().toISOString().slice(0, 10));
     setNotes("");
+    setTotalPrice("");
+    setJobReference("");
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const num = parseFloat(amount.replace(/,/g, "."));
+    const totalNum = totalPrice.trim() ? parseFloat(totalPrice.replace(/,/g, ".")) : undefined;
     const conceptText = concept === OTHER_CONCEPT ? customConcept.trim() : concept.trim();
     if (!clientName.trim() || Number.isNaN(num) || num <= 0 || !conceptText) return;
     setSaving(true);
     try {
+      const payload = {
+        date,
+        clientName: clientName.trim(),
+        clientEmail: clientEmail.trim() || undefined,
+        amount: num,
+        concept: conceptText,
+        notes: notes.trim() || undefined,
+        totalPrice: totalNum != null && !Number.isNaN(totalNum) && totalNum > 0 ? totalNum : undefined,
+        jobReference: jobReference.trim() || undefined,
+      };
       if (editingReceipt) {
-        await updateReceipt(editingReceipt.id, {
-          date,
-          clientName: clientName.trim(),
-          clientEmail: clientEmail.trim() || undefined,
-          amount: num,
-          concept: conceptText,
-          notes: notes.trim() || undefined,
-        });
+        await updateReceipt(editingReceipt.id, payload);
       } else {
-        await createReceipt({
-          date,
-          clientName: clientName.trim(),
-          clientEmail: clientEmail.trim() || undefined,
-          amount: num,
-          concept: conceptText,
-          notes: notes.trim() || undefined,
-        });
+        await createReceipt(payload);
       }
       await load();
       closeForm();
@@ -146,7 +150,7 @@ export default function ReceiptsENPage() {
         <h1 className="text-3xl font-extrabold admin-page-title tracking-tight">Payment receipts</h1>
         <button
           type="button"
-          onClick={() => { setEditingReceipt(null); setClientName(""); setClientEmail(""); setAmount(""); setConcept(CONCEPT_SUGGESTIONS[0]); setCustomConcept(""); setDate(new Date().toISOString().slice(0, 10)); setNotes(""); setShowForm(true); }}
+          onClick={() => { setEditingReceipt(null); setClientName(""); setClientEmail(""); setAmount(""); setConcept(CONCEPT_SUGGESTIONS[0]); setCustomConcept(""); setDate(new Date().toISOString().slice(0, 10)); setNotes(""); setTotalPrice(""); setJobReference(""); setShowForm(true); }}
           className="admin-btn-primary text-white inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
         >
           <PlusIcon className="h-5 w-5" />
@@ -259,6 +263,32 @@ export default function ReceiptsENPage() {
                 placeholder="e.g. Check #1234"
               />
             </div>
+            <div className="border-t border-white/10 pt-4 space-y-3">
+              <p className="text-sm font-medium text-br-pearl/80">Balance / job total (optional)</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-br-pearl/60 mb-1">Total job price (USD)</label>
+                  <input
+                    type="text"
+                    value={totalPrice}
+                    onChange={(e) => setTotalPrice(e.target.value)}
+                    className="w-full rounded-xl bg-br-carbon/80 border border-white/10 px-4 py-2.5 text-white placeholder-br-pearl/40 focus:border-br-red-main focus:ring-1 focus:ring-br-red-main"
+                    placeholder="e.g. 14900"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-br-pearl/60 mb-1">Job reference (to group receipts)</label>
+                  <input
+                    type="text"
+                    value={jobReference}
+                    onChange={(e) => setJobReference(e.target.value)}
+                    className="w-full rounded-xl bg-br-carbon/80 border border-white/10 px-4 py-2.5 text-white placeholder-br-pearl/40 focus:border-br-red-main focus:ring-1 focus:ring-br-red-main"
+                    placeholder="e.g. Smith roof 2026"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-br-pearl/50">Set total price and same job reference on related receipts to see balance due and send balance/thank-you receipts.</p>
+            </div>
             <div className="flex gap-2">
               <button type="submit" disabled={saving} className="admin-btn-primary text-white px-4 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-60">
                 {editingReceipt ? "Save changes" : "Save receipt"}
@@ -286,7 +316,10 @@ export default function ReceiptsENPage() {
           </div>
         ) : (
           <ul className="divide-y divide-white/5">
-            {receipts.map((r, i) => (
+            {receipts.map((r, i) => {
+              const jobRef = r.jobReference;
+              const balance = jobRef ? getJobBalance(receipts, jobRef) : null;
+              return (
               <li
                 key={r.id}
                 className="admin-list-item flex flex-wrap items-center justify-between gap-3 px-4 py-3 hover:bg-white/5 transition"
@@ -296,6 +329,11 @@ export default function ReceiptsENPage() {
                   <p className="font-mono text-sm text-br-red-main">{r.receiptNumber}</p>
                   <p className="font-medium text-white truncate">{r.clientName}</p>
                   <p className="text-sm text-br-pearl/80">{r.concept} · {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(r.amount)}</p>
+                  {balance != null && balance.totalPrice > 0 && (
+                    <p className="text-xs text-br-pearl/70 mt-1">
+                      Total: {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(balance.totalPrice)} · Paid: {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(balance.totalPaid)} · <span className={balance.balanceDue > 0 ? "text-amber-400" : "text-green-400"}>Balance: {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(balance.balanceDue)}</span>
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button
@@ -325,13 +363,18 @@ export default function ReceiptsENPage() {
                   </button>
                 </div>
               </li>
-            ))}
+            ); })}
           </ul>
         )}
       </div>
 
       {viewing && (
-        <ReceiptPrintView receipt={viewing} onClose={() => setViewing(null)} locale="en" />
+        <ReceiptPrintView
+          receipt={viewing}
+          allReceipts={receipts}
+          onClose={() => setViewing(null)}
+          locale="en"
+        />
       )}
     </div>
   );

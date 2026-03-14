@@ -208,6 +208,8 @@ model PaymentReceipt {
   amount         Float
   concept        String
   notes          String?
+  totalPrice     Float?   // Precio total del trabajo (para calcular saldo)
+  jobReference   String?  // Agrupa recibos del mismo trabajo
   createdAt      DateTime @default(now())
 }
 

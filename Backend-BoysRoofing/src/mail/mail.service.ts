@@ -117,7 +117,7 @@ export class MailService {
   }
 
   // ------------------------------------------------------
-  // 3️⃣ EMAIL: Enviar recibo de pago al cliente
+  // 3️⃣ EMAIL: Enviar recibo de pago al cliente (normal, saldo pendiente o agradecimiento)
   // ------------------------------------------------------
   async sendReceiptEmail(params: {
     to: string;
@@ -131,16 +131,22 @@ export class MailService {
     };
     locale: 'en' | 'es';
     logoUrl?: string;
+    receiptType?: 'payment' | 'balance_due' | 'thank_you';
+    balanceInfo?: {
+      totalPrice: number;
+      totalPaid: number;
+      balanceDue: number;
+    };
+    websiteLink?: string;
   }) {
-    const { to, receipt, locale, logoUrl } = params;
+    const { to, receipt, locale, logoUrl, receiptType = 'payment', balanceInfo, websiteLink = 'https://www.boysroofing.company' } = params;
     if (!to?.trim()) {
       this.logger.error('❌ No se proporcionó email para el recibo');
       return;
     }
-    const amountStr = new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(receipt.amount);
+    const fmt = (n: number) =>
+      new Intl.NumberFormat(locale === 'es' ? 'es-MX' : 'en-US', { style: 'currency', currency: 'USD' }).format(n);
+    const amountStr = fmt(receipt.amount);
     const dateStr = new Intl.DateTimeFormat(locale === 'es' ? 'es-MX' : 'en-US', {
       year: 'numeric',
       month: 'long',
@@ -148,17 +154,55 @@ export class MailService {
     }).format(new Date(receipt.date + 'T12:00:00'));
 
     const isEn = locale === 'en';
-    const subject = isEn
-      ? `Payment receipt ${receipt.receiptNumber} – Boy's Roofing`
-      : `Recibo de pago ${receipt.receiptNumber} – Boy's Roofing`;
     const receivedFrom = isEn ? 'Received from' : 'Recibí de';
     const theSumOf = isEn ? 'the sum of' : 'la cantidad de';
     const forConcept = isEn ? 'for' : 'por concepto de';
     const notesLabel = isEn ? 'Notes' : 'Notas';
     const signatureLabel = isEn ? 'Signature' : 'Firma';
-    const greeting = isEn
-      ? `Hi ${receipt.clientName}, please find your payment receipt below.`
-      : `Hola ${receipt.clientName}, adjunto encontrará su recibo de pago.`;
+
+    let subject: string;
+    let title: string;
+    let greeting: string;
+    let extraHtml = '';
+
+    if (receiptType === 'balance_due' && balanceInfo && balanceInfo.balanceDue > 0) {
+      const balanceStr = fmt(balanceInfo.balanceDue);
+      subject = isEn
+        ? `Balance due ${balanceStr} – Receipt ${receipt.receiptNumber} – Boy's Roofing`
+        : `Saldo pendiente ${balanceStr} – Recibo ${receipt.receiptNumber} – Boy's Roofing`;
+      title = isEn ? 'Payment receipt – Balance due' : 'Recibo de pago – Saldo pendiente';
+      greeting = isEn
+        ? `Hi ${receipt.clientName}, please find your payment receipt below. You have a balance due of ${balanceStr}.`
+        : `Hola ${receipt.clientName}, adjunto encontrará su recibo de pago. Usted me queda a deber ${balanceStr}.`;
+      extraHtml = `
+        <div style="background: #fff3cd; border: 1px solid #e0c000; border-radius: 10px; padding: 16px; margin: 16px 0;">
+          <p style="margin: 0 0 6px; font-size: 13px; color: #856404;"><strong>${isEn ? 'Total agreed' : 'Total acordado'}</strong> ${fmt(balanceInfo.totalPrice)}</p>
+          <p style="margin: 0 0 6px; font-size: 13px; color: #856404;"><strong>${isEn ? 'Total paid' : 'Total pagado'}</strong> ${fmt(balanceInfo.totalPaid)}</p>
+          <p style="margin: 0; font-size: 16px; font-weight: 700; color: #BA181B;">${isEn ? 'Balance due' : 'Saldo pendiente'}: ${balanceStr}</p>
+        </div>`;
+    } else if (receiptType === 'thank_you' && balanceInfo) {
+      subject = isEn
+        ? `Thank you – Payment complete – Boy's Roofing`
+        : `Gracias por confiar en nosotros – Boy's Roofing`;
+      title = isEn ? 'Thank you – Payment complete' : 'Gracias por confiar en nosotros';
+      greeting = isEn
+        ? `Hi ${receipt.clientName}, thank you for your trust. Your balance is paid in full. We hope to serve you again.`
+        : `Hola ${receipt.clientName}, gracias por confiar en nosotros. Su saldo está saldado. Esperamos poder atenderle de nuevo.`;
+      extraHtml = `
+        <div style="background: #d4edda; border: 1px solid #28a745; border-radius: 10px; padding: 16px; margin: 16px 0;">
+          <p style="margin: 0 0 6px; font-size: 14px; color: #155724;"><strong>${isEn ? 'Total paid' : 'Total pagado'}</strong> ${fmt(balanceInfo.totalPaid)}</p>
+          <p style="margin: 0; font-size: 16px; font-weight: 700; color: #155724;">${isEn ? 'Balance due' : 'Saldo pendiente'}: ${fmt(0)}</p>
+        </div>
+        <p style="margin: 16px 0 0; font-size: 14px;">${isEn ? 'Visit our website' : 'Visita nuestra web'}: <a href="${websiteLink}" style="color: #BA181B;">${websiteLink}</a></p>`;
+    } else {
+      subject = isEn
+        ? `Payment receipt ${receipt.receiptNumber} – Boy's Roofing`
+        : `Recibo de pago ${receipt.receiptNumber} – Boy's Roofing`;
+      title = isEn ? 'Payment receipt' : 'Recibo de pago';
+      greeting = isEn
+        ? `Hi ${receipt.clientName}, please find your payment receipt below.`
+        : `Hola ${receipt.clientName}, adjunto encontrará su recibo de pago.`;
+    }
 
     const logoHtml = logoUrl
       ? `<img src="${logoUrl}" alt="Boy's Roofing" style="height: 56px; width: auto; display: block; margin: 0 auto 12px;" />`
@@ -174,7 +218,7 @@ export class MailService {
             <div style="background: #161A1D; padding: 24px 28px; border-radius: 12px 12px 0 0; text-align: center;">
               ${logoHtml}
               <h1 style="margin: 0; color: #fff; font-size: 22px; font-weight: 700;">Boy's Roofing</h1>
-              <p style="margin: 6px 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">${isEn ? 'Payment receipt' : 'Recibo de pago'}</p>
+              <p style="margin: 6px 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">${title}</p>
             </div>
             <div style="padding: 28px; background: #f5f5f5; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
               <p style="margin: 0 0 16px; font-size: 16px;">${greeting}</p>
@@ -184,8 +228,9 @@ export class MailService {
                 <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.5;">${receivedFrom} <strong>${receipt.clientName}</strong> ${theSumOf} <strong style="color: #BA181B;">${amountStr}</strong> ${forConcept} <strong>${receipt.concept}</strong>.</p>
                 ${receipt.notes ? `<p style="margin: 0; font-size: 13px; color: #555;"><strong>${notesLabel}:</strong> ${receipt.notes}</p>` : ''}
               </div>
-              <p style="margin: 0; font-size: 12px; color: #6b6b6b;">${signatureLabel} _________________________</p>
-              <p style="margin: 20px 0 0; font-size: 12px; color: #6b6b6b;">${isEn ? 'Visit' : 'Visita'} https://www.boysroofing.company/en</p>
+              ${extraHtml}
+              <p style="margin: 16px 0 0; font-size: 12px; color: #6b6b6b;">${signatureLabel} _________________________</p>
+              ${receiptType === 'payment' ? `<p style="margin: 20px 0 0; font-size: 12px; color: #6b6b6b;">${isEn ? 'Visit' : 'Visita'} ${websiteLink}</p>` : ''}
             </div>
           </div>
         `,
