@@ -131,6 +131,7 @@ export class MailService {
     };
     locale: 'en' | 'es';
     logoUrl?: string;
+    signatureUrl?: string;
     receiptType?: 'payment' | 'balance_due' | 'thank_you';
     balanceInfo?: {
       totalPrice: number;
@@ -139,7 +140,7 @@ export class MailService {
     };
     websiteLink?: string;
   }) {
-    const { to, receipt, locale, logoUrl, receiptType = 'payment', balanceInfo, websiteLink = 'https://www.boysroofing.company' } = params;
+    const { to, receipt, locale, logoUrl, signatureUrl, receiptType = 'payment', balanceInfo, websiteLink = 'https://www.boysroofing.company' } = params;
     if (!to?.trim()) {
       this.logger.error('❌ No se proporcionó email para el recibo');
       return;
@@ -229,7 +230,8 @@ export class MailService {
                 ${receipt.notes ? `<p style="margin: 0; font-size: 13px; color: #555;"><strong>${notesLabel}:</strong> ${receipt.notes}</p>` : ''}
               </div>
               ${extraHtml}
-              <p style="margin: 16px 0 0; font-size: 12px; color: #6b6b6b;">${signatureLabel} _________________________</p>
+              <p style="margin: 16px 0 0; font-size: 12px; color: #6b6b6b;">${signatureLabel}</p>
+              ${signatureUrl ? `<img src="${signatureUrl}" alt="" style="height: 40px; width: auto; max-width: 120px; margin-top: 6px;" />` : '<p style="margin-top: 6px;">_________________________</p>'}
               ${receiptType === 'payment' ? `<p style="margin: 20px 0 0; font-size: 12px; color: #6b6b6b;">${isEn ? 'Visit' : 'Visita'} ${websiteLink}</p>` : ''}
             </div>
           </div>
