@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import type { PaymentReceipt } from "@/lib/receipts";
 import { updateReceipt, getJobBalance } from "@/lib/receipts";
@@ -334,7 +334,7 @@ function ReceiptContent({
             MozUserSelect: "none",
             msUserSelect: "none",
             WebkitUserDrag: "none",
-          }}
+          } as CSSProperties}
           onContextMenu={(e) => e.preventDefault()}
         >
           <img
@@ -342,7 +342,7 @@ function ReceiptContent({
             alt=""
             className="h-full w-auto max-w-[140px] object-contain pointer-events-none"
             draggable={false}
-            style={{ userSelect: "none", WebkitUserDrag: "none" }}
+            style={{ userSelect: "none", WebkitUserDrag: "none" } as CSSProperties}
             aria-hidden
           />
         </div>
