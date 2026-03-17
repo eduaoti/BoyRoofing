@@ -120,6 +120,7 @@ export function ReceiptPrintView({ receipt, allReceipts = [], onClose, locale }:
         },
         locale,
         logoUrl: `${baseUrl}/gallery/LOGO.png`,
+        signatureUrl: `${baseUrl}/firma.png`,
         websiteLink,
       };
       if (emailReceiptType === "balance_due" && balanceInfo && balanceInfo.balanceDue > 0) {
@@ -325,7 +326,26 @@ function ReceiptContent({
       )}
       <div className="pt-8 mt-8 border-t border-white/10">
         <p className="text-xs text-br-pearl/60 print:text-gray-500 uppercase tracking-wide">{t.signature}</p>
-        <div className="h-12 mt-2 border-b border-br-pearl/30 print:border-gray-400" />
+        <div
+          className="mt-2 h-12 w-[140px] select-none print:select-none inline-block"
+          style={{
+            userSelect: "none",
+            WebkitUserSelect: "none",
+            MozUserSelect: "none",
+            msUserSelect: "none",
+            WebkitUserDrag: "none",
+          }}
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          <img
+            src="/firma.png"
+            alt=""
+            className="h-full w-auto max-w-[140px] object-contain pointer-events-none"
+            draggable={false}
+            style={{ userSelect: "none", WebkitUserDrag: "none" }}
+            aria-hidden
+          />
+        </div>
       </div>
     </div>
   );

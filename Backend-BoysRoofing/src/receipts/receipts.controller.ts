@@ -58,6 +58,7 @@ export class ReceiptsController {
       };
       locale: 'en' | 'es';
       logoUrl?: string;
+      signatureUrl?: string;
       receiptType?: 'payment' | 'balance_due' | 'thank_you';
       balanceInfo?: { totalPrice: number; totalPaid: number; balanceDue: number };
       websiteLink?: string;
@@ -68,6 +69,7 @@ export class ReceiptsController {
       receipt: body.receipt,
       locale: body.locale,
       logoUrl: body.logoUrl,
+      signatureUrl: body.signatureUrl,
       receiptType: body.receiptType,
       balanceInfo: body.balanceInfo,
       websiteLink: body.websiteLink,

@@ -350,19 +350,36 @@ export class InvoicesService {
       doc.y = yTotals + 24;
 
       // ==========================
-      // FIRMA
+      // FIRMA (imagen de firma)
       // ==========================
       const signatureLabelY = doc.y;
       doc.fontSize(10).fillColor(brandDark).text('Signed:', leftX, signatureLabelY);
       const signatureLineY = signatureLabelY + 16;
-      doc
-        .moveTo(leftX + 45, signatureLineY)
-        .lineTo(280, signatureLineY)
-        .lineWidth(1)
-        .strokeColor(grayBorder)
-        .stroke();
-
-      doc.y = signatureLineY + 24;
+      const signaturePath = 'src/assets/firma.png';
+      try {
+        if (fs.existsSync(signaturePath)) {
+          const sigHeight = 28;
+          const sigWidth = 120;
+          doc.image(signaturePath, leftX + 45, signatureLineY - 4, { width: sigWidth, height: sigHeight });
+          doc.y = signatureLineY + sigHeight + 8;
+        } else {
+          doc
+            .moveTo(leftX + 45, signatureLineY)
+            .lineTo(280, signatureLineY)
+            .lineWidth(1)
+            .strokeColor(grayBorder)
+            .stroke();
+          doc.y = signatureLineY + 24;
+        }
+      } catch {
+        doc
+          .moveTo(leftX + 45, signatureLineY)
+          .lineTo(280, signatureLineY)
+          .lineWidth(1)
+          .strokeColor(grayBorder)
+          .stroke();
+        doc.y = signatureLineY + 24;
+      }
 
       // ==========================
       // FOOTER (con línea superior)
