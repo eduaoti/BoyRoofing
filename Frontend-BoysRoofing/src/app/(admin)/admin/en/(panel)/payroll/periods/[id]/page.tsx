@@ -6,6 +6,7 @@ import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import { ToastMessage, type ToastType } from "@/components/ToastMessage";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { displayPayrollPeriodTitle } from "@/lib/payroll-display";
 
 type Entry = {
   id: number;
@@ -201,6 +202,8 @@ export default function PayrollPeriodDetailEN() {
   const [deletingEntryId, setDeletingEntryId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
   const [entryDayStates, setEntryDayStates] = useState<Record<string, Record<string, 0 | 1 | 2>>>({});
+  const [periodLabelDraft, setPeriodLabelDraft] = useState("");
+  const [savingPeriodLabel, setSavingPeriodLabel] = useState(false);
 
   const load = useCallback(() => {
     if (!id) return;
@@ -223,6 +226,10 @@ export default function PayrollPeriodDetailEN() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (period) setPeriodLabelDraft(period.label ?? "");
+  }, [period?.id, period?.label]);
 
   useEffect(() => {
     if (period?.entries?.length && period.startDate && period.endDate) {
@@ -469,6 +476,27 @@ function handleSaveDays(entry: Entry, fullDays: number, halfDays: number, workDa
       .finally(() => setAddingWorkerId(null));
   }
 
+  function savePeriodLabel() {
+    if (!period) return;
+    const trimmed = periodLabelDraft.trim();
+    if (trimmed === (period.label ?? "").trim()) return;
+    setSavingPeriodLabel(true);
+    apiFetch(`/payroll/periods/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ label: trimmed }),
+    })
+      .then((r) => {
+        if (!r.ok) return r.text().then((t) => Promise.reject(new Error(t)));
+        return r.json();
+      })
+      .then((data) => {
+        setPeriod(data);
+        setToast({ type: "success", message: "Period name updated." });
+      })
+      .catch((e) => setToast({ type: "error", message: e?.message || "Error" }))
+      .finally(() => setSavingPeriodLabel(false));
+  }
+
   if (loading && !period) {
     return (
       <div className="p-6">
@@ -526,7 +554,7 @@ function handleSaveDays(entry: Entry, fullDays: number, halfDays: number, workDa
               ← Back to Payroll
             </Link>
             <h1 className="mt-2 text-2xl md:text-3xl font-bold text-br-pearl">
-              {period.label || `${period.startDate} – ${period.endDate}`}
+              {displayPayrollPeriodTitle(period.label, period.startDate, period.endDate, "en-US")}
             </h1>
             <p className="mt-1 text-sm text-br-white/60">
               {new Date(period.startDate).toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" })} – {new Date(period.endDate).toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
@@ -534,6 +562,33 @@ function handleSaveDays(entry: Entry, fullDays: number, halfDays: number, workDa
             <span className={`inline-flex mt-2 rounded-full px-3 py-1 text-xs font-semibold ${period.status === "DRAFT" ? "bg-amber-500/20 text-amber-400" : period.status === "PAID" ? "bg-green-500/20 text-green-400" : "bg-br-smoke text-br-pearl/80"}`}>
               {periodStatusLabel(period.status)}
             </span>
+            <div className="mt-4 max-w-xl">
+              <label htmlFor="period-label" className="text-xs font-medium text-br-white/50">
+                Period name
+              </label>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <input
+                  id="period-label"
+                  value={periodLabelDraft}
+                  onChange={(e) => setPeriodLabelDraft(e.target.value)}
+                  placeholder="Optional — empty uses date range in lists"
+                  className="min-w-[200px] flex-1 rounded-lg border border-white/15 bg-br-carbon/80 px-3 py-2 text-sm text-white placeholder:text-br-white/35"
+                />
+                <button
+                  type="button"
+                  disabled={
+                    savingPeriodLabel || periodLabelDraft.trim() === (period.label ?? "").trim()
+                  }
+                  onClick={savePeriodLabel}
+                  className="shrink-0 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-br-pearl hover:bg-white/15 disabled:opacity-50"
+                >
+                  {savingPeriodLabel ? "Saving…" : "Save"}
+                </button>
+              </div>
+              <p className="mt-1 text-xs text-br-white/40">
+                Clear the field and save to show only the date range as the title.
+              </p>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <button

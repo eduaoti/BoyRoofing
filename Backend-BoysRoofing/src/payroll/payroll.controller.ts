@@ -11,6 +11,7 @@ import {
 import { JwtAuthGuard } from '../auth/jwt/jwt.guard';
 import { PayrollService } from './payroll.service';
 import { CreatePeriodDto } from './dto/create-period.dto';
+import { UpdatePeriodDto } from './dto/update-period.dto';
 import { AddOccasionalDto } from './dto/add-occasional.dto';
 import { UpdateEntryDto } from './dto/update-entry.dto';
 import { MarkPaidDto } from './dto/mark-paid.dto';
@@ -39,6 +40,11 @@ export class PayrollController {
   @Post('periods')
   createPeriod(@Body() dto: CreatePeriodDto) {
     return this.payrollService.createPeriod(dto);
+  }
+
+  @Patch('periods/:id')
+  updatePeriod(@Param('id') id: string, @Body() dto: UpdatePeriodDto) {
+    return this.payrollService.updatePeriod(+id, dto);
   }
 
   @Post('periods/:id/add-worker')

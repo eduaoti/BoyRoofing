@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreatePeriodDto } from './dto/create-period.dto';
+import { UpdatePeriodDto } from './dto/update-period.dto';
 import { AddOccasionalDto } from './dto/add-occasional.dto';
 import { UpdateEntryDto } from './dto/update-entry.dto';
 import { MarkPaidDto } from './dto/mark-paid.dto';
@@ -52,6 +53,20 @@ export class PayrollService {
     if (!period) throw new Error('Period not found');
     await this.prisma.payrollPeriod.delete({ where: { id } });
     return { ok: true };
+  }
+
+  async updatePeriod(id: number, dto: UpdatePeriodDto) {
+    const period = await this.prisma.payrollPeriod.findUnique({ where: { id } });
+    if (!period) throw new Error('Period not found');
+    if (dto.label === undefined) {
+      return this.getPeriod(id);
+    }
+    const label = dto.label.trim() === '' ? null : dto.label.trim();
+    await this.prisma.payrollPeriod.update({
+      where: { id },
+      data: { label },
+    });
+    return this.getPeriod(id);
   }
 
   async createPeriod(dto: CreatePeriodDto) {

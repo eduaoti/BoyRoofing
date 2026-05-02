@@ -1,11 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { apiFetch } from "@/lib/api";
 import { ToastMessage, type ToastType } from "@/components/ToastMessage";
+import {
+  buildMonthlyPayrollReport,
+  defaultPayrollPeriodLabel,
+  displayPayrollPeriodTitle,
+  formatPayrollPeriodRange,
+  groupPayrollPeriodsByMonth,
+  isTechnicalPayrollLabel,
+  periodAmountPaid,
+} from "@/lib/payroll-display";
+import { buildPayrollReportCsv, downloadPayrollReportCsv } from "@/lib/payroll-report-csv";
 
 type Period = {
   id: number;
@@ -135,7 +145,7 @@ export default function NominaES() {
       body: JSON.stringify({
         startDate,
         endDate,
-        label: label.trim() || undefined,
+        label: label.trim() || defaultPayrollPeriodLabel(startDate, endDate, "es-ES"),
       }),
     })
       .then((r) => {
@@ -189,6 +199,27 @@ export default function NominaES() {
       })
       .catch((err) => setToast({ type: "error", message: err?.message || "Error al eliminar el periodo" }))
       .finally(() => setDeleting(false));
+  }
+
+  const locale = "es-ES";
+  const monthlyReport = useMemo(() => buildMonthlyPayrollReport(periods, locale), [periods]);
+  const periodsByMonth = useMemo(() => groupPayrollPeriodsByMonth(periods, locale), [periods]);
+
+  function exportPayrollCsv() {
+    const csv = buildPayrollReportCsv(periods, locale, {
+      monthKeyHeader: "Clave mes (AAAA-MM)",
+      monthLabelHeader: "Mes",
+      totalPaidHeader: "Total pagado",
+      periodCountHeader: "Periodos de nómina",
+      idHeader: "ID periodo",
+      nameHeader: "Nombre",
+      startHeader: "Fecha inicio",
+      endHeader: "Fecha fin",
+      statusHeader: "Estado",
+      amountPaidHeader: "Importe pagado",
+    });
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadPayrollReportCsv(`nomina-informe-${stamp}.csv`, csv);
   }
 
   if (loading) {
@@ -274,7 +305,7 @@ export default function NominaES() {
                     type="text"
                     value={label}
                     onChange={(e) => setLabel(e.target.value)}
-                    placeholder="ej. Semana 2 mar"
+                    placeholder="ej. Semana 3 – cuadrilla A (si vacío, se usan las fechas)"
                     className="mt-1 w-full rounded border border-br-smoke-light bg-br-carbon px-3 py-2 text-white"
                   />
                 </div>
@@ -331,57 +362,110 @@ export default function NominaES() {
         </div>
       )}
 
+      {monthlyReport.length > 0 && (
+        <div className="admin-card-glow overflow-hidden animate-fade-up">
+          <div className="flex flex-col gap-3 border-b border-white/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-semibold text-br-pearl">Totales por mes (pagado)</h2>
+            <button
+              type="button"
+              onClick={exportPayrollCsv}
+              className="shrink-0 rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-br-pearl hover:bg-white/10 transition"
+            >
+              Descargar CSV
+            </button>
+          </div>
+          <p className="px-5 pt-3 text-xs text-br-white/50">
+            Suma del importe “Pagado” de cada periodo, agrupada por el mes de inicio del periodo.
+          </p>
+          <div className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-3">
+            {monthlyReport.map((row) => (
+              <div
+                key={row.monthKey}
+                className="rounded-xl border border-white/10 bg-br-carbon/40 px-4 py-3"
+              >
+                <div className="text-sm font-medium capitalize text-br-pearl">{row.heading}</div>
+                <div className="mt-1 text-xl font-bold tabular-nums text-white">
+                  ${row.totalPaid.toFixed(2)}
+                </div>
+                <div className="mt-0.5 text-xs text-br-white/45">
+                  {row.periodCount} periodo{row.periodCount !== 1 ? "s" : ""}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="admin-card-glow overflow-hidden">
         <h2 className="border-b border-white/10 px-5 py-4 text-lg font-semibold text-br-pearl">
           Historial de nóminas
         </h2>
-        <ul className="divide-y divide-white/5">
-          {periods.length === 0 ? (
-            <li className="px-5 py-10 text-center text-br-white/50">
-              No hay periodos. Crea uno para empezar.
-            </li>
-          ) : (
-            periods.map((p, idx) => {
-              const totalPaid = p.totalPaid ?? p.entries?.reduce((s, e) => s + e.amountPaid, 0) ?? 0;
-              return (
-                <li
-                  key={p.id}
-                  className="admin-list-item flex flex-wrap items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
-                  style={{ animationDelay: `${idx * 60}ms` }}
-                >
-                  <div className="flex items-center gap-4">
-                    <Link
-                      href={`/admin/es/nomina/periodos/${p.id}`}
-                      className="font-medium text-br-pearl hover:text-br-red-main transition-colors"
+        {periods.length === 0 ? (
+          <div className="px-5 py-10 text-center text-br-white/50">
+            No hay periodos. Crea uno para empezar.
+          </div>
+        ) : (
+          periodsByMonth.map((group) => (
+            <div key={group.monthKey}>
+              <div className="sticky top-0 z-[1] border-b border-white/5 bg-br-smoke/90 px-5 py-2 backdrop-blur-sm">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-br-white/50 capitalize">
+                  {group.heading}
+                </h3>
+              </div>
+              <ul className="divide-y divide-white/5">
+                {group.periods.map((p, idx) => {
+                  const totalPaid = periodAmountPaid(p);
+                  const title = displayPayrollPeriodTitle(p.label, p.startDate, p.endDate, locale);
+                  const rangeLine = formatPayrollPeriodRange(p.startDate, p.endDate, locale);
+                  const showRangeUnderTitle =
+                    Boolean(p.label?.trim()) &&
+                    !isTechnicalPayrollLabel(p.label) &&
+                    rangeLine !== title;
+                  return (
+                    <li
+                      key={p.id}
+                      className="admin-list-item flex flex-wrap items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
+                      style={{ animationDelay: `${idx * 40}ms` }}
                     >
-                      {p.label || `${p.startDate} – ${p.endDate}`}
-                    </Link>
-                    {statusBadge(p.status)}
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-br-white/70">
-                    <span>{new Date(p.startDate).toLocaleDateString()} – {new Date(p.endDate).toLocaleDateString()}</span>
-                    <span>Pagado: ${Number(totalPaid).toFixed(2)}</span>
-                    <div className="flex items-center gap-3">
-                      <Link
-                        href={`/admin/es/nomina/periodos/${p.id}`}
-                        className="text-br-red-main hover:text-br-red-light font-medium transition-colors"
-                      >
-                        Ver
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => setDeletePeriodId(p.id)}
-                        className="text-br-white/50 hover:text-red-400 text-xs transition-colors"
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              );
-            })
-          )}
-        </ul>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <Link
+                            href={`/admin/es/nomina/periodos/${p.id}`}
+                            className="font-medium text-br-pearl hover:text-br-red-main transition-colors"
+                          >
+                            {title}
+                          </Link>
+                          {statusBadge(p.status)}
+                        </div>
+                        {showRangeUnderTitle ? (
+                          <p className="mt-1 text-xs text-br-white/45">{rangeLine}</p>
+                        ) : null}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-br-white/70">
+                        <span className="tabular-nums">Pagado: ${Number(totalPaid).toFixed(2)}</span>
+                        <div className="flex items-center gap-3">
+                          <Link
+                            href={`/admin/es/nomina/periodos/${p.id}`}
+                            className="text-br-red-main hover:text-br-red-light font-medium transition-colors"
+                          >
+                            Ver
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => setDeletePeriodId(p.id)}
+                            className="text-br-white/50 hover:text-red-400 text-xs transition-colors"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
