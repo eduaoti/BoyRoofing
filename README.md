@@ -1,6 +1,6 @@
 # Boy's Roofing
 
-Sitio web corporativo y panel de administración para **Boy's Roofing**, empresa de roofing en Texas. Incluye sitio público (EN/ES), cotizaciones, facturas, nómina, recibos de pago y medición de techos.
+Sitio web corporativo y panel de administración para **Boy's Roofing**, empresa de roofing en Texas. Incluye sitio público (EN/ES), mapa de zona de servicio con proyectos, reseñas (carrusel y enlaces por proyecto), cotizaciones, facturas, nómina, recibos de pago y medición de techos con informe en PDF.
 
 ---
 
@@ -14,6 +14,7 @@ Sitio web corporativo y panel de administración para **Boy's Roofing**, empresa
 - [Ejecución en local](#-ejecución-en-local)
 - [Scripts útiles](#-scripts-útiles)
 - [Despliegue](#-despliegue)
+- [Producción y vista previa](#-producción-y-vista-previa)
 - [Recursos](#-recursos)
 
 ---
@@ -22,12 +23,12 @@ Sitio web corporativo y panel de administración para **Boy's Roofing**, empresa
 
 | Capa        | Tecnología |
 |------------|------------|
-| **Frontend** | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Heroicons |
+| **Frontend** | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Heroicons, Swiper |
 | **Backend**  | NestJS 11, TypeScript, Prisma |
 | **Base de datos** | PostgreSQL |
 | **Email**   | Resend |
-| **Mapas / medición** | Google Maps JS API, Mapbox GL (dibujo de polígonos) |
-| **PDF**     | PDFKit (facturas en backend) |
+| **Mapas**   | Mapbox GL (Golden Triangle en la home, herramienta **Medir**, panel **Proyectos**; dibujo de polígonos con `@mapbox/mapbox-gl-draw`) |
+| **PDF**     | PDFKit (facturas e informes de medición de techo en backend) |
 
 ---
 
@@ -38,22 +39,29 @@ BoysRoofing/
 ├── Frontend-BoysRoofing/     # Next.js – sitio público + panel admin
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── (public)/     # Páginas públicas EN/ES (home, servicios, contacto, cotización, galería)
-│   │   │   └── (admin)/      # Panel admin EN/ES (login, dashboard, cotizaciones, facturas, etc.)
-│   │   ├── components/
+│   │   │   ├── (public)/     # Páginas EN/ES (home, servicios, nosotros, contacto, cotización, galería, review por token)
+│   │   │   ├── (admin)/      # Panel admin EN/ES
+│   │   │   └── api/translate # Proxy de traducción (MyMemory) para reseñas en mapa EN
+│   │   ├── components/       # Hero, HomePage, GoldenTriangleMap, ReviewsCarousel, Measure (Mapbox), etc.
+│   │   ├── contexts/         # Imágenes del sitio (Cloudinary + defaults)
+│   │   ├── locales/        # en.json / es.json
 │   │   └── lib/
 │   └── public/
 ├── Backend-BoysRoofing/      # NestJS – API REST
 │   ├── src/
 │   │   ├── auth/            # Login admin, JWT
 │   │   ├── quotes/          # Cotizaciones, notificación por email
-│   │   ├── invoices/        # Facturas, PDF, envío por email
-│   │   ├── mail/            # Resend (cotizaciones, facturas, recibos)
-│   │   ├── Reviews/         # Reseñas por cotización
+│   │   ├── invoices/      # Facturas, PDF, envío por email
+│   │   ├── mail/            # Resend
+│   │   ├── Reviews/         # Reseñas ligadas a cotización (flujo clásico)
+│   │   ├── projects/        # Proyectos en mapa, reseñas por token, subida de foto, aprobación
 │   │   ├── workers/         # Trabajadores (nómina)
-│   │   ├── payroll/        # Períodos, entradas, días trabajados
-│   │   └── receipts/       # Envío de recibos de pago por email
-│   └── prisma/              # Schema y migraciones
+│   │   ├── payroll/       # Períodos, entradas, días trabajados
+│   │   ├── receipts/       # Recibos de pago por email
+│   │   ├── roof-detection/ # Detección asistida de contorno de techo (Mapbox Static API, JWT)
+│   │   ├── roof-report/    # Generación de PDF de informe de medición (JWT)
+│   │   └── site-images/    # Imágenes editables del sitio (Cloudinary)
+│   └── prisma/
 └── README.md
 ```
 
@@ -63,10 +71,11 @@ BoysRoofing/
 
 ### Sitio público (EN / ES)
 
-- **Inicio:** hero, servicios, valores, reseñas.
-- **Servicios, Nosotros, Contacto:** páginas informativas.
-- **Cotización:** formulario que envía al backend y notifica por email al admin.
-- **Galería:** galería de imágenes.
+- **Inicio:** hero (imagen configurable), beneficios, bloque “nosotros” con imagen desde el panel, servicios destacados, misión / visión / valores, CTA a contacto. Animaciones al hacer scroll (`useReveal`).
+- **Mapa Golden Triangle:** sección con mapa Mapbox del área Beaumont–Port Arthur–Orange; muestra proyectos publicados desde el admin. En inglés, nombres y comentarios de reseñas del mapa se traducen vía `/api/translate`.
+- **Reseñas:** carrusel (Swiper) con reseñas aprobadas de proyectos; incluye reseñas por defecto si no hay datos. Modal para dejar reseña vinculada a cotización (flujo existente con email).
+- **Servicios, Nosotros, Contacto, Cotización, Galería:** páginas informativas; **Servicios** incluye comparativas antes/después y carrusel de trabajos alimentado por las mismas claves de imágenes del sitio (`service_*`, `carousel_*`).
+- **Dejar reseña por proyecto:** ruta `/review/[token]` (compartida EN/ES): el cliente envía mensaje, valoración y opcionalmente foto; el admin aprueba para que aparezca en el sitio.
 
 ### Panel de administración (EN / ES)
 
@@ -75,27 +84,28 @@ Acceso: `/admin/en/login` o `/admin/es/login`. El resto de rutas requieren sesi�
 | Sección | Descripción |
 |--------|-------------|
 | **Dashboard** | Resumen del panel. |
-| **Cotizaciones** | Listado y detalle de cotizaciones; estados (PENDING, IN_REVIEW, SENT, CLOSED). |
-| **Crear factura** | Crear factura asociada a una cotización; genera PDF y envía por email al cliente. |
-| **Medir** | Herramienta de medición de techos con mapa (polígonos, área). |
-| **Trabajadores** | CRUD de trabajadores; tarifa por día, saldo/balance. |
-| **Nómina** | Períodos de pago, entradas por trabajador (días completos/medios, bonos, deducciones), marcar pagado, círculo de días. |
-| **Balances / Deudas** | Resumen de balances por trabajador. |
-| **Recibos de pago** | Crear recibos (cliente, monto, concepto, fecha), ver/imprimir (con logo), enviar por email al cliente. Concepto “Otro” con campo de texto libre. |
-| **Imágenes del sitio** | Editar las imágenes que se muestran en la web (hero, about, servicios, galería, carrusel). Subida a Cloudinary y vista previa. |
+| **Cotizaciones** | Listado y detalle; estados (PENDING, IN_REVIEW, SENT, CLOSED). |
+| **Crear factura** | Factura asociada a cotización; PDF y envío por email. |
+| **Medir** | Mapa satélite Mapbox: búsqueda por dirección, dibujo de polígono, cálculo de área / perímetro / squares, resumen de roofing (pitch, desperdicio). **Detectar techo:** sugiere contorno vía backend. **Descargar informe:** PDF generado en el backend. |
+| **Trabajadores** | CRUD; tarifa por día, saldo. |
+| **Nómina** | Períodos, entradas, días completos/medios, bonos, deducciones, marcar pagado. |
+| **Balances / Deudas** | Resumen por trabajador. |
+| **Recibos de pago** | Crear, ver/imprimir, enviar por email (concepto “Otro” con texto libre). |
+| **Imágenes del sitio** | Hero, about, fundador/equipo, antes/después de servicios, carrusel (carousel_1…5), logo. Subida a Cloudinary. |
+| **Proyectos / Map** | CRUD de proyectos (nombre, coordenadas, logo); geocodificación Mapbox en el panel. Gestión de reseñas recibidas por token (aprobar / eliminar). |
 
 ### Backend (API)
 
-- **Auth:** `POST /auth/login` (email + password), JWT.
-- **Quotes:** listado, detalle, actualizar estado; envío de email al recibir nueva cotización.
-- **Invoices:** crear factura, generar PDF, enviar por email con Resend.
-- **Reviews:** verificación de elegibilidad y creación de reseñas por cotización.
-- **Workers:** CRUD de trabajadores.
-- **Payroll:** períodos, entradas, días trabajados, marcar pagado.
-- **Receipts:** `POST /receipts/send-email` para enviar recibo de pago por email (con logo y texto “Visita” en el pie).
-- **Site images:** `GET /site-images` (público) devuelve el mapa de imágenes; `PATCH /site-images/:key` y `POST /site-images/upload` (admin) para actualizar y subir a Cloudinary.
+- **Auth:** `POST /auth/login`, JWT.
+- **Quotes / Invoices / Reviews (cotización):** como antes; reseñas ligadas a `Quote`.
+- **Projects (público):** `GET /projects/map`, `GET /projects/reviews`, `GET /projects/review/:token`, `POST /projects/review/:token`, `POST /projects/review/:token/upload-photo`.
+- **Projects (admin, JWT):** CRUD, `POST /projects/upload-logo`, listado y moderación de reseñas de proyecto.
+- **Roof detection (JWT):** `POST /roof-detection/detect` — requiere `MAPBOX_TOKEN` o `NEXT_PUBLIC_MAPBOX_TOKEN` en el servidor para imágenes estáticas.
+- **Roof report (JWT):** `POST /roof-report/pdf` — PDF del informe de medición.
+- **Site images:** `GET /site-images` (público); `PATCH` / `POST .../upload` (admin).
+- **Recibos:** persistencia en `PaymentReceipt` y envío por email.
 
-Los **recibos de pago** se guardan en la base de datos (tabla `PaymentReceipt`), por lo que se sincronizan entre todos los dispositivos; el backend también envía el email del recibo. Las **imágenes del sitio** se guardan en la tabla `SiteImage` (key + URL de Cloudinary).
+Los **proyectos en mapa** y sus **reseñas** (`ProjectReview` / `MapProject`) son independientes del modelo `Review` por cotización; ambos conviven en el producto.
 
 ---
 
@@ -103,9 +113,10 @@ Los **recibos de pago** se guardan en la base de datos (tabla `PaymentReceipt`),
 
 - **Node.js** 18+ (recomendado 20+)
 - **npm** o **pnpm**
-- **PostgreSQL** (local o servicio remoto)
-- Cuenta en **Resend** (API key para emails)
-- **Google Maps API key** (opcional; solo para la herramienta Medir)
+- **PostgreSQL**
+- Cuenta en **Resend**
+- **Mapbox:** token público (`pk.`) en el frontend; para detección de techo en servidor, también `MAPBOX_TOKEN` (o reutilizar la variable que ya uses) en el backend
+- **Cloudinary** (imágenes del sitio y logos de proyecto en el admin)
 
 ---
 
@@ -126,16 +137,18 @@ MAIL_TO="admin@tudominio.com"
 PORT=3200
 FRONTEND_ORIGIN="http://localhost:3000"
 
-# Cloudinary (para Imágenes del sitio en el admin)
-CLOUDINARY_CLOUD_NAME=dy6p1dety
+# Cloudinary (imágenes del sitio y logos de proyectos)
+CLOUDINARY_CLOUD_NAME=tu_cloud_name
 CLOUDINARY_API_KEY=tu_api_key
 CLOUDINARY_API_SECRET=tu_api_secret
+
+# Detección de techo (imágenes Mapbox en servidor; puede ser el mismo token pk. con permisos adecuados)
+MAPBOX_TOKEN=tu_token_mapbox
 ```
 
-- `ADMIN_EMAIL` / `ADMIN_PASSWORD`: login del panel admin (el primer login puede crear el usuario si no existe).
-- `CLOUDINARY_*`: obligatorios para poder subir imágenes desde el panel “Imágenes del sitio”; si no están configurados, la subida fallará y podrás seguir usando las imágenes por defecto (`/gallery/...`).
-- `MAIL_FROM`: remitente de los emails (debe estar verificado en Resend).
-- `MAIL_TO`: destinatario de las notificaciones de nuevas cotizaciones.
+- `ADMIN_EMAIL` / `ADMIN_PASSWORD`: login del panel.
+- `CLOUDINARY_*`: necesarios para subidas desde el admin.
+- `MAPBOX_TOKEN`: obligatorio para `POST /roof-detection/detect` (el servicio también acepta `NEXT_PUBLIC_MAPBOX_TOKEN` si está definida en el mismo entorno).
 
 ### Frontend (`Frontend-BoysRoofing`)
 
@@ -143,10 +156,10 @@ Crea `.env.local` en la raíz del frontend:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3200
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_google_maps_api_key
+NEXT_PUBLIC_MAPBOX_TOKEN=pk.tu_token_publico_mapbox
 ```
 
-- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`: solo necesario para la sección **Medir** (mapa y dibujo de polígonos).
+- `NEXT_PUBLIC_MAPBOX_TOKEN`: necesario para el mapa Golden Triangle, la página **Medir**, el panel **Proyectos / Map** (geocodificación y vista de mapa). Debe ser el token **público** (`pk.`), no el secreto (`sk.`).
 
 ---
 
@@ -154,13 +167,13 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_google_maps_api_key
 
 ### 1. Base de datos
 
-Asegúrate de que PostgreSQL esté en marcha y que `DATABASE_URL` en el backend apunte a tu base. Luego:
+Asegúrate de que PostgreSQL esté en marcha y que `DATABASE_URL` apunte a tu base. Luego:
 
 ```bash
 cd Backend-BoysRoofing
 npm install
 npx prisma migrate deploy
-# o, en desarrollo: npx prisma generate
+# o, en desarrollo: npx prisma migrate dev
 ```
 
 ### 2. Backend
@@ -181,7 +194,7 @@ npm run dev
 ```
 
 Abre **http://localhost:3000**.  
-Para el panel: **http://localhost:3000/admin/en/login** o **/admin/es/login**.
+Panel: **http://localhost:3000/admin/en/login** o **/admin/es/login**.
 
 ---
 
@@ -193,9 +206,9 @@ Para el panel: **http://localhost:3000/admin/en/login** o **/admin/es/login**.
 |---------|-------------|
 | `npm run start:dev` | Desarrollo con watch |
 | `npm run build` | Compilar |
-| `npm run start:prod` | Producción (ejecuta migraciones y arranca) |
-| `npx prisma migrate dev` | Crear y aplicar migraciones en desarrollo |
-| `npx prisma studio` | Abrir Prisma Studio |
+| `npm run start:prod` | Producción (migraciones + arranque) |
+| `npx prisma migrate dev` | Migraciones en desarrollo |
+| `npx prisma studio` | Prisma Studio |
 
 ### Frontend
 
@@ -209,9 +222,44 @@ Para el panel: **http://localhost:3000/admin/en/login** o **/admin/es/login**.
 
 ## Despliegue
 
-- **Frontend:** preparado para Vercel u otro host de Next.js. Configura `NEXT_PUBLIC_API_URL` con la URL del backend en producción.
-- **Backend:** típicamente en Railway, Render, Fly.io o VPS. Configura `DATABASE_URL`, `JWT_SECRET`, `RESEND_*`, `MAIL_*`, `ADMIN_*` y `FRONTEND_ORIGIN` con la URL del frontend.
-- **Recibos por email:** el pie del correo muestra “Visita https://www.boysroofing.company/en”; la URL del logo en el email se construye con el origen del frontend.
+- **Frontend:** Vercel u otro host Next.js. En producción, `NEXT_PUBLIC_API_URL` debe apuntar al API público (p. ej. `https://api.boysroofing.company`) y `NEXT_PUBLIC_MAPBOX_TOKEN` debe tener restricciones de URL acordes a tu dominio.
+- **Backend:** Railway, Render, Fly.io o VPS. Incluye `DATABASE_URL`, `JWT_SECRET`, Resend, `ADMIN_*`, `FRONTEND_ORIGIN` (URL canónica del sitio, p. ej. `https://www.boysroofing.company`), Cloudinary y `MAPBOX_TOKEN` si usas detección de techo.
+- **Recibos y emails:** enlaces al sitio en plantillas usan `https://www.boysroofing.company` (EN/ES según locale); mantén `FRONTEND_ORIGIN` y el dominio en Resend alineados con esa URL.
+
+---
+
+## Producción y vista previa
+
+Referencias tomadas del dominio y variables usadas en el repo (`Frontend-BoysRoofing/.env`, componentes de recibo y correo).
+
+| Recurso | URL |
+|--------|-----|
+| **Sitio (raíz)** | [https://www.boysroofing.company](https://www.boysroofing.company) |
+| **Home EN** | [https://www.boysroofing.company/en](https://www.boysroofing.company/en) |
+| **Home ES** | [https://www.boysroofing.company/es](https://www.boysroofing.company/es) |
+| **API (REST)** | `https://api.boysroofing.company` |
+| **Admin EN** | [https://www.boysroofing.company/admin/en/login](https://www.boysroofing.company/admin/en/login) |
+| **Admin ES** | [https://www.boysroofing.company/admin/es/login](https://www.boysroofing.company/admin/es/login) |
+
+Los enlaces anteriores sirven como **vista previa en vivo** del hero, mapa Golden Triangle, carrusel de reseñas y el resto de secciones públicas.
+
+### Capturas para el README (opcional)
+
+Si quieres ilustrar la documentación con imágenes, guarda PNG o WebP en [`docs/screenshots/`](docs/screenshots/) con nombres claros y enlázalas aquí. Por ejemplo:
+
+| Archivo sugerido | Contenido |
+|------------------|-----------|
+| `home-hero-en.png` | Hero completo (EN) |
+| `home-golden-triangle.png` | Sección mapa + marcadores |
+| `home-reviews.png` | Carrusel de reseñas |
+| `services-before-after.png` | Bloque antes/después en servicios |
+| `admin-measure.png` | Herramienta Medir (admin) |
+
+Ejemplo de sintaxis en Markdown cuando el archivo exista:
+
+```markdown
+![Home — Golden Triangle](docs/screenshots/home-golden-triangle.png)
+```
 
 ---
 
@@ -221,6 +269,7 @@ Para el panel: **http://localhost:3000/admin/en/login** o **/admin/es/login**.
 - [NestJS Docs](https://docs.nestjs.com)
 - [Prisma Docs](https://www.prisma.io/docs)
 - [Resend](https://resend.com/docs)
+- [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/)
 - [Tailwind CSS](https://tailwindcss.com/docs)
 
 ---
